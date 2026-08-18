@@ -28,7 +28,7 @@ export default function EmployeesScreenController({
     UserPreferencesUtility.current.getEmployeesViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getEmployeesGridColumns(3)
+    UserPreferencesUtility.current.getEmployeesGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getEmployeesSingleLine(true)

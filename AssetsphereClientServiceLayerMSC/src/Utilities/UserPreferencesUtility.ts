@@ -63,8 +63,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Software Grid Columns (2 vs 3)
-  public getSoftwareGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Software Grid Columns (2 vs 3) - Default: 2
+  public getSoftwareGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.softwareGridColumnsKey);
     if (saved === '2') return 2;
@@ -92,8 +92,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Asset Inventory View Mode
-  public getInventoryViewMode(defaultMode: 'table' | 'grid' | 'kanban' = 'table'): 'table' | 'grid' | 'kanban' {
+  // Asset Inventory View Mode - Default: grid
+  public getInventoryViewMode(defaultMode: 'table' | 'grid' | 'kanban' = 'grid'): 'table' | 'grid' | 'kanban' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.inventoryViewModeKey);
     if (saved === 'table' || saved === 'grid' || saved === 'kanban') return saved;
@@ -106,8 +106,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Asset Inventory Grid Columns (2 vs 3)
-  public getInventoryGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Asset Inventory Grid Columns (2 vs 3) - Default: 2
+  public getInventoryGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.inventoryGridColumnsKey);
     if (saved === '2') return 2;
@@ -135,7 +135,7 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Employees View Mode
+  // Employees View Mode - Default: grid
   public getEmployeesViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.employeesViewModeKey);
@@ -148,8 +148,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Employees Grid Columns (2 vs 3)
-  public getEmployeesGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Employees Grid Columns (2 vs 3) - Default: 2
+  public getEmployeesGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.employeesGridColumnsKey);
     if (saved === '2') return 2;
@@ -177,7 +177,7 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Procurement View Mode
+  // Procurement View Mode - Default: grid
   public getProcurementViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.procurementViewModeKey);
@@ -190,8 +190,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Procurement Grid Columns (2 vs 3)
-  public getProcurementGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Procurement Grid Columns (2 vs 3) - Default: 2
+  public getProcurementGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.procurementGridColumnsKey);
     if (saved === '2') return 2;
@@ -219,7 +219,7 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Vendors View Mode
+  // Vendors View Mode - Default: grid
   public getVendorsViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.vendorsViewModeKey);
@@ -232,8 +232,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Vendors Grid Columns (2 vs 3)
-  public getVendorsGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Vendors Grid Columns (2 vs 3) - Default: 2
+  public getVendorsGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.vendorsGridColumnsKey);
     if (saved === '2') return 2;
@@ -261,7 +261,7 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Cloud View Mode
+  // Cloud View Mode - Default: grid
   public getCloudViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.cloudViewModeKey);
@@ -274,8 +274,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Cloud Grid Columns (2 vs 3)
-  public getCloudGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Cloud Grid Columns (2 vs 3) - Default: 2
+  public getCloudGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.cloudGridColumnsKey);
     if (saved === '2') return 2;
@@ -303,7 +303,7 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Service Desk View Mode
+  // Service Desk View Mode - Default: grid
   public getServiceDeskViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.serviceDeskViewModeKey);
@@ -316,8 +316,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Service Desk Grid Columns (2 vs 3)
-  public getServiceDeskGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Service Desk Grid Columns (2 vs 3) - Default: 2
+  public getServiceDeskGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.serviceDeskGridColumnsKey);
     if (saved === '2') return 2;
@@ -345,8 +345,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Compliance View Mode
-  public getComplianceViewMode(defaultMode: 'grid' | 'list' = 'list'): 'grid' | 'list' {
+  // Compliance View Mode - Default: grid
+  public getComplianceViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.complianceViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
@@ -358,8 +358,8 @@ export default class UserPreferencesUtility {
     }
   }
 
-  // Compliance Grid Columns (2 vs 3)
-  public getComplianceGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+  // Compliance Grid Columns (2 vs 3) - Default: 2
+  public getComplianceGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
     if (typeof window === 'undefined') return defaultCols;
     const saved = localStorage.getItem(this.complianceGridColumnsKey);
     if (saved === '2') return 2;

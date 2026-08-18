@@ -25,7 +25,7 @@ export default function VendorsScreenController({
     UserPreferencesUtility.current.getVendorsViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getVendorsGridColumns(3)
+    UserPreferencesUtility.current.getVendorsGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getVendorsSingleLine(true)

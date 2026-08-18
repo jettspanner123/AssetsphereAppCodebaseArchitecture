@@ -57,7 +57,7 @@ export default function HeaderStaticComponent({
   }, []);
 
   return (
-    <header className="h-16 border-b border-slate-200 dark:border-zinc-800/80 bg-white/80 dark:bg-black/80 backdrop-blur-md sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
+    <header className="h-16 border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-black/50 backdrop-blur-lg sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
       {/* Brand logo / Mobile title */}
       <div className="flex items-center gap-3 shrink-0">
         <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-lg shadow-sm">

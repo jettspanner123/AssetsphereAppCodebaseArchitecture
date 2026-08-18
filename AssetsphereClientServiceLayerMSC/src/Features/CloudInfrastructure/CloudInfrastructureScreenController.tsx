@@ -16,7 +16,7 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
     UserPreferencesUtility.current.getCloudViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getCloudGridColumns(3)
+    UserPreferencesUtility.current.getCloudGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getCloudSingleLine(true)

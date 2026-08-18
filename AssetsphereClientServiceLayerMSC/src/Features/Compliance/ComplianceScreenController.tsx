@@ -24,10 +24,10 @@ export default function ComplianceScreenController({
   assets,
 }: ComplianceScreenControllerProps): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
-    UserPreferencesUtility.current.getComplianceViewMode('list')
+    UserPreferencesUtility.current.getComplianceViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getComplianceGridColumns(3)
+    UserPreferencesUtility.current.getComplianceGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getComplianceSingleLine(true)

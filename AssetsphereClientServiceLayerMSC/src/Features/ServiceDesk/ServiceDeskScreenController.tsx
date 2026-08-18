@@ -21,7 +21,7 @@ export default function ServiceDeskScreenController({
     UserPreferencesUtility.current.getServiceDeskViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getServiceDeskGridColumns(3)
+    UserPreferencesUtility.current.getServiceDeskGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getServiceDeskSingleLine(true)

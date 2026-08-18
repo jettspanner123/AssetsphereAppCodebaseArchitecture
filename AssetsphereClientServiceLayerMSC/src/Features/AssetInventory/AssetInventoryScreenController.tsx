@@ -43,10 +43,10 @@ export default function AssetInventoryScreenController({
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(() =>
-    UserPreferencesUtility.current.getInventoryViewMode('table')
+    UserPreferencesUtility.current.getInventoryViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getInventoryGridColumns(3)
+    UserPreferencesUtility.current.getInventoryGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getInventorySingleLine(true)

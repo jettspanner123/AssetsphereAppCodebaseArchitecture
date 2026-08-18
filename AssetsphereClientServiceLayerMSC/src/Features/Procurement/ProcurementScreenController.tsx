@@ -26,7 +26,7 @@ export default function ProcurementScreenController({
     UserPreferencesUtility.current.getProcurementViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getProcurementGridColumns(3)
+    UserPreferencesUtility.current.getProcurementGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getProcurementSingleLine(true)

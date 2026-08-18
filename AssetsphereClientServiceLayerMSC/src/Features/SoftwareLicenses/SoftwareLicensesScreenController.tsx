@@ -25,7 +25,7 @@ export default function SoftwareLicensesScreenController({
     UserPreferencesUtility.current.getSoftwareViewMode('grid')
   );
   const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getSoftwareGridColumns(3)
+    UserPreferencesUtility.current.getSoftwareGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
     UserPreferencesUtility.current.getSoftwareSingleLine(true)

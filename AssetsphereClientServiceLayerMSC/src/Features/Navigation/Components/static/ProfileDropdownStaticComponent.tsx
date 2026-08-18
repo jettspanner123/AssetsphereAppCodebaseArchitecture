@@ -2,7 +2,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
-  Cloud,
   QrCode,
   Settings,
   LogOut,
@@ -10,7 +9,6 @@ import {
   Sun,
   Moon,
 } from 'lucide-react';
-import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 
 export interface ProfileDropdownStaticComponentProps {
@@ -35,6 +33,7 @@ export default function ProfileDropdownStaticComponent({
   onToggleTheme,
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
   const isDark = currentTheme === ApplicationThemeCON.DARK;
+  const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
 
   return (
     <AnimatePresence>
@@ -46,127 +45,143 @@ export default function ProfileDropdownStaticComponent({
             className="fixed inset-0 z-40 bg-transparent cursor-default"
           />
 
-          {/* Spacious Dropdown Panel */}
+          {/* Clean Executive Profile Popover */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -6 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-12 w-[350px] z-50 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl p-5 text-xs select-none space-y-5"
+            className="absolute right-0 top-12 w-80 z-50 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl p-4 text-xs select-none space-y-4"
           >
-            {/* User Profile Info Header */}
-            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-200/80 dark:border-zinc-800/80">
-              <div className="w-11 h-11 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-base shadow-sm shrink-0">
+            {/* 1. Header: User Identity */}
+            <div className="flex items-center gap-3 pb-3.5 border-b border-slate-100 dark:border-zinc-800/80">
+              <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-sm shadow-xs shrink-0">
                 AV
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-slate-900 dark:text-white font-serif-headline text-sm truncate">
+                <h3 className="font-bold text-slate-900 dark:text-white font-serif-headline text-sm truncate leading-tight">
                   Alexander Vance
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate mt-0.5">
-                  Director of IT & Enterprise Security
+                <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate mt-0.5 font-mono">
+                  Director of IT
                 </p>
-                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-zinc-500 font-mono mt-1">
-                  <Mail className="w-3 h-3 shrink-0" />
+                <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 truncate">
+                  <Mail className="w-3 h-3 shrink-0 text-slate-400" />
                   <span className="truncate">a.vance@assetsphere.io</span>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions List */}
-            <div className="space-y-2.5">
-              <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase font-mono tracking-wider px-1">
-                Quick Tools & Environment
-              </h4>
+            {/* 2. Full-Width Preferences & Environment Switchers */}
+            <div className="space-y-3">
+              <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-slate-400 dark:text-zinc-500 block px-1">
+                Preferences & Controls
+              </span>
 
-              {/* Theme Mode Toggle Action */}
-              <button
-                onClick={onToggleTheme}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 dark:text-amber-400">
-                    {isDark ? (
-                      <Moon className="w-4 h-4 text-indigo-400" />
-                    ) : (
-                      <Sun className="w-4 h-4 text-amber-500" />
-                    )}
-                  </div>
-                  <span className="text-xs">{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+              {/* Theme Mode Control Block */}
+              <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">
+                <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-200 font-medium">
+                  {isDark ? (
+                    <Moon className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  ) : (
+                    <Sun className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  )}
+                  <span>Theme Mode</span>
                 </div>
-                <BadgeSharedComponent variant="neutral" size="sm">
-                  Switch
-                </BadgeSharedComponent>
-              </button>
 
-              {/* Barcode Scanner Action */}
+                <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8 w-full">
+                  <button
+                    onClick={() => isDark && onToggleTheme()}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                      !isDark
+                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Sun className="w-3 h-3" />
+                    <span>Light Mode</span>
+                  </button>
+                  <button
+                    onClick={() => !isDark && onToggleTheme()}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                      isDark
+                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Moon className="w-3 h-3" />
+                    <span>Dark Mode</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Environment Control Block */}
+              <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">
+                <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-200 font-medium">
+                  <Shield className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span>Deployment Environment</span>
+                </div>
+
+                <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8 w-full">
+                  <button
+                    onClick={() => !isSelfHosted && onToggleDeploymentMode()}
+                    className={`flex-1 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                      isSelfHosted
+                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Air-Gapped
+                  </button>
+                  <button
+                    onClick={() => isSelfHosted && onToggleDeploymentMode()}
+                    className={`flex-1 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                      !isSelfHosted
+                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    Cloud Sync
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. Quick Action Links */}
+            <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-zinc-800/80">
               <button
                 onClick={() => {
                   onClose();
                   onOpenScanner();
                 }}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors font-medium cursor-pointer"
               >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
-                    <QrCode className="w-4 h-4" />
-                  </div>
-                  <span className="text-xs">Scan Asset Barcode</span>
-                </div>
+                <QrCode className="w-4 h-4 text-slate-400" />
+                <span>Scan Asset Barcode</span>
               </button>
 
-              {/* System Settings Link */}
               {onNavigateSettings && (
                 <button
                   onClick={() => {
                     onClose();
                     onNavigateSettings();
                   }}
-                  className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+                  className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors font-medium cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
-                      <Settings className="w-4 h-4" />
-                    </div>
-                    <span className="text-xs">System Settings & Config</span>
-                  </div>
+                  <Settings className="w-4 h-4 text-slate-400" />
+                  <span>System Settings & Config</span>
                 </button>
               )}
-
-              {/* Deployment Mode Toggle */}
-              <button
-                onClick={onToggleDeploymentMode}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
-                    {deploymentMode === 'Self-Hosted Air-Gapped' ? (
-                      <Shield className="w-4 h-4" />
-                    ) : (
-                      <Cloud className="w-4 h-4" />
-                    )}
-                  </div>
-                  <div className="truncate text-left">
-                    <span className="block text-xs truncate">{deploymentMode}</span>
-                  </div>
-                </div>
-                <BadgeSharedComponent
-                  variant={deploymentMode === 'Self-Hosted Air-Gapped' ? 'success' : 'info'}
-                  size="sm"
-                >
-                  Active
-                </BadgeSharedComponent>
-              </button>
             </div>
 
-            {/* Sign Out Section */}
-            <div className="pt-3 border-t border-slate-200/80 dark:border-zinc-800/80">
+            {/* 4. Footer: Sign Out */}
+            <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80">
               <button
                 onClick={() => {
                   onClose();
                   alert('Signed out of AssetSphere Enterprise.');
                 }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium text-xs"
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>

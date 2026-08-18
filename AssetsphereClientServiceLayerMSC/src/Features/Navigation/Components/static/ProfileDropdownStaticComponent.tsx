@@ -7,9 +7,11 @@ import {
   Settings,
   LogOut,
   Mail,
-  SlidersHorizontal,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
+import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 
 export interface ProfileDropdownStaticComponentProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ export interface ProfileDropdownStaticComponentProps {
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
   onNavigateSettings?: () => void;
+  currentTheme: string;
+  onToggleTheme: () => void;
 }
 
 export default function ProfileDropdownStaticComponent({
@@ -27,7 +31,11 @@ export default function ProfileDropdownStaticComponent({
   deploymentMode,
   onToggleDeploymentMode,
   onNavigateSettings,
+  currentTheme,
+  onToggleTheme,
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
+  const isDark = currentTheme === ApplicationThemeCON.DARK;
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -38,37 +46,58 @@ export default function ProfileDropdownStaticComponent({
             className="fixed inset-0 z-40 bg-transparent cursor-default"
           />
 
-          {/* Dropdown Panel */}
+          {/* Spacious Dropdown Panel */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -8 }}
+            initial={{ opacity: 0, scale: 0.96, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -8 }}
+            exit={{ opacity: 0, scale: 0.96, y: -6 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute right-0 top-12 w-80 z-50 bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl p-4 text-xs space-y-4 select-none"
+            className="absolute right-0 top-12 w-[350px] z-50 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl p-5 text-xs select-none space-y-5"
           >
-            {/* User Details Header */}
-            <div className="flex items-center gap-3 pb-3 border-b border-slate-200 dark:border-zinc-800">
-              <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-sm shadow-sm shrink-0">
+            {/* User Profile Info Header */}
+            <div className="flex items-center gap-3.5 pb-4 border-b border-slate-200/80 dark:border-zinc-800/80">
+              <div className="w-11 h-11 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-base shadow-sm shrink-0">
                 AV
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-semibold text-slate-900 dark:text-white font-serif-headline truncate text-sm">
+                <h3 className="font-semibold text-slate-900 dark:text-white font-serif-headline text-sm truncate">
                   Alexander Vance
                 </h3>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate">
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate mt-0.5">
                   Director of IT & Enterprise Security
                 </p>
-                <div className="flex items-center gap-1.5 text-[10px] text-slate-400 dark:text-zinc-500 font-mono mt-0.5">
-                  <Mail className="w-3 h-3" /> a.vance@assetsphere.io
+                <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-zinc-500 font-mono mt-1">
+                  <Mail className="w-3 h-3 shrink-0" />
+                  <span className="truncate">a.vance@assetsphere.io</span>
                 </div>
               </div>
             </div>
 
-            {/* Quick Actions & Settings Controls */}
-            <div className="space-y-2">
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase font-mono tracking-wider">
-                Quick Actions & Controls
-              </span>
+            {/* Quick Actions List */}
+            <div className="space-y-2.5">
+              <h4 className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase font-mono tracking-wider px-1">
+                Quick Tools & Environment
+              </h4>
+
+              {/* Theme Mode Toggle Action */}
+              <button
+                onClick={onToggleTheme}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500 dark:text-amber-400">
+                    {isDark ? (
+                      <Moon className="w-4 h-4 text-indigo-400" />
+                    ) : (
+                      <Sun className="w-4 h-4 text-amber-500" />
+                    )}
+                  </div>
+                  <span className="text-xs">{isDark ? 'Dark Mode' : 'Light Mode'}</span>
+                </div>
+                <BadgeSharedComponent variant="neutral" size="sm">
+                  Switch
+                </BadgeSharedComponent>
+              </button>
 
               {/* Barcode Scanner Action */}
               <button
@@ -76,17 +105,14 @@ export default function ProfileDropdownStaticComponent({
                   onClose();
                   onOpenScanner();
                 }}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-100/70 dark:bg-zinc-900 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
               >
-                <div className="flex items-center gap-2.5">
-                  <div className="p-1.5 rounded-md bg-sky-500/10 text-sky-500">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
                     <QrCode className="w-4 h-4" />
                   </div>
-                  <span>Scan Asset Barcode</span>
+                  <span className="text-xs">Scan Asset Barcode</span>
                 </div>
-                <BadgeSharedComponent variant="info" size="sm">
-                  Camera
-                </BadgeSharedComponent>
               </button>
 
               {/* System Settings Link */}
@@ -96,36 +122,32 @@ export default function ProfileDropdownStaticComponent({
                     onClose();
                     onNavigateSettings();
                   }}
-                  className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-100/70 dark:bg-zinc-900 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+                  className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
                       <Settings className="w-4 h-4" />
                     </div>
-                    <span>System Settings & Config</span>
+                    <span className="text-xs">System Settings & Config</span>
                   </div>
-                  <BadgeSharedComponent variant="neutral" size="sm">
-                    Admin
-                  </BadgeSharedComponent>
                 </button>
               )}
 
               {/* Deployment Mode Toggle */}
               <button
                 onClick={onToggleDeploymentMode}
-                className="w-full flex items-center justify-between p-2.5 rounded-lg bg-slate-100/70 dark:bg-zinc-900 hover:bg-slate-200/80 dark:hover:bg-zinc-800 transition-colors text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 hover:bg-slate-100 dark:hover:bg-zinc-800/80 transition-all text-slate-900 dark:text-zinc-100 font-medium cursor-pointer"
               >
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500 shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                     {deploymentMode === 'Self-Hosted Air-Gapped' ? (
-                      <Shield className="w-4 h-4 text-emerald-500" />
+                      <Shield className="w-4 h-4" />
                     ) : (
-                      <Cloud className="w-4 h-4 text-sky-500" />
+                      <Cloud className="w-4 h-4" />
                     )}
                   </div>
                   <div className="truncate text-left">
-                    <span className="block truncate">{deploymentMode}</span>
-                    <span className="text-[10px] text-slate-400 font-normal">Click to toggle env</span>
+                    <span className="block text-xs truncate">{deploymentMode}</span>
                   </div>
                 </div>
                 <BadgeSharedComponent
@@ -137,14 +159,14 @@ export default function ProfileDropdownStaticComponent({
               </button>
             </div>
 
-            {/* Sign Out Action */}
-            <div className="pt-2 border-t border-slate-200 dark:border-zinc-800">
+            {/* Sign Out Section */}
+            <div className="pt-3 border-t border-slate-200/80 dark:border-zinc-800/80">
               <button
                 onClick={() => {
                   onClose();
                   alert('Signed out of AssetSphere Enterprise.');
                 }}
-                className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium text-xs"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>

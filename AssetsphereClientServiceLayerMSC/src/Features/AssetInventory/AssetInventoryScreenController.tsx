@@ -18,6 +18,7 @@ import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import AssetInventoryCON from './Constants/AssetInventoryCON';
+import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 
 export interface AssetInventoryScreenControllerProps {
   assets: Asset[];
@@ -38,8 +39,23 @@ export default function AssetInventoryScreenController({
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'table' | 'grid' | 'kanban'>('table');
-  const [isSingleLineMode, setIsSingleLineMode] = useState<boolean>(true);
+
+  const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(() =>
+    UserPreferencesUtility.current.getInventoryViewMode('table')
+  );
+  const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
+    UserPreferencesUtility.current.getInventorySingleLine(true)
+  );
+
+  const setViewMode = (mode: 'table' | 'grid' | 'kanban') => {
+    setViewModeState(mode);
+    UserPreferencesUtility.current.setInventoryViewMode(mode);
+  };
+
+  const setIsSingleLineMode = (val: boolean) => {
+    setIsSingleLineModeState(val);
+    UserPreferencesUtility.current.setInventorySingleLine(val);
+  };
 
   const filteredAssets = assets.filter((ast) => {
     if (selectedCategory !== 'ALL' && ast.category !== selectedCategory) return false;
@@ -201,7 +217,7 @@ export default function AssetInventoryScreenController({
                 onClick={() => setIsSingleLineMode(!isSingleLineMode)}
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium hairline-border transition-colors cursor-pointer ${
                   isSingleLineMode
-                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 font-bold'
                     : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
                 }`}
                 title="Toggle Single-Line No-Wrap Table Mode"
@@ -225,14 +241,14 @@ export default function AssetInventoryScreenController({
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[1100px] whitespace-nowrap' : ''}`}>
               <thead>
                 <tr className="border-b border-slate-200 dark:border-zinc-800 bg-slate-100/50 dark:bg-zinc-900/40 text-slate-400 dark:text-zinc-500 font-mono">
-                  <th className="py-3 px-4">Asset Tag</th>
-                  <th className="py-3 px-4">Device Specifications</th>
-                  <th className="py-3 px-4">Category</th>
-                  <th className="py-3 px-4">Owner / Assigned</th>
-                  <th className="py-3 px-4">Valuation</th>
-                  <th className="py-3 px-4">Compliance</th>
-                  <th className="py-3 px-4">Health</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
+                  <th className="py-3.5 px-4">Asset Tag</th>
+                  <th className="py-3.5 px-4">Device Specifications</th>
+                  <th className="py-3.5 px-4">Category</th>
+                  <th className="py-3.5 px-4">Owner / Assigned</th>
+                  <th className="py-3.5 px-4">Valuation</th>
+                  <th className="py-3.5 px-4">Compliance</th>
+                  <th className="py-3.5 px-4">Health</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">

@@ -86,25 +86,13 @@ export default function DashboardScreenController({
   return (
     <div className="space-y-6">
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
-            {DashboardCON.TITLE}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            {DashboardCON.SUBTITLE}
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <ButtonSharedComponent
-            variant="primary"
-            size="md"
-            onClick={onOpenAIAssistant}
-            icon={<Activity className="w-4 h-4 text-sky-400" />}
-          >
-            Copilot Intelligence
-          </ButtonSharedComponent>
-        </div>
+      <div className="pb-4 border-b border-slate-200 dark:border-zinc-800">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          {DashboardCON.TITLE}
+        </h1>
+        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          {DashboardCON.SUBTITLE}
+        </p>
       </div>
 
       {/* KPI Cards Grid - Simple, Crisp & Un-cluttered */}

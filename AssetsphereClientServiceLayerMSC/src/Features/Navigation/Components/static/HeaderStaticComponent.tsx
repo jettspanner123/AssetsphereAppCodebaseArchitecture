@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Search, Plus, Bell, User } from 'lucide-react';
+import { Search, Plus, Bell } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
-import ThemeToggleSharedComponent from '../../../../Shared/Components/ThemeToggleSharedComponent';
 import ProfileDropdownStaticComponent from './ProfileDropdownStaticComponent';
 import NavigationCON from '../../Constants/NavigationCON';
 
@@ -75,12 +74,6 @@ export default function HeaderStaticComponent({
           Add Asset
         </ButtonSharedComponent>
 
-        {/* Theme Toggle */}
-        <ThemeToggleSharedComponent
-          currentTheme={currentTheme}
-          onToggle={onToggleTheme}
-        />
-
         {/* Notifications Button */}
         <div className="relative">
           <button
@@ -117,6 +110,8 @@ export default function HeaderStaticComponent({
             deploymentMode={deploymentMode}
             onToggleDeploymentMode={onToggleDeploymentMode}
             onNavigateSettings={onNavigateSettings}
+            currentTheme={currentTheme}
+            onToggleTheme={onToggleTheme}
           />
         </div>
       </div>

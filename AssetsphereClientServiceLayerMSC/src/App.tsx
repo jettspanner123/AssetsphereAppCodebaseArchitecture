@@ -11,6 +11,7 @@ import {
 } from './data/mockAssets';
 import { Asset, Employee, SoftwareLicense, PurchaseOrder, ServiceTicket, Vendor } from './types';
 import ApplicationThemeUtility from './Utilities/ApplicationThemeUtility';
+import UserPreferencesUtility from './Utilities/UserPreferencesUtility';
 import ExportUtility from './Utilities/ExportUtility';
 import { TabType } from './components/Sidebar';
 
@@ -34,7 +35,6 @@ import SettingsScreenController from './Features/Settings/SettingsScreenControll
 import QRBadgeModalController from './Features/QRScanner/QRBadgeModalController';
 import QRScannerModalController from './Features/QRScanner/QRScannerModalController';
 import ModalSharedComponent from './Shared/Components/ModalSharedComponent';
-import BadgeSharedComponent from './Shared/Components/BadgeSharedComponent';
 
 export default function App(): React.JSX.Element {
   // Theme State
@@ -53,20 +53,27 @@ export default function App(): React.JSX.Element {
 
   // Portfolio State
   const [assets, setAssets] = useState<Asset[]>(mockAssets);
-  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
-  const [licenses, setLicenses] = useState<SoftwareLicense[]>(mockSoftwareLicenses);
-  const [orders, setOrders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
-  const [tickets, setTickets] = useState<ServiceTicket[]>(mockServiceTickets);
-  const [vendors, setVendors] = useState<Vendor[]>(mockVendors);
-  const [recommendations, setRecommendations] = useState(mockAIRecommendations);
-  const [campaign, setCampaign] = useState(mockVerificationCampaigns[0]);
+  const [employees] = useState<Employee[]>(mockEmployees);
+  const [licenses] = useState<SoftwareLicense[]>(mockSoftwareLicenses);
+  const [orders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
+  const [tickets] = useState<ServiceTicket[]>(mockServiceTickets);
+  const [vendors] = useState<Vendor[]>(mockVendors);
+  const [recommendations] = useState(mockAIRecommendations);
+  const [campaign] = useState(mockVerificationCampaigns[0]);
 
-  // Navigation State
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+  // Navigation State with localStorage Persistence
+  const [activeTab, setActiveTabState] = useState<TabType>(() =>
+    UserPreferencesUtility.current.getActiveTab('dashboard')
+  );
   const [globalSearch, setGlobalSearch] = useState('');
   const [deploymentMode, setDeploymentMode] = useState<
     'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync'
   >('Self-Hosted Air-Gapped');
+
+  const setActiveTab = (tab: TabType) => {
+    setActiveTabState(tab);
+    UserPreferencesUtility.current.setActiveTab(tab);
+  };
 
   // Modal States
   const [selectedAssetForDetail, setSelectedAssetForDetail] = useState<Asset | null>(null);
@@ -90,26 +97,80 @@ export default function App(): React.JSX.Element {
         prev.map((a) => (a.id === assetFormState.initialAsset?.id ? ({ ...a, ...assetData } as Asset) : a))
       );
     } else {
-      setAssets((prev) => [assetData as Asset, ...prev]);
+      const newAsset: Asset = {
+        id: Date.now().toString(),
+        assetNumber: `AST-${Math.floor(10000 + Math.random() * 90000)}`,
+        barcodeValue: `BAR-${Date.now()}`,
+        serialNumber: assetData.serialNumber || `SN-${Date.now()}`,
+        companyTag: 'AST-TAG',
+        hostname: assetData.hostname || 'HOST-NEW',
+        deviceName: assetData.deviceName || 'New Asset',
+        category: (assetData.category || 'Computing') as any,
+        subtype: (assetData.subtype || 'Laptop') as any,
+        manufacturer: assetData.manufacturer || 'Generic',
+        brand: 'Generic',
+        model: assetData.model || 'Standard',
+        productFamily: 'Enterprise',
+        sku: 'SKU-100',
+        releaseYear: 2026,
+        lifecycleStatus: (assetData.lifecycleStatus || 'In Store') as any,
+        department: assetData.department || 'IT',
+        currentLocation: assetData.currentLocation || 'HQ Warehouse',
+        assignedToEmployeeName: assetData.assignedToEmployeeName,
+        currentValue: (assetData as any).purchaseCost || 0,
+        depreciationMethod: 'Straight Line',
+        usefulLifeYears: 4,
+        salvageValue: 100,
+        totalCostOfOwnership: (assetData as any).purchaseCost || 0,
+        timeline: [],
+        chainOfCustody: [],
+        procurement: {
+          purchaseDate: new Date().toISOString().split('T')[0],
+          purchaseOrderNo: `PO-2026-${Math.floor(100 + Math.random() * 900)}`,
+          vendorName: 'Direct Order',
+          invoiceNo: 'INV-100',
+          invoiceDate: '2026-01-01',
+          purchaseCost: (assetData as any).purchaseCost || 0,
+          gstPct: 18,
+          currency: 'USD',
+          budgetCode: 'BUD-100',
+          costCenter: 'CC-100',
+          isCapitalized: true,
+          procurementMethod: 'Direct Purchase',
+        },
+        health: {
+          overallScore: 100,
+          deviceAgeMonths: 1,
+          repairCount: 0,
+          warrantyStatus: 'Active',
+          downtimeHoursTotal: 0,
+          performanceIndex: 99,
+          securityCompliancePct: 100,
+        },
+        security: {
+          antivirusStatus: 'Active',
+          vpnClientStatus: 'Installed',
+          bitlockerEnabled: true,
+          encryptionStatus: 'Encrypted',
+          patchLevel: 'Latest',
+          securityBaselineScore: 100,
+          complianceScore: 100,
+          isCompliant: true,
+        },
+      };
+      setAssets((prev) => [newAsset, ...prev]);
     }
     setAssetFormState({ isOpen: false, initialAsset: null });
-  };
-
-  const handleVerifyAsset = (assetId: string) => {
-    setCampaign((prev) => ({
-      ...prev,
-      verifiedAssetsCount: Math.min(prev.verifiedAssetsCount + 1, prev.totalTargetAssets),
-    }));
-  };
-
-  const handleExportCSV = () => {
-    ExportUtility.current.exportAssetsToCSV(assets);
   };
 
   const handleToggleDeploymentMode = () => {
     setDeploymentMode((prev) =>
       prev === 'Self-Hosted Air-Gapped' ? 'Enterprise Cloud Sync' : 'Self-Hosted Air-Gapped'
     );
+  };
+
+  const handleExportCSV = () => {
+    ExportUtility.current.exportAssetsToCSV(assets);
   };
 
   return (
@@ -136,7 +197,7 @@ export default function App(): React.JSX.Element {
           recommendations={recommendations}
           campaign={campaign}
           onSelectAsset={setSelectedAssetForDetail}
-          onOpenAIAssistant={() => setActiveTab('ai-assistant')}
+          onOpenAIAssistant={() => setActiveTab('ai-assistant' as TabType)}
           onNavigateTab={setActiveTab}
         />
       )}
@@ -203,56 +264,99 @@ export default function App(): React.JSX.Element {
         />
       )}
 
-      {/* Modals */}
+      {/* Global Asset Detail Modal */}
       <AssetDetailModalController
         asset={selectedAssetForDetail}
         onClose={() => setSelectedAssetForDetail(null)}
-        onOpenQRBadgeModal={setSelectedAssetForQR}
+        onOpenQRBadgeModal={(ast) => {
+          setSelectedAssetForDetail(null);
+          setSelectedAssetForQR(ast);
+        }}
         onEditAsset={(ast) => {
           setSelectedAssetForDetail(null);
           setAssetFormState({ isOpen: true, initialAsset: ast });
         }}
       />
 
+      {/* Global Asset Form Modal */}
       <AssetFormModalController
         isOpen={assetFormState.isOpen}
-        initialAsset={assetFormState.initialAsset}
-        onSave={handleSaveAsset}
         onClose={() => setAssetFormState({ isOpen: false, initialAsset: null })}
+        onSave={handleSaveAsset}
+        initialAsset={assetFormState.initialAsset}
       />
 
+      {/* QR Badge Modal */}
       <QRBadgeModalController
         asset={selectedAssetForQR}
         onClose={() => setSelectedAssetForQR(null)}
       />
 
+      {/* QR Scanner Modal */}
       <QRScannerModalController
         isOpen={isQRScannerOpen}
         onClose={() => setIsQRScannerOpen(false)}
-        onVerifyAsset={handleVerifyAsset}
         assets={assets}
+        onVerifyAsset={(assetId) => {
+          const found = assets.find((a) => a.id === assetId);
+          if (found) {
+            setSelectedAssetForDetail(found);
+          }
+        }}
       />
 
       {/* Notifications Drawer Modal */}
       <ModalSharedComponent
         isOpen={isNotificationsOpen}
         onClose={() => setIsNotificationsOpen(false)}
-        title="Enterprise Alerts & Security Notifications"
-        subtitle={`${unreadAlertCount} critical issues requiring attention`}
-        maxWidth="md"
+        title="Enterprise System Notifications"
+        subtitle={`${unreadAlertCount} active alerts requiring administrator review`}
+        maxWidth="xl"
       >
         <div className="space-y-3 text-xs">
           {nonCompliantCount > 0 && (
-            <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-300">
-              <div className="font-semibold mb-1">Security Audit Flags</div>
-              <p>{nonCompliantCount} endpoints failed BitLocker encryption or EDR agent checks.</p>
+            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/50 flex items-start gap-3">
+              <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5" />
+              <div>
+                <h4 className="font-semibold text-rose-900 dark:text-rose-300">
+                  {nonCompliantCount} Security Non-Compliance Violations
+                </h4>
+                <p className="text-rose-700 dark:text-rose-400 text-[11px] mt-0.5">
+                  Devices detected without active Disk Encryption or required EDR agents.
+                </p>
+                <button
+                  onClick={() => {
+                    setIsNotificationsOpen(false);
+                    setActiveTab('compliance');
+                  }}
+                  className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400 underline cursor-pointer"
+                >
+                  Inspect Compliance Matrix →
+                </button>
+              </div>
             </div>
           )}
 
           {openTicketCount > 0 && (
-            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
-              <div className="font-semibold mb-1">Service Desk Queue</div>
-              <p>{openTicketCount} hardware maintenance repair tickets pending resolution.</p>
+            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/50 flex items-start gap-3">
+              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1.5" />
+              <div>
+                <h4 className="font-semibold text-amber-900 dark:text-amber-300">
+                  {openTicketCount} Open Service Desk Tickets
+                </h4>
+                <p className="text-amber-700 dark:text-amber-400 text-[11px] mt-0.5">
+                  Hardware repairs and ticket requests pending technician assignment.
+                </p>
+                <button
+                  onClick={() => {
+                    setIsNotificationsOpen(false);
+                    setActiveTab('servicedesk');
+                  }}
+                  className="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400 underline cursor-pointer"
+                >
+                  View Service Queue →
+                </button>
+              </div>
             </div>
           )}
         </div>

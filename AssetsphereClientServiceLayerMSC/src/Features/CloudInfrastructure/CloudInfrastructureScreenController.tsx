@@ -196,6 +196,22 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
             </div>
           </div>
         </div>
+
+        {/* Cloud Compute Status Color Legend Indicator */}
+        <div className="pt-3.5 mt-4 border-t border-slate-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-5 text-xs font-mono">
+          <div className="flex items-center gap-2">
+            <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 shadow-xs" />
+            <span className="text-slate-700 dark:text-zinc-300 font-medium">Active Running Node</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-amber-500 via-orange-400 to-amber-500 shadow-xs" />
+            <span className="text-slate-700 dark:text-zinc-300 font-medium">High Load Scaling</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-rose-500 via-red-500 to-rose-500 shadow-xs" />
+            <span className="text-slate-700 dark:text-zinc-300 font-medium">Stopped / Offline</span>
+          </div>
+        </div>
       </CardSharedComponent>
 
       {/* Fallback Empty State */}

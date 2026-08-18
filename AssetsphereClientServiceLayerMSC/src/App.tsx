@@ -202,7 +202,10 @@ export default function App(): React.JSX.Element {
       deploymentMode={deploymentMode}
       onToggleDeploymentMode={handleToggleDeploymentMode}
       unreadCount={unreadAlertCount}
+      isNotificationsOpen={isNotificationsOpen}
       onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
+      nonCompliantCount={nonCompliantCount}
+      openTicketCount={openTicketCount}
       unreadAlertCount={unreadAlertCount}
     >
       {/* Tab Screen Routing */}
@@ -321,62 +324,6 @@ export default function App(): React.JSX.Element {
         }}
       />
 
-      {/* Notifications Drawer Modal */}
-      <ModalSharedComponent
-        isOpen={isNotificationsOpen}
-        onClose={() => setIsNotificationsOpen(false)}
-        title="Enterprise System Notifications"
-        subtitle={`${unreadAlertCount} active alerts requiring administrator review`}
-        maxWidth="xl"
-      >
-        <div className="space-y-3 text-xs">
-          {nonCompliantCount > 0 && (
-            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/20 border border-rose-200/60 dark:border-rose-900/50 flex items-start gap-3">
-              <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0 mt-1.5" />
-              <div>
-                <h4 className="font-semibold text-rose-900 dark:text-rose-300">
-                  {nonCompliantCount} Security Non-Compliance Violations
-                </h4>
-                <p className="text-rose-700 dark:text-rose-400 text-[11px] mt-0.5">
-                  Devices detected without active Disk Encryption or required EDR agents.
-                </p>
-                <button
-                  onClick={() => {
-                    setIsNotificationsOpen(false);
-                    setActiveTab('compliance');
-                  }}
-                  className="mt-2 text-xs font-semibold text-rose-600 dark:text-rose-400 underline cursor-pointer"
-                >
-                  Inspect Compliance Matrix →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {openTicketCount > 0 && (
-            <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-900/50 flex items-start gap-3">
-              <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 mt-1.5" />
-              <div>
-                <h4 className="font-semibold text-amber-900 dark:text-amber-300">
-                  {openTicketCount} Open Service Desk Tickets
-                </h4>
-                <p className="text-amber-700 dark:text-amber-400 text-[11px] mt-0.5">
-                  Hardware repairs and ticket requests pending technician assignment.
-                </p>
-                <button
-                  onClick={() => {
-                    setIsNotificationsOpen(false);
-                    setActiveTab('servicedesk');
-                  }}
-                  className="mt-2 text-xs font-semibold text-amber-600 dark:text-amber-400 underline cursor-pointer"
-                >
-                  View Service Queue →
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </ModalSharedComponent>
     </NavigationController>
   );
 }

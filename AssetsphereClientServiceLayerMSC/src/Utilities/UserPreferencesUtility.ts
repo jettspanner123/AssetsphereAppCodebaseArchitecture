@@ -33,6 +33,10 @@ export default class UserPreferencesUtility {
   private serviceDeskGridColumnsKey = 'assetsphere_servicedesk_grid_columns';
   private serviceDeskSingleLineKey = 'assetsphere_servicedesk_single_line';
 
+  private complianceViewModeKey = 'assetsphere_compliance_view_mode';
+  private complianceGridColumnsKey = 'assetsphere_compliance_grid_columns';
+  private complianceSingleLineKey = 'assetsphere_compliance_single_line';
+
   // Active Tab Persistence
   public getActiveTab(defaultTab: TabType = 'dashboard'): TabType {
     if (typeof window === 'undefined') return defaultTab;
@@ -338,6 +342,48 @@ export default class UserPreferencesUtility {
   public setServiceDeskSingleLine(val: boolean): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.serviceDeskSingleLineKey, val.toString());
+    }
+  }
+
+  // Compliance View Mode
+  public getComplianceViewMode(defaultMode: 'grid' | 'list' = 'list'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.complianceViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setComplianceViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.complianceViewModeKey, mode);
+    }
+  }
+
+  // Compliance Grid Columns (2 vs 3)
+  public getComplianceGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.complianceGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setComplianceGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.complianceGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Compliance Single-Line Mode
+  public getComplianceSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.complianceSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setComplianceSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.complianceSingleLineKey, val.toString());
     }
   }
 }

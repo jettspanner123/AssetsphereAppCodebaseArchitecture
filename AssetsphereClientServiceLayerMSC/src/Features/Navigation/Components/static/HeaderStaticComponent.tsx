@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Search, Plus, Bell } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
 import ProfileDropdownStaticComponent from './ProfileDropdownStaticComponent';
+import NotificationsDropdownStaticComponent from './NotificationsDropdownStaticComponent';
 import NavigationCON from '../../Constants/NavigationCON';
+import { TabType } from '../../../../components/Sidebar';
 
 export interface HeaderStaticComponentProps {
   globalSearch: string;
@@ -14,7 +16,11 @@ export interface HeaderStaticComponentProps {
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
   unreadCount: number;
+  isNotificationsOpen: boolean;
   onToggleNotifications: () => void;
+  nonCompliantCount?: number;
+  openTicketCount?: number;
+  onNavigateTab?: (tab: TabType) => void;
   onNavigateSettings?: () => void;
 }
 
@@ -28,7 +34,11 @@ export default function HeaderStaticComponent({
   deploymentMode,
   onToggleDeploymentMode,
   unreadCount,
+  isNotificationsOpen,
   onToggleNotifications,
+  nonCompliantCount = 0,
+  openTicketCount = 0,
+  onNavigateTab,
   onNavigateSettings,
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -91,7 +101,7 @@ export default function HeaderStaticComponent({
           Add Asset
         </ButtonSharedComponent>
 
-        {/* Notifications Button */}
+        {/* Notifications Popover Dropdown Button */}
         <div className="relative">
           <button
             onClick={onToggleNotifications}
@@ -105,6 +115,15 @@ export default function HeaderStaticComponent({
               </span>
             )}
           </button>
+
+          {/* Notifications Dropdown Popover */}
+          <NotificationsDropdownStaticComponent
+            isOpen={isNotificationsOpen}
+            onClose={onToggleNotifications}
+            nonCompliantCount={nonCompliantCount}
+            openTicketCount={openTicketCount}
+            onNavigateTab={onNavigateTab}
+          />
         </div>
 
         {/* Profile Button */}

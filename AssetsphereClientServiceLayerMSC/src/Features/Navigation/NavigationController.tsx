@@ -19,7 +19,10 @@ export default function NavigationController({
   deploymentMode,
   onToggleDeploymentMode,
   unreadCount,
+  isNotificationsOpen,
   onToggleNotifications,
+  nonCompliantCount,
+  openTicketCount,
   activeTab,
   onSelectTab,
   unreadAlertCount,
@@ -36,7 +39,11 @@ export default function NavigationController({
         deploymentMode={deploymentMode}
         onToggleDeploymentMode={onToggleDeploymentMode}
         unreadCount={unreadCount}
+        isNotificationsOpen={isNotificationsOpen}
         onToggleNotifications={onToggleNotifications}
+        nonCompliantCount={nonCompliantCount}
+        openTicketCount={openTicketCount}
+        onNavigateTab={onSelectTab}
         onNavigateSettings={() => onSelectTab('settings')}
       />
       <div className="flex-1 flex w-full items-start">

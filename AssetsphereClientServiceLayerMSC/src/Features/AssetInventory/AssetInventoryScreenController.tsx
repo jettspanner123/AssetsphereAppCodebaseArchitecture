@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   ShieldAlert,
   User,
+  Maximize2,
+  WrapText,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
@@ -37,6 +39,7 @@ export default function AssetInventoryScreenController({
   const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'table' | 'grid' | 'kanban'>('table');
+  const [isSingleLineMode, setIsSingleLineMode] = useState<boolean>(true);
 
   const filteredAssets = assets.filter((ast) => {
     if (selectedCategory !== 'ALL' && ast.category !== selectedCategory) return false;
@@ -79,6 +82,7 @@ export default function AssetInventoryScreenController({
                   ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
               }`}
+              title="Table View"
             >
               <List className="w-4 h-4" />
             </button>
@@ -89,6 +93,7 @@ export default function AssetInventoryScreenController({
                   ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
               }`}
+              title="Grid View"
             >
               <Grid className="w-4 h-4" />
             </button>
@@ -99,6 +104,7 @@ export default function AssetInventoryScreenController({
                   ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
                   : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
               }`}
+              title="Kanban Board"
             >
               <Columns className="w-4 h-4" />
             </button>
@@ -156,38 +162,58 @@ export default function AssetInventoryScreenController({
           </div>
         </div>
 
-        {/* Secondary Filter Dropdowns */}
-        <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 dark:text-zinc-400 font-medium">Lifecycle:</span>
-            <select
-              value={selectedLifecycle}
-              onChange={(e) => setSelectedLifecycle(e.target.value)}
-              className="h-8 px-2.5 rounded-md bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 hairline-border focus:outline-none"
-            >
-              {AssetInventoryCON.LIFECYCLE_OPTIONS.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </select>
+        {/* Secondary Filter Dropdowns & Single-Line Toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 dark:text-zinc-400 font-medium">Lifecycle:</span>
+              <select
+                value={selectedLifecycle}
+                onChange={(e) => setSelectedLifecycle(e.target.value)}
+                className="h-8 px-2.5 rounded-md bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 hairline-border focus:outline-none"
+              >
+                {AssetInventoryCON.LIFECYCLE_OPTIONS.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 dark:text-zinc-400 font-medium">Security Compliance:</span>
+              <select
+                value={complianceFilter}
+                onChange={(e) => setComplianceFilter(e.target.value)}
+                className="h-8 px-2.5 rounded-md bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 hairline-border focus:outline-none"
+              >
+                <option value="ALL">All Devices</option>
+                <option value="COMPLIANT">Compliant Only</option>
+                <option value="NON_COMPLIANT">Non-Compliant Only</option>
+              </select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 dark:text-zinc-400 font-medium">Security Compliance:</span>
-            <select
-              value={complianceFilter}
-              onChange={(e) => setComplianceFilter(e.target.value)}
-              className="h-8 px-2.5 rounded-md bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 hairline-border focus:outline-none"
-            >
-              <option value="ALL">All Devices</option>
-              <option value="COMPLIANT">Compliant Only</option>
-              <option value="NON_COMPLIANT">Non-Compliant Only</option>
-            </select>
-          </div>
+          <div className="flex items-center gap-4">
+            {/* Single Line Scroll Toggle */}
+            {viewMode === 'table' && (
+              <button
+                onClick={() => setIsSingleLineMode(!isSingleLineMode)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium hairline-border transition-colors cursor-pointer ${
+                  isSingleLineMode
+                    ? 'bg-zinc-900 text-white dark:bg-white dark:text-zinc-900'
+                    : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
+                }`}
+                title="Toggle Single-Line No-Wrap Table Mode"
+              >
+                {isSingleLineMode ? <Maximize2 className="w-3.5 h-3.5" /> : <WrapText className="w-3.5 h-3.5" />}
+                <span>{isSingleLineMode ? 'Single-Line Mode: ON' : 'Wrap Text'}</span>
+              </button>
+            )}
 
-          <div className="ml-auto text-slate-400 dark:text-zinc-500 font-mono text-[11px]">
-            Showing {filteredAssets.length} of {assets.length} items
+            <div className="text-slate-400 dark:text-zinc-500 font-mono text-[11px]">
+              Showing {filteredAssets.length} of {assets.length} items
+            </div>
           </div>
         </div>
       </CardSharedComponent>
@@ -195,8 +221,8 @@ export default function AssetInventoryScreenController({
       {/* Main Content Area View Modes */}
       {viewMode === 'table' && (
         <CardSharedComponent className="p-0 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+          <div className="overflow-x-auto w-full">
+            <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[1100px] whitespace-nowrap' : ''}`}>
               <thead>
                 <tr className="border-b border-slate-200 dark:border-zinc-800 bg-slate-100/50 dark:bg-zinc-900/40 text-slate-400 dark:text-zinc-500 font-mono">
                   <th className="py-3 px-4">Asset Tag</th>
@@ -215,45 +241,58 @@ export default function AssetInventoryScreenController({
                     key={asset.id}
                     className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors group"
                   >
-                    <td className="py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-zinc-100">
+                    <td className={`py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-zinc-100 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       {asset.assetNumber}
                     </td>
-                    <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-900 dark:text-white">
-                        {asset.deviceName}
-                      </div>
-                      <div className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">
-                        S/N: {asset.serialNumber} • {asset.subtype || asset.category}
-                      </div>
+                    <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
+                      {isSingleLineMode ? (
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-slate-900 dark:text-white">
+                            {asset.deviceName}
+                          </span>
+                          <span className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
+                            (S/N: {asset.serialNumber} • {asset.subtype || asset.category})
+                          </span>
+                        </div>
+                      ) : (
+                        <div>
+                          <div className="font-semibold text-slate-900 dark:text-white">
+                            {asset.deviceName}
+                          </div>
+                          <div className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">
+                            S/N: {asset.serialNumber} • {asset.subtype || asset.category}
+                          </div>
+                        </div>
+                      )}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       <BadgeSharedComponent variant="neutral" size="sm">
                         {asset.category}
                       </BadgeSharedComponent>
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300">
-                        <User className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />
-                        <span>{asset.assignedToEmployeeName || 'Unassigned'}</span>
+                        <User className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 shrink-0" />
+                        <span className="truncate">{asset.assignedToEmployeeName || 'Unassigned'}</span>
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-white">
+                    <td className={`py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-white ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       ${asset.currentValue?.toLocaleString() || 0}
                     </td>
-                    <td className="py-3.5 px-4">
+                    <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       {asset.security?.isCompliant ? (
                         <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400 text-[11px] font-medium">
-                          <ShieldCheck className="w-3.5 h-3.5" />
+                          <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                           <span>Encrypted</span>
                         </div>
                       ) : (
                         <div className="flex items-center gap-1 text-rose-600 dark:text-rose-400 text-[11px] font-medium">
-                          <ShieldAlert className="w-3.5 h-3.5" />
+                          <ShieldAlert className="w-3.5 h-3.5 shrink-0" />
                           <span>Action Reqd</span>
                         </div>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 font-mono">
+                    <td className={`py-3.5 px-4 font-mono ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       <span
                         className={`font-semibold ${
                           (asset.health?.overallScore || 0) < 70
@@ -266,7 +305,7 @@ export default function AssetInventoryScreenController({
                         {asset.health?.overallScore || 0}%
                       </span>
                     </td>
-                    <td className="py-3.5 px-4 text-right">
+                    <td className={`py-3.5 px-4 text-right ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => onOpenQRBadgeModal(asset)}

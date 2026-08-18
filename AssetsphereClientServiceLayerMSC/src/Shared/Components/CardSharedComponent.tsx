@@ -13,34 +13,27 @@ export interface CardSharedComponentProps {
 export default function CardSharedComponent({
   children,
   variant = 'card',
-  glow = 'none',
   className = '',
   onClick,
   hoverable = false,
 }: CardSharedComponentProps): React.JSX.Element {
   let surfaceStyle = '';
   if (variant === 'elevated') {
-    surfaceStyle = 'bg-slate-100/90 dark:bg-[#101012] hairline-border-strong';
+    surfaceStyle = 'bg-white dark:bg-[#121215] border border-slate-200/60 dark:border-zinc-800/60 shadow-xs';
   } else if (variant === 'deep') {
-    surfaceStyle = 'bg-slate-50 dark:bg-[#06060a] hairline-border-strong';
+    surfaceStyle = 'bg-slate-50 dark:bg-[#08080a] border border-slate-200/40 dark:border-zinc-800/40';
   } else {
-    surfaceStyle = 'bg-slate-50/60 dark:bg-[#0a0a0c] hairline-border';
+    surfaceStyle = 'bg-white dark:bg-[#0d0d10] border border-slate-200/50 dark:border-zinc-800/50 shadow-2xs';
   }
 
-  let glowClass = '';
-  if (glow === 'orange') glowClass = 'glow-orange';
-  if (glow === 'blue') glowClass = 'glow-blue';
-  if (glow === 'green') glowClass = 'glow-green';
-  if (glow === 'red') glowClass = 'glow-red';
-
   const hoverClass = hoverable
-    ? 'hover:border-slate-300 dark:hover:border-zinc-700 cursor-pointer'
+    ? 'hover:border-slate-300/80 dark:hover:border-zinc-700/80 hover:shadow-md transition-all cursor-pointer'
     : '';
 
   return (
     <div
       onClick={onClick}
-      className={`rounded-xl p-5 relative overflow-hidden transition-colors duration-200 ${surfaceStyle} ${glowClass} ${hoverClass} ${className}`}
+      className={`rounded-xl p-5 relative transition-all duration-200 ${surfaceStyle} ${hoverClass} ${className}`}
     >
       {children}
     </div>

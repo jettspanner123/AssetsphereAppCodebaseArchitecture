@@ -22,9 +22,9 @@ import {
   Wrench,
   ShieldCheck,
   AlertTriangle,
-  Sparkles,
   ChevronRight,
-  TrendingDown,
+  Activity,
+  ArrowRight,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
@@ -53,11 +53,6 @@ export default function DashboardScreenController({
   // Metrics
   const totalAssets = assets.length;
   const totalValuation = assets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
-  const totalPurchaseCost = assets.reduce(
-    (sum, a) => sum + (a.procurement?.purchaseCost || 0),
-    0
-  );
-  const totalDepreciation = totalPurchaseCost - totalValuation;
   const activeTicketsCount = tickets.filter(
     (t) => t.status !== 'Closed' && t.status !== 'Resolved'
   ).length;
@@ -105,122 +100,99 @@ export default function DashboardScreenController({
             variant="primary"
             size="md"
             onClick={onOpenAIAssistant}
-            icon={<Sparkles className="w-4 h-4 text-amber-400" />}
+            icon={<Activity className="w-4 h-4 text-sky-400" />}
           >
-            AI Copilot Insights
+            Copilot Intelligence
           </ButtonSharedComponent>
         </div>
       </div>
 
-      {/* KPI Cards Grid */}
+      {/* KPI Cards Grid - Simple, Crisp & Un-cluttered */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1 */}
-        <CardSharedComponent glow="blue" hoverable onClick={() => onNavigateTab('assets')}>
+        <CardSharedComponent hoverable onClick={() => onNavigateTab('assets')}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Total Asset Count</span>
-            <div className="p-2 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Total Assets</span>
+            <span className="p-1.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300">
               <Box className="w-4 h-4" />
-            </div>
+            </span>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono">{totalAssets}</span>
-            <BadgeSharedComponent variant="success" size="sm">
-              Operational
-            </BadgeSharedComponent>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              {totalAssets}
+            </span>
+            <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">devices</span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2">
-            Across {Object.keys(categoryMap).length} equipment categories
-          </p>
         </CardSharedComponent>
 
         {/* Metric 2 */}
-        <CardSharedComponent glow="green" hoverable onClick={() => onNavigateTab('analytics')}>
+        <CardSharedComponent hoverable onClick={() => onNavigateTab('analytics')}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Portfolio Net Valuation</span>
-            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Portfolio Valuation</span>
+            <span className="p-1.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300">
               <DollarSign className="w-4 h-4" />
-            </div>
+            </span>
           </div>
-          <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono">
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               ${totalValuation.toLocaleString()}
             </span>
-            <span className="text-[11px] text-slate-400 dark:text-zinc-500 flex items-center gap-1 font-mono">
-              <TrendingDown className="w-3 h-3 text-amber-500" />
-              -${Math.round(totalDepreciation / 1000)}k dep.
-            </span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2">
-            Original Cost: ${totalPurchaseCost.toLocaleString()}
-          </p>
         </CardSharedComponent>
 
         {/* Metric 3 */}
-        <CardSharedComponent glow="red" hoverable onClick={() => onNavigateTab('compliance')}>
+        <CardSharedComponent hoverable onClick={() => onNavigateTab('compliance')}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Security Compliance</span>
-            <div className="p-2 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
+            <span className="p-1.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300">
               <ShieldCheck className="w-4 h-4" />
-            </div>
+            </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               {Math.round(((totalAssets - nonCompliantCount) / (totalAssets || 1)) * 100)}%
             </span>
-            {nonCompliantCount > 0 ? (
-              <BadgeSharedComponent variant="danger" size="sm" showDot>
-                {nonCompliantCount} Non-Compliant
-              </BadgeSharedComponent>
-            ) : (
-              <BadgeSharedComponent variant="success" size="sm">
-                100% Compliant
-              </BadgeSharedComponent>
-            )}
+            <BadgeSharedComponent variant={nonCompliantCount === 0 ? 'success' : 'danger'} size="sm">
+              {nonCompliantCount === 0 ? 'Optimal' : `${nonCompliantCount} Flags`}
+            </BadgeSharedComponent>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2">
-            BitLocker & EDR agent compliance status
-          </p>
         </CardSharedComponent>
 
         {/* Metric 4 */}
-        <CardSharedComponent glow="orange" hoverable onClick={() => onNavigateTab('servicedesk')}>
+        <CardSharedComponent hoverable onClick={() => onNavigateTab('servicedesk')}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Service Desk Queue</span>
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
+            <span className="text-xs font-medium text-slate-500 dark:text-zinc-400">Open Tickets</span>
+            <span className="p-1.5 rounded-md bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-300">
               <Wrench className="w-4 h-4" />
-            </div>
+            </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold text-slate-900 dark:text-white font-mono">{activeTicketsCount}</span>
-            <span className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              {activeTicketsCount}
+            </span>
+            <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
               Avg Health: {avgHealthScore}%
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2">
-            Open maintenance & hardware repair tickets
-          </p>
         </CardSharedComponent>
       </div>
 
-      {/* AI Recommendation Banner */}
+      {/* Clean Technical Risk Analysis Banner */}
       {recommendations.length > 0 && (
-        <CardSharedComponent glow="orange" variant="elevated">
+        <CardSharedComponent>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="p-2.5 rounded-lg bg-amber-500/10 text-amber-500 shrink-0 mt-0.5 sm:mt-0">
-                <Sparkles className="w-5 h-5" />
+              <div className="p-2 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 shrink-0 mt-0.5 sm:mt-0">
+                <Activity className="w-4 h-4 text-sky-500" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
-                    AI Predictive Asset Insights
+                  <h3 className="text-xs font-semibold text-slate-900 dark:text-white uppercase font-mono tracking-wider">
+                    Portfolio Risk & Optimization Analysis
                   </h3>
-                  <BadgeSharedComponent variant="warning" size="sm">
-                    {recommendations[0].impact} Impact
-                  </BadgeSharedComponent>
                 </div>
                 <p className="text-xs text-slate-600 dark:text-zinc-300 mt-1">
-                  {recommendations[0].title} — {recommendations[0].estimatedCostOrSaving}
+                  {recommendations[0].title} • Expected Impact: {recommendations[0].estimatedCostOrSaving}
                 </p>
               </div>
             </div>
@@ -228,8 +200,9 @@ export default function DashboardScreenController({
               variant="outline"
               size="sm"
               onClick={onOpenAIAssistant}
+              icon={<ArrowRight className="w-3.5 h-3.5" />}
             >
-              Analyze with Copilot
+              Open Analysis
             </ButtonSharedComponent>
           </div>
         </CardSharedComponent>

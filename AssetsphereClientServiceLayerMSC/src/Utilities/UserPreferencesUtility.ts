@@ -4,6 +4,7 @@ export default class UserPreferencesUtility {
   public static current: UserPreferencesUtility = new UserPreferencesUtility();
 
   private activeTabKey = 'assetsphere_active_tab';
+
   private softwareViewModeKey = 'assetsphere_software_view_mode';
   private softwareGridColumnsKey = 'assetsphere_software_grid_columns';
   private softwareSingleLineKey = 'assetsphere_software_single_line';
@@ -11,6 +12,18 @@ export default class UserPreferencesUtility {
   private inventoryViewModeKey = 'assetsphere_inventory_view_mode';
   private inventoryGridColumnsKey = 'assetsphere_inventory_grid_columns';
   private inventorySingleLineKey = 'assetsphere_inventory_single_line';
+
+  private employeesViewModeKey = 'assetsphere_employees_view_mode';
+  private employeesGridColumnsKey = 'assetsphere_employees_grid_columns';
+  private employeesSingleLineKey = 'assetsphere_employees_single_line';
+
+  private procurementViewModeKey = 'assetsphere_procurement_view_mode';
+  private procurementGridColumnsKey = 'assetsphere_procurement_grid_columns';
+  private procurementSingleLineKey = 'assetsphere_procurement_single_line';
+
+  private vendorsViewModeKey = 'assetsphere_vendors_view_mode';
+  private vendorsGridColumnsKey = 'assetsphere_vendors_grid_columns';
+  private vendorsSingleLineKey = 'assetsphere_vendors_single_line';
 
   // Active Tab Persistence
   public getActiveTab(defaultTab: TabType = 'dashboard'): TabType {
@@ -107,6 +120,132 @@ export default class UserPreferencesUtility {
   public setInventorySingleLine(val: boolean): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.inventorySingleLineKey, val.toString());
+    }
+  }
+
+  // Employees View Mode
+  public getEmployeesViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.employeesViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setEmployeesViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.employeesViewModeKey, mode);
+    }
+  }
+
+  // Employees Grid Columns (2 vs 3)
+  public getEmployeesGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.employeesGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setEmployeesGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.employeesGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Employees Single-Line Mode
+  public getEmployeesSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.employeesSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setEmployeesSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.employeesSingleLineKey, val.toString());
+    }
+  }
+
+  // Procurement View Mode
+  public getProcurementViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.procurementViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setProcurementViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.procurementViewModeKey, mode);
+    }
+  }
+
+  // Procurement Grid Columns (2 vs 3)
+  public getProcurementGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.procurementGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setProcurementGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.procurementGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Procurement Single-Line Mode
+  public getProcurementSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.procurementSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setProcurementSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.procurementSingleLineKey, val.toString());
+    }
+  }
+
+  // Vendors View Mode
+  public getVendorsViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.vendorsViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setVendorsViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.vendorsViewModeKey, mode);
+    }
+  }
+
+  // Vendors Grid Columns (2 vs 3)
+  public getVendorsGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.vendorsGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setVendorsGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.vendorsGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Vendors Single-Line Mode
+  public getVendorsSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.vendorsSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setVendorsSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.vendorsSingleLineKey, val.toString());
     }
   }
 }

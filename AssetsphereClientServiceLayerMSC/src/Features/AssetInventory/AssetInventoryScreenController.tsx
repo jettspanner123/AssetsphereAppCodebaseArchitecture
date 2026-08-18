@@ -463,69 +463,75 @@ export default function AssetInventoryScreenController({
               key={asset.id}
               hoverable
               onClick={() => onSelectAsset(asset)}
-              className="p-6 flex flex-col justify-between space-y-5"
+              className="p-6 flex flex-col justify-between space-y-6"
             >
-              <div>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="text-[11px] font-mono text-slate-400 dark:text-zinc-500">
-                      {asset.assetNumber}
-                    </span>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate mt-0.5">
-                      {asset.deviceName}
-                    </h3>
-                  </div>
+              {/* 1. Header: Device Name & Manufacturer/Category */}
+              <div className="min-w-0">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+                  {asset.deviceName}
+                </h3>
+                <p className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate">
+                  {asset.manufacturer} {asset.model} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{asset.category}</span>
+                </p>
+              </div>
+
+              {/* 2. Hero Metric: Valuation & Asset Tag */}
+              <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                    ${asset.currentValue?.toLocaleString() || 0}
+                  </span>
+                  <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
+                    {asset.assetNumber}
+                  </span>
+                </div>
+
+                {/* Assigned Owner Row */}
+                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                  <span className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Owner
+                  </span>
+                  <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+                    {asset.assignedToEmployeeName || 'Unassigned'}
+                  </span>
+                </div>
+              </div>
+
+              {/* 3. Footer Metadata: Repositioned Badge Tag, Compliance & QR Action */}
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-1 gap-2">
+                <div className="flex items-center gap-2 truncate">
                   <BadgeSharedComponent
-                    variant={asset.security?.isCompliant ? 'success' : 'danger'}
+                    variant={
+                      asset.lifecycleStatus === 'In Use' || asset.lifecycleStatus === 'Assigned'
+                        ? 'success'
+                        : asset.lifecycleStatus === 'Repair' || asset.lifecycleStatus === 'Maintenance'
+                        ? 'warning'
+                        : 'neutral'
+                    }
                     size="sm"
                   >
                     {asset.lifecycleStatus}
                   </BadgeSharedComponent>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                  {asset.manufacturer} {asset.model} • <span className="font-mono text-slate-400">{asset.category}</span>
-                </p>
-              </div>
 
-              <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
-                <div className="flex justify-between text-slate-500 dark:text-zinc-400">
-                  <span>Serial Number:</span>
-                  <span className="font-mono text-slate-700 dark:text-zinc-300 font-medium">
-                    {asset.serialNumber}
-                  </span>
+                  <div className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-slate-400 truncate">
+                    {asset.security?.isCompliant ? (
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    ) : (
+                      <ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                    )}
+                    <span className="truncate">{asset.security?.isCompliant ? 'Encrypted' : 'Alert'}</span>
+                  </div>
                 </div>
-                <div className="flex justify-between text-slate-500 dark:text-zinc-400">
-                  <span>Assigned Owner:</span>
-                  <span className="text-slate-900 dark:text-white font-semibold">
-                    {asset.assignedToEmployeeName || 'Unassigned'}
-                  </span>
-                </div>
-                <div className="flex justify-between text-slate-500 dark:text-zinc-400">
-                  <span>Valuation:</span>
-                  <span className="font-mono font-bold text-slate-900 dark:text-white">
-                    ${asset.currentValue?.toLocaleString()}
-                  </span>
-                </div>
-              </div>
 
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-1">
-                <div className="flex items-center gap-1.5">
-                  {asset.security?.isCompliant ? (
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-                  ) : (
-                    <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
-                  )}
-                  <span>{asset.security?.isCompliant ? 'Encrypted' : 'Non-Compliant'}</span>
-                </div>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onOpenQRBadgeModal(asset);
                   }}
-                  className="p-1 rounded hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-700 dark:hover:text-white font-mono"
+                  className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
                   title="Generate QR Badge"
                 >
-                  <QrCode className="w-4 h-4" />
+                  <QrCode className="w-3.5 h-3.5" />
                 </button>
               </div>
             </CardSharedComponent>

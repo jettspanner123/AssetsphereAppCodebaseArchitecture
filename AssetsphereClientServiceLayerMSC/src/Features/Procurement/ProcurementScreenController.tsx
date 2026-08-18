@@ -75,34 +75,26 @@ export default function ProcurementScreenController({
           </p>
         </div>
 
-        {/* Hero Portfolio Stat Badges */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="px-4 py-2.5 rounded-xl bg-slate-100/80 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 text-xs flex items-center gap-3">
-            <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <DollarSign className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="block text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-mono tracking-wider">
-                Total Orders Value
-              </span>
-              <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
-                ${totalProcurementSpend.toLocaleString()}
-              </span>
-            </div>
+        {/* Executive Typographic Metric Counters */}
+        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              ${totalProcurementSpend.toLocaleString()}
+            </span>
+            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+              Total Orders Value
+            </span>
           </div>
 
-          <div className="hidden sm:flex px-4 py-2.5 rounded-xl bg-slate-100/80 dark:bg-zinc-900 border border-slate-200/60 dark:border-zinc-800 text-xs items-center gap-3">
-            <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-              <ShoppingCart className="w-4 h-4" />
-            </div>
-            <div>
-              <span className="block text-[10px] text-slate-400 dark:text-zinc-500 uppercase font-mono tracking-wider">
-                Active Orders
-              </span>
-              <span className="text-base font-bold text-slate-900 dark:text-white font-mono">
-                {filteredOrders.length} POs
-              </span>
-            </div>
+          <div className="h-6 w-px bg-slate-200 dark:bg-zinc-800" />
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              {filteredOrders.length}
+            </span>
+            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+              Active Orders
+            </span>
           </div>
         </div>
       </div>

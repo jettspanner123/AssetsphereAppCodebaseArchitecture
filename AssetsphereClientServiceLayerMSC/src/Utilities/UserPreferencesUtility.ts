@@ -25,6 +25,10 @@ export default class UserPreferencesUtility {
   private vendorsGridColumnsKey = 'assetsphere_vendors_grid_columns';
   private vendorsSingleLineKey = 'assetsphere_vendors_single_line';
 
+  private cloudViewModeKey = 'assetsphere_cloud_view_mode';
+  private cloudGridColumnsKey = 'assetsphere_cloud_grid_columns';
+  private cloudSingleLineKey = 'assetsphere_cloud_single_line';
+
   // Active Tab Persistence
   public getActiveTab(defaultTab: TabType = 'dashboard'): TabType {
     if (typeof window === 'undefined') return defaultTab;
@@ -246,6 +250,48 @@ export default class UserPreferencesUtility {
   public setVendorsSingleLine(val: boolean): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.vendorsSingleLineKey, val.toString());
+    }
+  }
+
+  // Cloud View Mode
+  public getCloudViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.cloudViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setCloudViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.cloudViewModeKey, mode);
+    }
+  }
+
+  // Cloud Grid Columns (2 vs 3)
+  public getCloudGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.cloudGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setCloudGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.cloudGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Cloud Single-Line Mode
+  public getCloudSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.cloudSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setCloudSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.cloudSingleLineKey, val.toString());
     }
   }
 }

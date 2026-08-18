@@ -29,6 +29,10 @@ export default class UserPreferencesUtility {
   private cloudGridColumnsKey = 'assetsphere_cloud_grid_columns';
   private cloudSingleLineKey = 'assetsphere_cloud_single_line';
 
+  private serviceDeskViewModeKey = 'assetsphere_servicedesk_view_mode';
+  private serviceDeskGridColumnsKey = 'assetsphere_servicedesk_grid_columns';
+  private serviceDeskSingleLineKey = 'assetsphere_servicedesk_single_line';
+
   // Active Tab Persistence
   public getActiveTab(defaultTab: TabType = 'dashboard'): TabType {
     if (typeof window === 'undefined') return defaultTab;
@@ -292,6 +296,48 @@ export default class UserPreferencesUtility {
   public setCloudSingleLine(val: boolean): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.cloudSingleLineKey, val.toString());
+    }
+  }
+
+  // Service Desk View Mode
+  public getServiceDeskViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
+    if (typeof window === 'undefined') return defaultMode;
+    const saved = localStorage.getItem(this.serviceDeskViewModeKey);
+    return saved === 'list' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setServiceDeskViewMode(mode: 'grid' | 'list'): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.serviceDeskViewModeKey, mode);
+    }
+  }
+
+  // Service Desk Grid Columns (2 vs 3)
+  public getServiceDeskGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.serviceDeskGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setServiceDeskGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.serviceDeskGridColumnsKey, cols.toString());
+    }
+  }
+
+  // Service Desk Single-Line Mode
+  public getServiceDeskSingleLine(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.serviceDeskSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setServiceDeskSingleLine(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.serviceDeskSingleLineKey, val.toString());
     }
   }
 }

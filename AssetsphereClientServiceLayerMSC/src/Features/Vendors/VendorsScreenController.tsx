@@ -4,16 +4,14 @@ import {
   Search,
   Mail,
   Phone,
-  Building2,
-  Star,
   Grid,
   List,
   Maximize2,
   WrapText,
   User,
+  Award,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
-import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 
 export interface VendorsScreenControllerProps {
@@ -57,13 +55,35 @@ export default function VendorsScreenController({
       (v.phone || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const avgRating =
+  const avgSlaRating =
     filteredVendors.length > 0
       ? (
           filteredVendors.reduce((sum, v) => sum + (v.ratingScore || 0), 0) /
           filteredVendors.length
         ).toFixed(1)
       : '0.0';
+
+  const getSLAColorStyles = (score: number) => {
+    if (score >= 4.0) {
+      return {
+        text: 'text-emerald-600 dark:text-emerald-400',
+        icon: 'text-emerald-500',
+        bar: 'bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]',
+      };
+    }
+    if (score >= 3.0) {
+      return {
+        text: 'text-amber-600 dark:text-amber-400',
+        icon: 'text-amber-500',
+        bar: 'bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.5)]',
+      };
+    }
+    return {
+      text: 'text-rose-600 dark:text-rose-400',
+      icon: 'text-rose-500',
+      bar: 'bg-gradient-to-r from-rose-500 via-red-400 to-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.5)]',
+    };
+  };
 
   return (
     <div className="space-y-6">
@@ -74,7 +94,7 @@ export default function VendorsScreenController({
             Vendors & Service Level Agreements
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            Hardware OEMs, VAR suppliers, warranty contacts, and SLA performance ratings
+            Supplier performance metrics, contract renewals, SLA compliance scores, and vendor contacts
           </p>
         </div>
 
@@ -93,7 +113,7 @@ export default function VendorsScreenController({
 
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {avgRating} / 5.0
+              {avgSlaRating} <span className="text-xs text-slate-400 font-normal">/ 5.0</span>
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
               Avg SLA Rating
@@ -112,7 +132,7 @@ export default function VendorsScreenController({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by vendor name, contact person, email..."
+              placeholder="Search by vendor name, contact, email, phone..."
               className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
@@ -229,39 +249,57 @@ export default function VendorsScreenController({
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredVendors.map((v) => (
-            <CardSharedComponent key={v.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
-              {/* Header */}
-              <div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                  {v.name}
-                </h3>
-                <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
-                  <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
-                </p>
-              </div>
-
-              {/* Contact Details & SLA Score */}
-              <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
-                <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
-                  <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span className="truncate">{v.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
-                  <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>{v.phone}</span>
+          {filteredVendors.map((v) => {
+            const slaStyles = getSLAColorStyles(v.ratingScore || 0);
+            return (
+              <CardSharedComponent key={v.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
+                {/* Header */}
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+                    {v.name}
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
+                    <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
+                  </p>
                 </div>
 
-                {/* Relocated SLA Rating at the bottom with divider */}
-                <div className="flex justify-between items-center pt-2.5 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
-                  <span className="text-slate-500 dark:text-zinc-400 font-sans font-medium">SLA Rating Score:</span>
-                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
-                    ★ {v.ratingScore} / 5.0
-                  </span>
+                {/* Contact Details & SLA Score */}
+                <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span className="truncate">{v.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
+                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>{v.phone}</span>
+                  </div>
+
+                  {/* Dynamic Color SLA Rating Gauge & Score Bar */}
+                  <div className="pt-3.5 mt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-2.5">
+                    <div className="flex justify-between items-baseline">
+                      <span className="text-xs text-slate-500 dark:text-zinc-400 font-sans font-semibold flex items-center gap-1.5">
+                        <Award className={`w-4 h-4 ${slaStyles.icon}`} /> SLA Rating Score
+                      </span>
+                      <div className="flex items-baseline gap-1 font-mono">
+                        <span className={`text-2xl font-extrabold tracking-tight ${slaStyles.text}`}>
+                          {v.ratingScore}
+                        </span>
+                        <span className="text-slate-400 font-medium text-xs">/ 5.0</span>
+                      </div>
+                    </div>
+
+                    {/* Dynamic Color SLA Rating Progress Meter Bar */}
+                    <div className="w-full bg-slate-100 dark:bg-zinc-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/80 dark:border-zinc-700/60">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${slaStyles.bar}`}
+                        style={{ width: `${((v.ratingScore || 0) / 5) * 100}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </CardSharedComponent>
-          ))}
+              </CardSharedComponent>
+            );
+          })}
         </div>
       )}
 
@@ -280,28 +318,31 @@ export default function VendorsScreenController({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">
-                {filteredVendors.map((v) => (
-                  <tr
-                    key={v.id}
-                    className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors"
-                  >
-                    <td className="py-4 px-5 font-serif-headline font-bold text-slate-900 dark:text-white text-sm">
-                      {v.name}
-                    </td>
-                    <td className="py-4 px-5 text-slate-700 dark:text-zinc-300">
-                      {v.contactPerson}
-                    </td>
-                    <td className="py-4 px-5 font-mono text-slate-500 dark:text-zinc-400">
-                      {v.email}
-                    </td>
-                    <td className="py-4 px-5 font-mono text-slate-600 dark:text-zinc-300">
-                      {v.phone}
-                    </td>
-                    <td className="py-4 px-5 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                      SLA Rating {v.ratingScore}/5
-                    </td>
-                  </tr>
-                ))}
+                {filteredVendors.map((v) => {
+                  const slaStyles = getSLAColorStyles(v.ratingScore || 0);
+                  return (
+                    <tr
+                      key={v.id}
+                      className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors"
+                    >
+                      <td className="py-4 px-5 font-serif-headline font-bold text-slate-900 dark:text-white text-sm">
+                        {v.name}
+                      </td>
+                      <td className="py-4 px-5 text-slate-700 dark:text-zinc-300">
+                        {v.contactPerson}
+                      </td>
+                      <td className="py-4 px-5 font-mono text-slate-500 dark:text-zinc-400">
+                        {v.email}
+                      </td>
+                      <td className="py-4 px-5 font-mono text-slate-600 dark:text-zinc-300">
+                        {v.phone}
+                      </td>
+                      <td className={`py-4 px-5 text-right font-mono font-bold text-sm ${slaStyles.text}`}>
+                        ★ SLA {v.ratingScore} / 5.0
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

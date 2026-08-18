@@ -9,6 +9,7 @@ export default class UserPreferencesUtility {
   private softwareSingleLineKey = 'assetsphere_software_single_line';
 
   private inventoryViewModeKey = 'assetsphere_inventory_view_mode';
+  private inventoryGridColumnsKey = 'assetsphere_inventory_grid_columns';
   private inventorySingleLineKey = 'assetsphere_inventory_single_line';
 
   // Active Tab Persistence
@@ -77,6 +78,21 @@ export default class UserPreferencesUtility {
   public setInventoryViewMode(mode: 'table' | 'grid' | 'kanban'): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.inventoryViewModeKey, mode);
+    }
+  }
+
+  // Asset Inventory Grid Columns (2 vs 3)
+  public getInventoryGridColumns(defaultCols: 2 | 3 = 3): 2 | 3 {
+    if (typeof window === 'undefined') return defaultCols;
+    const saved = localStorage.getItem(this.inventoryGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setInventoryGridColumns(cols: 2 | 3): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.inventoryGridColumnsKey, cols.toString());
     }
   }
 

@@ -64,6 +64,15 @@
   border: 1px solid var(--color-hairline-strong);
 }
 
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Atmospheric section glows */
 .glow-orange {
   background: radial-gradient(circle at 50% 0%, rgba(255, 128, 31, 0.12) 0%, transparent 60%);
@@ -83,19 +92,19 @@
 
 /* Custom sleek scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-canvas);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-ash);
-  border-radius: 3px;
+  background: var(--color-stone);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-mute);
+  background: var(--color-ash);
 }

@@ -38,7 +38,7 @@ export const QRScannerModal: React.FC<QRScannerModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div className="bg-[#161618] border border-slate-800 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden text-slate-300">
         <div className="p-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
           <div className="font-semibold text-sm text-white flex items-center gap-2">

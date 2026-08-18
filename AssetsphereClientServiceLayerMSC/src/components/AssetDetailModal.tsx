@@ -56,7 +56,7 @@ export const AssetDetailModal: React.FC<AssetDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-end p-0 md:p-4">
+    <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-end p-0 md:p-4">
       <div className="bg-[#161618] border-l md:border border-slate-800 w-full max-w-4xl h-full md:h-[92vh] md:rounded-2xl shadow-2xl flex flex-col text-slate-300 overflow-hidden">
         {/* Header Bar */}
         <div className="p-5 bg-slate-900 border-b border-slate-800 flex items-start justify-between gap-4">

@@ -51,7 +51,7 @@ export default function ModalSharedComponent({
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 dark:bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm"
           />
 
           {/* Dialog content */}

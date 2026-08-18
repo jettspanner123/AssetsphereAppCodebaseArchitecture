@@ -232,21 +232,16 @@ export default function VendorsScreenController({
           {filteredVendors.map((v) => (
             <CardSharedComponent key={v.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
               {/* Header */}
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                    {v.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
-                    <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
-                  </p>
-                </div>
-                <BadgeSharedComponent variant="success" size="sm">
-                  SLA {v.ratingScore}/5
-                </BadgeSharedComponent>
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+                  {v.name}
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
+                  <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
+                </p>
               </div>
 
-              {/* Contact Details */}
+              {/* Contact Details & SLA Score */}
               <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
                 <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
                   <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -255,6 +250,14 @@ export default function VendorsScreenController({
                 <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
                   <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
                   <span>{v.phone}</span>
+                </div>
+
+                {/* Relocated SLA Rating at the bottom with divider */}
+                <div className="flex justify-between items-center pt-2.5 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
+                  <span className="text-slate-500 dark:text-zinc-400 font-sans font-medium">SLA Rating Score:</span>
+                  <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400 text-xs">
+                    ★ {v.ratingScore} / 5.0
+                  </span>
                 </div>
               </div>
             </CardSharedComponent>
@@ -294,10 +297,8 @@ export default function VendorsScreenController({
                     <td className="py-4 px-5 font-mono text-slate-600 dark:text-zinc-300">
                       {v.phone}
                     </td>
-                    <td className="py-4 px-5 text-right">
-                      <BadgeSharedComponent variant="success" size="sm">
-                        SLA Rating {v.ratingScore}/5
-                      </BadgeSharedComponent>
+                    <td className="py-4 px-5 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                      SLA Rating {v.ratingScore}/5
                     </td>
                   </tr>
                 ))}

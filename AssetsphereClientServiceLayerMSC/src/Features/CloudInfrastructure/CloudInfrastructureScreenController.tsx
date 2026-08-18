@@ -227,9 +227,9 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
                     {res.name}
                   </h3>
                 </div>
-                <BadgeSharedComponent variant="success" size="sm" showDot>
-                  {res.status}
-                </BadgeSharedComponent>
+                <span className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400">
+                  ● {res.status}
+                </span>
               </div>
 
               <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
@@ -284,10 +284,8 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
                     <td className="py-4 px-5 font-mono text-slate-500 dark:text-zinc-400">
                       {res.region}
                     </td>
-                    <td className="py-4 px-5">
-                      <BadgeSharedComponent variant="success" size="sm" showDot>
-                        {res.status}
-                      </BadgeSharedComponent>
+                    <td className="py-4 px-5 font-mono text-xs font-medium text-emerald-600 dark:text-emerald-400">
+                      ● {res.status}
                     </td>
                     <td className="py-4 px-5 text-right font-mono font-bold text-slate-900 dark:text-white">
                       ${res.cost}/mo

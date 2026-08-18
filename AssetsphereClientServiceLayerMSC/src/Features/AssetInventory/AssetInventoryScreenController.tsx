@@ -376,10 +376,8 @@ export default function AssetInventoryScreenController({
                         </div>
                       )}
                     </td>
-                    <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
-                      <BadgeSharedComponent variant="neutral" size="sm">
-                        {asset.category}
-                      </BadgeSharedComponent>
+                    <td className={`py-3.5 px-4 font-medium text-slate-700 dark:text-zinc-300 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
+                      {asset.category}
                     </td>
                     <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       <div className="flex items-center gap-1.5 text-slate-700 dark:text-zinc-300">
@@ -492,18 +490,9 @@ export default function AssetInventoryScreenController({
               {/* 3. Footer Metadata: Repositioned Badge Tag, Compliance & QR Action */}
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-1 gap-2">
                 <div className="flex items-center gap-2 truncate">
-                  <BadgeSharedComponent
-                    variant={
-                      asset.lifecycleStatus === 'In Use' || asset.lifecycleStatus === 'Assigned'
-                        ? 'success'
-                        : asset.lifecycleStatus === 'Repair' || asset.lifecycleStatus === 'Maintenance'
-                        ? 'warning'
-                        : 'neutral'
-                    }
-                    size="sm"
-                  >
+                  <span className="font-mono font-medium text-slate-500 dark:text-zinc-400 text-xs">
                     {asset.lifecycleStatus}
-                  </BadgeSharedComponent>
+                  </span>
 
                   <div className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-slate-400 truncate">
                     {asset.security?.isCompliant ? (

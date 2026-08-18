@@ -13,7 +13,6 @@ import {
   User,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
-import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 
 export interface ProcurementScreenControllerProps {
@@ -230,32 +229,16 @@ export default function ProcurementScreenController({
             <CardSharedComponent key={po.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
               {/* Header */}
               <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-xs font-mono text-sky-500 font-bold flex items-center gap-1">
-                    <FileText className="w-3.5 h-3.5" /> {po.poNumber}
-                  </span>
-                  <BadgeSharedComponent
-                    variant={
-                      po.status === 'PO Issued' || po.status === 'Delivered & QA' ? 'success' : 'warning'
-                    }
-                    size="sm"
-                  >
-                    {po.status}
-                  </BadgeSharedComponent>
-                </div>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate mt-1">
+                <span className="text-xs font-mono text-sky-500 font-bold flex items-center gap-1">
+                  <FileText className="w-3.5 h-3.5" /> {po.poNumber}
+                </span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate mt-0.5">
                   {po.vendorName}
                 </h3>
               </div>
 
-              {/* Middle Section: Valuation & Details */}
+              {/* Middle Section: Details & Valuation */}
               <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
-                <div className="flex justify-between items-baseline">
-                  <span className="text-slate-500 dark:text-zinc-400">PO Cost:</span>
-                  <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
-                    ${po.totalCost?.toLocaleString()}
-                  </span>
-                </div>
                 <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
                   <span className="flex items-center gap-1 text-slate-400">
                     <Calendar className="w-3.5 h-3.5" /> Order Date:
@@ -267,6 +250,18 @@ export default function ProcurementScreenController({
                     <User className="w-3.5 h-3.5" /> Requestor:
                   </span>
                   <span className="font-medium">{po.requestorName}</span>
+                </div>
+                <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
+                  <span className="text-slate-400 font-medium">Status:</span>
+                  <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">{po.status}</span>
+                </div>
+
+                {/* PO Cost at the very last with a top divider */}
+                <div className="flex justify-between items-baseline pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
+                  <span className="text-slate-500 dark:text-zinc-400 font-medium">PO Cost:</span>
+                  <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
+                    ${po.totalCost?.toLocaleString()}
+                  </span>
                 </div>
               </div>
             </CardSharedComponent>
@@ -307,15 +302,8 @@ export default function ProcurementScreenController({
                     <td className="py-4 px-5 text-slate-700 dark:text-zinc-300">
                       {po.requestorName}
                     </td>
-                    <td className="py-4 px-5">
-                      <BadgeSharedComponent
-                        variant={
-                          po.status === 'PO Issued' || po.status === 'Delivered & QA' ? 'success' : 'warning'
-                        }
-                        size="sm"
-                      >
-                        {po.status}
-                      </BadgeSharedComponent>
+                    <td className="py-4 px-5 font-mono font-medium text-slate-600 dark:text-zinc-300">
+                      {po.status}
                     </td>
                     <td className="py-4 px-5 text-right font-mono font-bold text-slate-900 dark:text-white">
                       ${po.totalCost?.toLocaleString()}

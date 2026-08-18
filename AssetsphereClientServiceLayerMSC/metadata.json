@@ -1,0 +1,6 @@
+{
+  "name": "AssetSphere Enterprise",
+  "description": "Enterprise IT Asset Management (ITAM) platform for physical, virtual, and cloud assets with complete lifecycle, compliance, finance, and AI-assisted operations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

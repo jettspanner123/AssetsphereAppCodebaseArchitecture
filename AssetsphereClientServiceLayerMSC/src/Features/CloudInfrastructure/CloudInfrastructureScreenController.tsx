@@ -5,6 +5,7 @@ import {
   List,
   Maximize2,
   WrapText,
+  Activity,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
@@ -219,19 +220,19 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
           } gap-6`}
         >
           {filteredResources.map((res) => (
-            <CardSharedComponent key={res.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider">{res.provider}</span>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 leading-tight truncate">
-                    {res.name}
-                  </h3>
-                </div>
-                <span className="text-xs font-mono font-medium text-emerald-600 dark:text-emerald-400">
-                  ● {res.status}
-                </span>
+            <CardSharedComponent key={res.id} hoverable className="p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
+              {/* Top Status Ambient Gradient Bar */}
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+
+              {/* Header */}
+              <div>
+                <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider">{res.provider}</span>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 leading-tight truncate">
+                  {res.name}
+                </h3>
               </div>
 
+              {/* Node Specification & Details */}
               <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Instance Type:</span>
@@ -241,9 +242,11 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
                   <span className="text-slate-400">Cloud Region:</span>
                   <span className="text-slate-900 dark:text-zinc-200 font-medium">{res.region}</span>
                 </div>
-                <div className="flex justify-between pt-1">
-                  <span className="text-slate-400">Monthly Burn Rate:</span>
-                  <span className="text-slate-900 dark:text-white font-bold">${res.cost}/mo</span>
+
+                {/* Monthly Burn Rate at bottom with top divider */}
+                <div className="flex justify-between items-baseline pt-2.5 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
+                  <span className="text-slate-400 font-sans font-medium">Monthly Burn Rate:</span>
+                  <span className="text-base font-bold font-mono text-slate-900 dark:text-white">${res.cost}/mo</span>
                 </div>
               </div>
             </CardSharedComponent>

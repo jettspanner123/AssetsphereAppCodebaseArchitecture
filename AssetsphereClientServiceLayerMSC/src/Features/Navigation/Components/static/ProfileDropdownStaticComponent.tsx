@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Shield,
@@ -34,19 +34,43 @@ export default function ProfileDropdownStaticComponent({
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
   const isDark = currentTheme === ApplicationThemeCON.DARK;
   const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: MouseEvent | TouchEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    };
+
+    // Use a small timeout so the opening click event finishes before listening
+    const timeoutId = setTimeout(() => {
+      document.addEventListener('mousedown', handlePointerDown);
+      document.addEventListener('touchstart', handlePointerDown);
+    }, 10);
+
+    return () => {
+      clearTimeout(timeoutId);
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+    };
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
       {isOpen && (
         <React.Fragment>
-          {/* Backdrop */}
+          {/* Full Screen Transparent Backdrop Overlay */}
           <div
             onClick={onClose}
-            className="fixed inset-0 z-40 bg-transparent cursor-default"
+            className="fixed inset-0 z-40 bg-transparent cursor-default pointer-events-auto"
           />
 
           {/* Clean Executive Profile Popover */}
           <motion.div
+            ref={dropdownRef}
             initial={{ opacity: 0, scale: 0.96, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -6 }}

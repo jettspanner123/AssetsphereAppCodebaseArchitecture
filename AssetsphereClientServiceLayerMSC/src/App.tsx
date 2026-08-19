@@ -29,9 +29,11 @@ import ModalSharedComponent from './Shared/Components/ModalSharedComponent';
 
 export default function App(): React.JSX.Element {
   // Theme State
-  const [currentTheme, setCurrentTheme] = useState<string>(() =>
-    ApplicationThemeUtility.current.getSavedTheme()
-  );
+  const [currentTheme, setCurrentTheme] = useState<string>(() => {
+    const saved = ApplicationThemeUtility.current.getSavedTheme();
+    ApplicationThemeUtility.current.applyTheme(saved);
+    return saved;
+  });
 
   useEffect(() => {
     ApplicationThemeUtility.current.applyTheme(currentTheme);

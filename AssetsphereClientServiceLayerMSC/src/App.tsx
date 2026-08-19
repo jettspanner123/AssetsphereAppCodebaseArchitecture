@@ -1,14 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  mockAssets,
-  mockEmployees,
-  mockSoftwareLicenses,
-  mockPurchaseOrders,
-  mockServiceTickets,
-  mockVendors,
-  mockAIRecommendations,
-  mockVerificationCampaigns,
-} from './data/mockAssets';
+import MockDataSeederService from './services/MockDataSeederService';
 import { Asset, Employee, SoftwareLicense, PurchaseOrder, ServiceTicket, Vendor } from './types';
 import ApplicationThemeUtility from './Utilities/ApplicationThemeUtility';
 import UserPreferencesUtility from './Utilities/UserPreferencesUtility';
@@ -51,15 +42,15 @@ export default function App(): React.JSX.Element {
     setCurrentTheme(next);
   };
 
-  // Portfolio State
-  const [assets, setAssets] = useState<Asset[]>(mockAssets);
-  const [employees] = useState<Employee[]>(mockEmployees);
-  const [licenses] = useState<SoftwareLicense[]>(mockSoftwareLicenses);
-  const [orders] = useState<PurchaseOrder[]>(mockPurchaseOrders);
-  const [tickets] = useState<ServiceTicket[]>(mockServiceTickets);
-  const [vendors] = useState<Vendor[]>(mockVendors);
-  const [recommendations] = useState(mockAIRecommendations);
-  const [campaign] = useState(mockVerificationCampaigns[0]);
+  // Portfolio State Sourced from MockDataSeederService
+  const [assets, setAssets] = useState<Asset[]>(() => MockDataSeederService.current.getAssets());
+  const [employees] = useState<Employee[]>(() => MockDataSeederService.current.getEmployees());
+  const [licenses] = useState<SoftwareLicense[]>(() => MockDataSeederService.current.getSoftwareLicenses());
+  const [orders] = useState<PurchaseOrder[]>(() => MockDataSeederService.current.getPurchaseOrders());
+  const [tickets] = useState<ServiceTicket[]>(() => MockDataSeederService.current.getServiceTickets());
+  const [vendors] = useState<Vendor[]>(() => MockDataSeederService.current.getVendors());
+  const [recommendations] = useState(() => MockDataSeederService.current.getAIRecommendations());
+  const [campaign] = useState(() => MockDataSeederService.current.getVerificationCampaigns()[0]);
 
   // Navigation State with localStorage Persistence
   const [activeTab, setActiveTabState] = useState<TabType>(() =>

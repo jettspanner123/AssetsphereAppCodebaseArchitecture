@@ -10,6 +10,7 @@ import {
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
+import MockDataSeederService from '../../services/MockDataSeederService';
 
 export default function CloudInfrastructureScreenController(): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
@@ -38,12 +39,7 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
     UserPreferencesUtility.current.setCloudSingleLine(val);
   };
 
-  const cloudResources = [
-    { id: 'c1', provider: 'AWS', name: 'prod-api-cluster-us-east', type: 'EC2 t4g.xlarge', region: 'us-east-1', cost: 420, status: 'Running' },
-    { id: 'c2', provider: 'AWS', name: 'rds-postgres-primary', type: 'db.r6g.2xlarge', region: 'us-east-1', cost: 1250, status: 'Running' },
-    { id: 'c3', provider: 'Azure', name: 'vm-ml-training-gpu', type: 'Standard_NC24ads_A100_v4', region: 'eastus2', cost: 3400, status: 'Running' },
-    { id: 'c4', provider: 'Google Cloud', name: 'gke-prod-us-central', type: 'n2-standard-8 x 6', region: 'us-central1', cost: 1890, status: 'Running' },
-  ];
+  const cloudResources = MockDataSeederService.current.getCloudResources();
 
   const filteredResources = cloudResources.filter(
     (res) =>

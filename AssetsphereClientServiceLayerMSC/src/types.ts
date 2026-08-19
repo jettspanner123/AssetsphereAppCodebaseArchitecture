@@ -471,3 +471,14 @@ export interface AIRecommendation {
   estimatedCostOrSaving: string;
   actionableStep: string;
 }
+
+export interface CloudResource {
+  id: string;
+  provider: string;
+  name: string;
+  type: string;
+  region: string;
+  cost: number;
+  status: string;
+}
+

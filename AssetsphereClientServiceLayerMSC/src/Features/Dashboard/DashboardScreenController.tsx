@@ -86,7 +86,7 @@ export default function DashboardScreenController({
   return (
     <div className="space-y-6">
       {/* Title Header */}
-      <div className="pb-4 border-b border-slate-200 dark:border-zinc-800">
+      <div className="pb-4 border-b border-slate-300 dark:border-zinc-800">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
           {DashboardCON.TITLE}
         </h1>
@@ -292,9 +292,8 @@ export default function DashboardScreenController({
       {/* Critical Failure Risk Devices Table */}
       <CardSharedComponent>
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-amber-500" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
               Assets Requiring Physical Verification or Maintenance
             </h3>
           </div>
@@ -311,7 +310,7 @@ export default function DashboardScreenController({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-slate-200 dark:border-zinc-800 text-slate-400 dark:text-zinc-500 font-mono">
+              <tr className="border-b border-slate-300 dark:border-zinc-800 text-slate-500 dark:text-zinc-500 font-mono">
                 <th className="py-2.5 px-3">Asset Tag</th>
                 <th className="py-2.5 px-3">Device Name</th>
                 <th className="py-2.5 px-3">Category</th>

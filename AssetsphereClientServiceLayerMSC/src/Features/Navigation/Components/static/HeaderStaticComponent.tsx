@@ -5,6 +5,7 @@ import ProfileDropdownStaticComponent from './ProfileDropdownStaticComponent';
 import NotificationsDropdownStaticComponent from './NotificationsDropdownStaticComponent';
 import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../components/Sidebar';
+import weplmLogo from '../../../../assets/weplm.jpeg';
 
 export interface HeaderStaticComponentProps {
   globalSearch: string;
@@ -60,9 +61,11 @@ export default function HeaderStaticComponent({
     <header className="h-16 border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-black/50 backdrop-blur-lg sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
       {/* Brand logo / Mobile title */}
       <div className="flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-lg shadow-sm">
-          A
-        </div>
+        <img
+          src={weplmLogo}
+          alt="We.PLM Logo"
+          className="w-8 h-8 rounded-sm object-cover shrink-0 shadow-sm border border-slate-200/80 dark:border-zinc-800"
+        />
         <div className="hidden sm:block">
           <h1 className="text-base font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline leading-none">
             {NavigationCON.BRAND_TITLE}
@@ -96,7 +99,8 @@ export default function HeaderStaticComponent({
           variant="primary"
           size="sm"
           onClick={onOpenNewAsset}
-          icon={<Plus className="w-4 h-4" />}
+          icon={<Plus className="w-4 h-4 text-white" />}
+          className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
         >
           Add Asset
         </ButtonSharedComponent>

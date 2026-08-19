@@ -98,17 +98,6 @@ export default function HeaderStaticComponent({
           </kbd>
         </div>
 
-        {/* Add Asset Trigger */}
-        <ButtonSharedComponent
-          variant="primary"
-          size="sm"
-          onClick={onOpenNewAsset}
-          icon={<Plus className="w-4 h-4 text-white" />}
-          className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-        >
-          Add Asset
-        </ButtonSharedComponent>
-
         {/* Notifications Popover Dropdown Button */}
         <div className="relative">
           <button

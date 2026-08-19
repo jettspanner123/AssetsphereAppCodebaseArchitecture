@@ -157,9 +157,10 @@ export default function AssetInventoryScreenController({
               variant="primary"
               size="sm"
               onClick={onOpenAddModal}
-              icon={<Plus className="w-3.5 h-3.5" />}
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+              icon={<Plus className="w-3.5 h-3.5 !text-white" />}
             >
-              Register Device
+              <span className="!text-white font-medium">Register Device</span>
             </ButtonSharedComponent>
           </div>
         </div>

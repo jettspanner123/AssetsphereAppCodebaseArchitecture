@@ -3,6 +3,7 @@ import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../types
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import InputSharedComponent from '../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
+import { Plus } from 'lucide-react';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
 
 const CATEGORY_OPTIONS: SelectOption[] = [
@@ -202,8 +203,14 @@ export default function AssetFormModalController({
           <ButtonSharedComponent variant="outline" size="sm" onClick={onClose}>
             Cancel
           </ButtonSharedComponent>
-          <ButtonSharedComponent type="submit" variant="primary" size="sm">
-            Save Asset Specs
+          <ButtonSharedComponent
+            type="submit"
+            variant="primary"
+            size="sm"
+            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+            icon={<Plus className="w-3.5 h-3.5 !text-white" />}
+          >
+            <span className="!text-white font-medium">{initialAsset ? 'Save Asset Specs' : 'Register Device'}</span>
           </ButtonSharedComponent>
         </div>
       </form>

@@ -42,15 +42,39 @@ export default function App(): React.JSX.Element {
     setCurrentTheme(next);
   };
 
+  // Show Mock Data Toggle State (Persisted via UserPreferencesUtility)
+  const [showMockData, setShowMockDataState] = useState<boolean>(() =>
+    UserPreferencesUtility.current.getShowMockData(true)
+  );
+
+  const handleToggleShowMockData = () => {
+    const next = !showMockData;
+    setShowMockDataState(next);
+    UserPreferencesUtility.current.setShowMockData(next);
+  };
+
   // Portfolio State Sourced from MockDataSeederService
-  const [assets, setAssets] = useState<Asset[]>(() => MockDataSeederService.current.getAssets());
-  const [employees] = useState<Employee[]>(() => MockDataSeederService.current.getEmployees());
-  const [licenses] = useState<SoftwareLicense[]>(() => MockDataSeederService.current.getSoftwareLicenses());
-  const [orders] = useState<PurchaseOrder[]>(() => MockDataSeederService.current.getPurchaseOrders());
-  const [tickets] = useState<ServiceTicket[]>(() => MockDataSeederService.current.getServiceTickets());
-  const [vendors] = useState<Vendor[]>(() => MockDataSeederService.current.getVendors());
-  const [recommendations] = useState(() => MockDataSeederService.current.getAIRecommendations());
-  const [campaign] = useState(() => MockDataSeederService.current.getVerificationCampaigns()[0]);
+  const [mockAssetsList, setMockAssetsList] = useState<Asset[]>(() => MockDataSeederService.current.getAssets());
+
+  const assets = showMockData ? mockAssetsList : [];
+  const employees = showMockData ? MockDataSeederService.current.getEmployees() : [];
+  const licenses = showMockData ? MockDataSeederService.current.getSoftwareLicenses() : [];
+  const orders = showMockData ? MockDataSeederService.current.getPurchaseOrders() : [];
+  const tickets = showMockData ? MockDataSeederService.current.getServiceTickets() : [];
+  const vendors = showMockData ? MockDataSeederService.current.getVendors() : [];
+  const recommendations = showMockData ? MockDataSeederService.current.getAIRecommendations() : [];
+  const campaign = showMockData ? MockDataSeederService.current.getVerificationCampaigns()[0] : {
+    id: 'CMP-EMPTY',
+    title: 'No Active Verification Campaign',
+    targetDepartment: 'N/A',
+    startDate: 'N/A',
+    endDate: 'N/A',
+    totalTargetAssets: 0,
+    verifiedAssetsCount: 0,
+    flaggedDiscrepancies: 0,
+    status: 'Draft' as const,
+    description: 'Mock data is currently hidden.',
+  };
 
   // Navigation State with localStorage Persistence
   const [activeTab, setActiveTabState] = useState<TabType>(() =>
@@ -84,7 +108,7 @@ export default function App(): React.JSX.Element {
   // Handlers
   const handleSaveAsset = (assetData: Partial<Asset>) => {
     if (assetFormState.initialAsset) {
-      setAssets((prev) =>
+      setMockAssetsList((prev) =>
         prev.map((a) => (a.id === assetFormState.initialAsset?.id ? ({ ...a, ...assetData } as Asset) : a))
       );
     } else {
@@ -165,7 +189,7 @@ export default function App(): React.JSX.Element {
           isCompliant: true,
         },
       };
-      setAssets((prev) => [newAsset, ...prev]);
+      setMockAssetsList((prev) => [newAsset, ...prev]);
     }
     setAssetFormState({ isOpen: false, initialAsset: null });
   };
@@ -198,6 +222,8 @@ export default function App(): React.JSX.Element {
       nonCompliantCount={nonCompliantCount}
       openTicketCount={openTicketCount}
       unreadAlertCount={unreadAlertCount}
+      showMockData={showMockData}
+      onToggleShowMockData={handleToggleShowMockData}
     >
       {/* Tab Screen Routing */}
       {activeTab === 'dashboard' && (

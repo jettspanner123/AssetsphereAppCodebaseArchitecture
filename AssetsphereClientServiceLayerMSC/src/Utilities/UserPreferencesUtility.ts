@@ -386,4 +386,20 @@ export default class UserPreferencesUtility {
       localStorage.setItem(this.complianceSingleLineKey, val.toString());
     }
   }
+
+  // Development Tools: Show Mock Data Preference
+  private showMockDataKey = 'assetsphere_show_mock_data';
+
+  public getShowMockData(defaultVal: boolean = true): boolean {
+    if (typeof window === 'undefined') return defaultVal;
+    const saved = localStorage.getItem(this.showMockDataKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setShowMockData(val: boolean): void {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(this.showMockDataKey, val.toString());
+    }
+  }
 }

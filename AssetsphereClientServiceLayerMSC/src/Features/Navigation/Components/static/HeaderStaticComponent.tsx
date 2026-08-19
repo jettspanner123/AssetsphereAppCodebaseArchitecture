@@ -23,6 +23,8 @@ export interface HeaderStaticComponentProps {
   openTicketCount?: number;
   onNavigateTab?: (tab: TabType) => void;
   onNavigateSettings?: () => void;
+  showMockData?: boolean;
+  onToggleShowMockData?: () => void;
 }
 
 export default function HeaderStaticComponent({
@@ -41,6 +43,8 @@ export default function HeaderStaticComponent({
   openTicketCount = 0,
   onNavigateTab,
   onNavigateSettings,
+  showMockData,
+  onToggleShowMockData,
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -152,6 +156,8 @@ export default function HeaderStaticComponent({
             onNavigateSettings={onNavigateSettings}
             currentTheme={currentTheme}
             onToggleTheme={onToggleTheme}
+            showMockData={showMockData}
+            onToggleShowMockData={onToggleShowMockData}
           />
         </div>
       </div>

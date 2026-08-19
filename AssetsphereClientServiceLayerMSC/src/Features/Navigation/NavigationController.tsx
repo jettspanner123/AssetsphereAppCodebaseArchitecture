@@ -26,6 +26,8 @@ export default function NavigationController({
   activeTab,
   onSelectTab,
   unreadAlertCount,
+  showMockData,
+  onToggleShowMockData,
 }: NavigationControllerProps): React.JSX.Element {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200">
@@ -45,6 +47,8 @@ export default function NavigationController({
         openTicketCount={openTicketCount}
         onNavigateTab={onSelectTab}
         onNavigateSettings={() => onSelectTab('settings')}
+        showMockData={showMockData}
+        onToggleShowMockData={onToggleShowMockData}
       />
       <div className="flex-1 flex w-full items-start">
         <SidebarStaticComponent

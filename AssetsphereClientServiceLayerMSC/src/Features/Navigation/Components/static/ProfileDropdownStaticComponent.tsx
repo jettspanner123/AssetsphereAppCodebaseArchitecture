@@ -8,8 +8,12 @@ import {
   Mail,
   Sun,
   Moon,
+  Wrench,
+  Database,
+  EyeOff,
 } from 'lucide-react';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
+import ENValidator from '../../../../Utilities/ENValidator';
 
 export interface ProfileDropdownStaticComponentProps {
   isOpen: boolean;
@@ -20,6 +24,8 @@ export interface ProfileDropdownStaticComponentProps {
   onNavigateSettings?: () => void;
   currentTheme: string;
   onToggleTheme: () => void;
+  showMockData?: boolean;
+  onToggleShowMockData?: () => void;
 }
 
 export default function ProfileDropdownStaticComponent({
@@ -31,10 +37,26 @@ export default function ProfileDropdownStaticComponent({
   onNavigateSettings,
   currentTheme,
   onToggleTheme,
+  showMockData = true,
+  onToggleShowMockData,
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
   const isDark = currentTheme === ApplicationThemeCON.DARK;
   const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Check if ASSETSPHERE_ENV_MODE in env is set to "development" using ENValidator
+  let isDevelopmentMode = false;
+  try {
+    const mode = ENValidator.current.getValue('ASSETSPHERE_ENV_MODE');
+    isDevelopmentMode = mode.toLowerCase() === 'development';
+  } catch {
+    try {
+      const mode = ENValidator.current.getValue('VITE_ASSETSPHERE_ENV_MODE');
+      isDevelopmentMode = mode.toLowerCase() === 'development';
+    } catch {
+      isDevelopmentMode = import.meta.env.MODE === 'development';
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
@@ -45,7 +67,6 @@ export default function ProfileDropdownStaticComponent({
       }
     };
 
-    // Use a small timeout so the opening click event finishes before listening
     const timeoutId = setTimeout(() => {
       document.addEventListener('mousedown', handlePointerDown);
       document.addEventListener('touchstart', handlePointerDown);
@@ -169,6 +190,47 @@ export default function ProfileDropdownStaticComponent({
                   </button>
                 </div>
               </div>
+
+            {/* 3. Development Tools Section (Only shown if ASSETSPHERE_ENV_MODE is "development") */}
+            {isDevelopmentMode && (
+              <div className="space-y-2 pt-1">
+                <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-slate-400 dark:text-zinc-500 block px-1">
+                  Development Tools
+                </span>
+
+                <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">
+                  <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-200 font-medium">
+                    <Wrench className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>Mock Data Mode</span>
+                  </div>
+
+                  <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8 w-full">
+                    <button
+                      type="button"
+                      onClick={() => !showMockData && onToggleShowMockData?.()}
+                      className={`flex-1 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                        showMockData
+                          ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Show Mock Data
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => showMockData && onToggleShowMockData?.()}
+                      className={`flex-1 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                        !showMockData
+                          ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                          : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                      }`}
+                    >
+                      Hide Mock Data
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
             </div>
 
             {/* 3. Quick Action Links */}

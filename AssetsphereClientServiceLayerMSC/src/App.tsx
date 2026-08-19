@@ -82,6 +82,28 @@ export default function App(): React.JSX.Element {
   const [activeTab, setActiveTabState] = useState<TabType>(() =>
     UserPreferencesUtility.current.getActiveTab('dashboard')
   );
+
+  // Dynamic Document Title based on Active Tab Selection
+  useEffect(() => {
+    const tabTitles: Record<TabType, string> = {
+      dashboard: 'Executive Dashboard',
+      inventory: 'Asset Inventory',
+      employees: 'Employees & Allocations',
+      licenses: 'Software Licenses',
+      cloud: 'Cloud Resources',
+      procurement: 'Procurement & POs',
+      servicedesk: 'Service Desk Tickets',
+      vendors: 'Vendor Catalog',
+      compliance: 'Security & Compliance',
+      verification: 'Asset Verification',
+      ai_assistant: 'AI Copilot',
+      analytics: 'Lifecycle Analytics',
+      settings: 'System Settings',
+    };
+
+    const tabLabel = tabTitles[activeTab] || 'Dashboard';
+    document.title = `Assetsphere - ${tabLabel} | We.PLM`;
+  }, [activeTab]);
   const [globalSearch, setGlobalSearch] = useState('');
   const [deploymentMode, setDeploymentMode] = useState<
     'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync'

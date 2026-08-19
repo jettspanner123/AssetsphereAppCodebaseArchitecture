@@ -11,6 +11,7 @@ import {
   Wrench,
   Database,
   EyeOff,
+  Trash2,
 } from 'lucide-react';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 import ENValidator from '../../../../Utilities/ENValidator';
@@ -198,6 +199,7 @@ export default function ProfileDropdownStaticComponent({
                   Development Tools
                 </span>
 
+                {/* Mock Data Toggle */}
                 <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">
                   <div className="flex items-center gap-2 text-slate-700 dark:text-zinc-200 font-medium">
                     <Wrench className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -229,6 +231,24 @@ export default function ProfileDropdownStaticComponent({
                     </button>
                   </div>
                 </div>
+
+                {/* Clear LocalStorage Control Block */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (window.confirm('Clear all LocalStorage data and preferences saved by AssetSphere and reload?')) {
+                      localStorage.clear();
+                      window.location.reload();
+                    }
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all cursor-pointer font-medium text-xs shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                    <span>Clear App LocalStorage</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-semibold uppercase">Purge All</span>
+                </button>
               </div>
             )}
             </div>

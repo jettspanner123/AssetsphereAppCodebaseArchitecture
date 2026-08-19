@@ -8,7 +8,9 @@ export interface ModalSharedComponentProps {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
+  footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  minHeight?: string;
 }
 
 export default function ModalSharedComponent({
@@ -17,7 +19,9 @@ export default function ModalSharedComponent({
   title,
   subtitle,
   children,
+  footer,
   maxWidth = '2xl',
+  minHeight,
 }: ModalSharedComponentProps): React.JSX.Element {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -63,11 +67,11 @@ export default function ModalSharedComponent({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl overflow-hidden z-10 my-auto`}
+            className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl overflow-hidden z-10 my-auto flex flex-col`}
           >
             {/* Header */}
             {(title || subtitle) && (
-              <div className="px-6 py-4 border-b border-slate-200 dark:border-zinc-800/80 flex items-center justify-between">
+              <div className="px-6 py-4 border-b border-slate-200 dark:border-zinc-800/80 flex items-center justify-between shrink-0">
                 <div>
                   {title && (
                     <h2 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-zinc-100 font-serif-headline">
@@ -90,7 +94,16 @@ export default function ModalSharedComponent({
             )}
 
             {/* Body */}
-            <div className="p-6 max-h-[80vh] overflow-y-auto">{children}</div>
+            <div className={`p-6 flex-1 max-h-[85vh] overflow-y-auto ${minHeight ? minHeight : ''}`}>
+              {children}
+            </div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="px-6 py-4 border-t border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-[#08080a] shrink-0">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}

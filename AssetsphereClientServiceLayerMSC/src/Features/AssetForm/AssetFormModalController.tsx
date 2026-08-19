@@ -3,6 +3,26 @@ import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../types
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import InputSharedComponent from '../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
+import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
+
+const CATEGORY_OPTIONS: SelectOption[] = [
+  { value: 'Computing', label: 'Computing', sublabel: 'Laptops, Desktops & Workstations' },
+  { value: 'Mobile', label: 'Mobile', sublabel: 'Smartphones & Tablets' },
+  { value: 'Peripherals', label: 'Peripherals', sublabel: 'Monitors, Docks & Keyboards' },
+  { value: 'Storage', label: 'Storage', sublabel: 'SAN, NAS & Disk Arrays' },
+  { value: 'Networking', label: 'Networking', sublabel: 'Switches, Routers & Firewalls' },
+  { value: 'Security Devices', label: 'Security Devices', sublabel: 'Hardware Security Keys & HSMs' },
+  { value: 'Infrastructure', label: 'Infrastructure', sublabel: 'UPS, Racks & Power Distribution' },
+];
+
+const DEPARTMENT_OPTIONS: SelectOption[] = [
+  { value: 'Engineering', label: 'Engineering', sublabel: 'Software & Infrastructure Development' },
+  { value: 'Design', label: 'Design', sublabel: 'UX Research & Product Design' },
+  { value: 'Product', label: 'Product', sublabel: 'Product Management & Growth' },
+  { value: 'Finance', label: 'Finance', sublabel: 'Global Financial Planning & Treasury' },
+  { value: 'Human Resources', label: 'Human Resources', sublabel: 'People Operations & Talent' },
+  { value: 'IT Operations', label: 'IT Operations', sublabel: 'Enterprise Infrastructure & Support' },
+];
 
 export interface AssetFormModalControllerProps {
   isOpen: boolean;
@@ -125,80 +145,60 @@ export default function AssetFormModalController({
       title={initialAsset ? 'Edit IT Asset Specification' : 'Register New Enterprise IT Asset'}
       subtitle={`Asset Tag Assigned: ${assetNumber}`}
       maxWidth="3xl"
+      minHeight="min-h-[460px]"
     >
-      <form onSubmit={handleSubmit} className="space-y-4 text-xs">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <InputSharedComponent
-            label="Device Name / Model Title *"
-            value={deviceName}
-            onChange={(e) => setDeviceName(e.target.value)}
-            placeholder="e.g. MacBook Pro 16 M3 Max"
-            required
-          />
-          <InputSharedComponent
-            label="Serial Number (S/N) *"
-            value={serialNumber}
-            onChange={(e) => setSerialNumber(e.target.value)}
-            placeholder="e.g. C02G4109MD6N"
-            required
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full min-h-[420px] text-xs">
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InputSharedComponent
+              label="Device Name / Model Title *"
+              value={deviceName}
+              onChange={(e) => setDeviceName(e.target.value)}
+              placeholder="e.g. MacBook Pro 16 M3 Max"
+              required
+            />
+            <InputSharedComponent
+              label="Serial Number (S/N) *"
+              value={serialNumber}
+              onChange={(e) => setSerialNumber(e.target.value)}
+              placeholder="e.g. C02G4109MD6N"
+              required
+            />
+          </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 mb-1 block">
-              Equipment Category
-            </label>
-            <select
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <CustomSelectSharedComponent
+              label="Equipment Category"
               value={category}
-              onChange={(e) => setCategory(e.target.value as AssetCategory)}
-              className="w-full h-10 px-3 rounded-md bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong focus:outline-none text-xs"
-            >
-              <option value="Computing">Computing</option>
-              <option value="Mobile">Mobile</option>
-              <option value="Peripherals">Peripherals</option>
-              <option value="Storage">Storage</option>
-              <option value="Networking">Networking</option>
-              <option value="Security Devices">Security Devices</option>
-              <option value="Infrastructure">Infrastructure</option>
-            </select>
-          </div>
+              options={CATEGORY_OPTIONS}
+              onChange={(val) => setCategory(val as AssetCategory)}
+            />
 
-          <div>
-            <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 mb-1 block">
-              Department Allocation
-            </label>
-            <select
+            <CustomSelectSharedComponent
+              label="Department Allocation"
               value={department}
-              onChange={(e) => setDepartment(e.target.value)}
-              className="w-full h-10 px-3 rounded-md bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong focus:outline-none text-xs"
-            >
-              <option value="Engineering">Engineering</option>
-              <option value="Design">Design</option>
-              <option value="Product">Product</option>
-              <option value="Finance">Finance</option>
-              <option value="Human Resources">Human Resources</option>
-              <option value="IT Operations">IT Operations</option>
-            </select>
+              options={DEPARTMENT_OPTIONS}
+              onChange={(val) => setDepartment(val)}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InputSharedComponent
+              label="Manufacturer Brand"
+              value={manufacturer}
+              onChange={(e) => setManufacturer(e.target.value)}
+              placeholder="e.g. Apple / Dell / Cisco"
+            />
+            <InputSharedComponent
+              label="Original Purchase Cost ($)"
+              type="number"
+              value={purchaseCost}
+              onChange={(e) => setPurchaseCost(Number(e.target.value))}
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <InputSharedComponent
-            label="Manufacturer Brand"
-            value={manufacturer}
-            onChange={(e) => setManufacturer(e.target.value)}
-            placeholder="e.g. Apple / Dell / Cisco"
-          />
-          <InputSharedComponent
-            label="Original Purchase Cost ($)"
-            type="number"
-            value={purchaseCost}
-            onChange={(e) => setPurchaseCost(Number(e.target.value))}
-          />
-        </div>
-
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800">
+        <div className="flex items-center justify-end gap-3 pt-4 mt-8 border-t border-slate-200 dark:border-zinc-800 shrink-0">
           <ButtonSharedComponent variant="outline" size="sm" onClick={onClose}>
             Cancel
           </ButtonSharedComponent>

@@ -124,7 +124,7 @@ export default function AssetFormModalController({
       onClose={onClose}
       title={initialAsset ? 'Edit IT Asset Specification' : 'Register New Enterprise IT Asset'}
       subtitle={`Asset Tag Assigned: ${assetNumber}`}
-      maxWidth="xl"
+      maxWidth="3xl"
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

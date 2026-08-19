@@ -8,7 +8,7 @@ export interface ModalSharedComponentProps {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '4xl';
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
 }
 
 export default function ModalSharedComponent({
@@ -38,7 +38,10 @@ export default function ModalSharedComponent({
   if (maxWidth === 'md') widthClass = 'max-w-md';
   if (maxWidth === 'lg') widthClass = 'max-w-lg';
   if (maxWidth === 'xl') widthClass = 'max-w-xl';
+  if (maxWidth === '2xl') widthClass = 'max-w-2xl';
+  if (maxWidth === '3xl') widthClass = 'max-w-3xl';
   if (maxWidth === '4xl') widthClass = 'max-w-4xl';
+  if (maxWidth === '5xl') widthClass = 'max-w-5xl';
 
   return (
     <AnimatePresence>

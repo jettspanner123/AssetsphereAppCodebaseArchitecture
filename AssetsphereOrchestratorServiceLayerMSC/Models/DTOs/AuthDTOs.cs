@@ -1,3 +1,5 @@
+using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
+
 namespace AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
 
 public sealed class LoginRequestDTO
@@ -12,8 +14,8 @@ public sealed class RegisterRequestDTO
     public string Password { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string Role { get; set; } = "ITManager";
-    public string? Department { get; set; }
+    public UserRoleType Role { get; set; } = UserRoleType.USER;
+    public DepartmentType? Department { get; set; }
 }
 
 public sealed class RefreshTokenRequestDTO
@@ -28,8 +30,8 @@ public sealed class UserProfileDTO
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
     public string FullName => $"{FirstName} {LastName}".Trim();
-    public string Role { get; set; } = string.Empty;
-    public string? Department { get; set; }
+    public UserRoleType Role { get; set; } = UserRoleType.USER;
+    public DepartmentType? Department { get; set; }
     public string? AvatarUrl { get; set; }
     public DateTime? LastLoginAt { get; set; }
 }

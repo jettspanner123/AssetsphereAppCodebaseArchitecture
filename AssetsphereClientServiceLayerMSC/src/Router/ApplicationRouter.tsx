@@ -9,6 +9,7 @@ import {
   useSearch,
   useRouterState,
   Navigate,
+  redirect,
 } from '@tanstack/react-router';
 import ApplicationRouteCON from '../Constants/ApplicationRouteCON';
 import { DashboardSearchSchema, DashboardSearchParams } from './RouterSearchParamsModel';
@@ -324,11 +325,6 @@ export function DashboardShell(): React.JSX.Element {
   const isAssetFormOpen = Boolean(search.newAsset);
   const isQRScannerOpen = Boolean(search.scanner);
 
-  // If unauthenticated, redirect to Login
-  if (!authSession) {
-    return <Navigate to={ApplicationRouteCON.LOGIN} />;
-  }
-
   return (
     <NavigationController
       activeTab={activeTab}
@@ -406,6 +402,12 @@ export function DashboardShell(): React.JSX.Element {
 const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: ApplicationRouteCON.LOGIN,
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (session) {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+    }
+  },
   component: function LoginComponent() {
     const navigate = useNavigate();
     const savedTheme = ApplicationThemeUtility.current.getSavedTheme();
@@ -433,11 +435,17 @@ const loginRoute = createRoute({
   },
 });
 
-// Index Route (Redirect to /dashboard or /login)
+// Index Route (Redirect to /dashboard or /login based on session)
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: ApplicationRouteCON.ROOT,
-  component: () => <Navigate to={ApplicationRouteCON.DASHBOARD_OVERVIEW} />,
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (!session) {
+      throw redirect({ to: ApplicationRouteCON.LOGIN });
+    }
+    throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+  },
 });
 
 // Dashboard Parent Layout Route
@@ -445,6 +453,12 @@ const dashboardLayoutRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: ApplicationRouteCON.DASHBOARD_ROOT,
   validateSearch: (rawSearch: Record<string, unknown>) => DashboardSearchSchema.parse(rawSearch),
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (!session) {
+      throw redirect({ to: ApplicationRouteCON.LOGIN });
+    }
+  },
   component: DashboardShell,
 });
 

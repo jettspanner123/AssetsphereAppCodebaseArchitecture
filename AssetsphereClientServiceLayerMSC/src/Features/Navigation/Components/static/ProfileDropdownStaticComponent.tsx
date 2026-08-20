@@ -253,7 +253,7 @@ export default function ProfileDropdownStaticComponent({
                   onClick={() => {
                     if (window.confirm('Clear all LocalStorage data and preferences saved by AssetSphere and reload?')) {
                       localStorage.clear();
-                      window.location.reload();
+                      window.location.href = '/login';
                     }
                   }}
                   className="w-full flex items-center justify-between p-2.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 transition-all cursor-pointer font-medium text-xs shadow-2xs"

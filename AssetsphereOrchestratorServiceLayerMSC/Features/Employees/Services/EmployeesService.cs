@@ -2,6 +2,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Data;
 using AssetsphereOrchestratorServiceLayerMSC.Exceptions;
 using AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
+using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
 using Microsoft.EntityFrameworkCore;
 
 namespace AssetsphereOrchestratorServiceLayerMSC.Features.Employees.Services;
@@ -15,13 +16,13 @@ public sealed class EmployeesService
         _dbContext = dbContext;
     }
 
-    public async Task<List<EmployeeResponseDTO>> GetAllEmployeesAsync(string? department = null, string? search = null)
+    public async Task<List<EmployeeResponseDTO>> GetAllEmployeesAsync(DepartmentType? department = null, string? search = null)
     {
         IQueryable<EmployeeEntityClass> query = _dbContext.Employees.AsNoTracking();
 
-        if (!string.IsNullOrWhiteSpace(department) && department != "all")
+        if (department.HasValue)
         {
-            query = query.Where(e => e.Department.ToLower() == department.Trim().ToLower());
+            query = query.Where(e => e.Department == department.Value);
         }
 
         if (!string.IsNullOrWhiteSpace(search))
@@ -68,6 +69,7 @@ public sealed class EmployeesService
             Status = a.Status,
             AssignedEmployeeId = a.AssignedEmployeeId,
             AssignedEmployeeName = a.AssignedEmployeeName,
+            AssignedDepartment = a.AssignedDepartment,
             Location = a.Location,
             PurchasePrice = a.PurchasePrice,
             CurrentBookValue = a.CurrentBookValue,
@@ -89,7 +91,7 @@ public sealed class EmployeesService
             EmployeeId = request.EmployeeId.Trim().ToUpper(),
             FullName = request.FullName.Trim(),
             Email = request.Email.Trim().ToLower(),
-            Department = request.Department.Trim(),
+            Department = request.Department,
             Designation = request.Designation.Trim(),
             Location = request.Location.Trim(),
             Status = request.Status,
@@ -116,7 +118,7 @@ public sealed class EmployeesService
 
         if (request.FullName != null) emp.FullName = request.FullName.Trim();
         if (request.Email != null) emp.Email = request.Email.Trim().ToLower();
-        if (request.Department != null) emp.Department = request.Department.Trim();
+        if (request.Department.HasValue) emp.Department = request.Department.Value;
         if (request.Designation != null) emp.Designation = request.Designation.Trim();
         if (request.Location != null) emp.Location = request.Location.Trim();
         if (request.Status != null) emp.Status = request.Status;

@@ -23,6 +23,7 @@ public class AssetsphereDbContext : DbContext
     public DbSet<SecurityComplianceFrameworkEntityClass> ComplianceFrameworks => Set<SecurityComplianceFrameworkEntityClass>();
     public DbSet<AIRecommendationEntityClass> AIRecommendations => Set<AIRecommendationEntityClass>();
     public DbSet<AuditLogEntityClass> AuditLogs => Set<AuditLogEntityClass>();
+    public DbSet<ConfigurationConstantEntityClass> ConfigurationConstants => Set<ConfigurationConstantEntityClass>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -41,6 +42,7 @@ public class AssetsphereDbContext : DbContext
         modelBuilder.Entity<SecurityComplianceFrameworkEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<AIRecommendationEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<AuditLogEntityClass>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ConfigurationConstantEntityClass>().HasQueryFilter(e => !e.IsDeleted);
 
         // Table Mapping & Indexes
         modelBuilder.Entity<UserEntityClass>(entity =>
@@ -48,6 +50,8 @@ public class AssetsphereDbContext : DbContext
             entity.ToTable(DatabaseCON.UsersTable);
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Email).IsUnique();
+            entity.Property(e => e.Role).HasConversion<string>();
+            entity.Property(e => e.Department).HasConversion<string>();
         });
 
         modelBuilder.Entity<AssetEntityClass>(entity =>
@@ -59,6 +63,7 @@ public class AssetsphereDbContext : DbContext
             entity.HasIndex(e => e.Category);
             entity.HasIndex(e => e.Status);
             entity.HasIndex(e => e.AssignedEmployeeId);
+            entity.Property(e => e.AssignedDepartment).HasConversion<string>();
         });
 
         modelBuilder.Entity<EmployeeEntityClass>(entity =>
@@ -67,6 +72,7 @@ public class AssetsphereDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.EmployeeId).IsUnique();
             entity.HasIndex(e => e.Email);
+            entity.Property(e => e.Department).HasConversion<string>();
         });
 
         modelBuilder.Entity<SoftwareLicenseEntityClass>(entity =>
@@ -123,6 +129,13 @@ public class AssetsphereDbContext : DbContext
         {
             entity.ToTable(DatabaseCON.AuditLogsTable);
             entity.HasKey(e => e.Id);
+        });
+
+        modelBuilder.Entity<ConfigurationConstantEntityClass>(entity =>
+        {
+            entity.ToTable(DatabaseCON.ConfigurationConstantsTable);
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.ConfigurationKey).IsUnique();
         });
     }
 

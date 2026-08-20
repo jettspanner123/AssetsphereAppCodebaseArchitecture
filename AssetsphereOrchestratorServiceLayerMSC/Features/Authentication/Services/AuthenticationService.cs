@@ -5,6 +5,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Features.Authentication.Constants;
 using AssetsphereOrchestratorServiceLayerMSC.Helpers;
 using AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
+using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
 using AssetsphereOrchestratorServiceLayerMSC.Utilities;
 using AssetsphereOrchestratorServiceLayerMSC.Validators;
 using Microsoft.EntityFrameworkCore;
@@ -84,8 +85,8 @@ public sealed class AuthenticationService
             PasswordHash = PasswordHashHelper.Current.HashPassword(request.Password),
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Role = string.IsNullOrWhiteSpace(request.Role) ? ApplicationCON.RoleManager : request.Role,
-            Department = request.Department ?? "IT",
+            Role = request.Role,
+            Department = request.Department,
             IsActive = true,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = "registration"

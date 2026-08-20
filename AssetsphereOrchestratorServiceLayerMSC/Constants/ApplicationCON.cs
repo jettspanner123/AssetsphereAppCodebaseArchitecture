@@ -8,10 +8,9 @@ public static class ApplicationCON
     public const string EnvironmentProduction = "production";
     public const string EnvironmentStaging = "staging";
 
-    // Roles
-    public const string RoleAdmin = "SuperAdmin";
-    public const string RoleManager = "ITManager";
-    public const string RoleAuditor = "Auditor";
-    public const string RoleTechnician = "ITTechnician";
-    public const string RoleEmployee = "Employee";
+    // Roles (matching UserRoleType enum)
+    public const string RoleAdmin = "ADMIN";
+    public const string RoleOperator = "OPERATOR";
+    public const string RoleUser = "USER";
+    public const string RoleDeveloper = "DEVELOPER";
 }

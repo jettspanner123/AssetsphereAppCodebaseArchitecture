@@ -3,6 +3,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Factories;
 using AssetsphereOrchestratorServiceLayerMSC.Features.Employees.Services;
 using AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
+using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ public sealed class EmployeesController : ControllerBase
 
     [HttpGet(ApplicationRouteFactory.EmployeeRoutes.GetAll)]
     public async Task<ActionResult<ApiResponseClass<List<EmployeeResponseDTO>>>> GetAll(
-        [FromQuery] string? department,
+        [FromQuery] DepartmentType? department,
         [FromQuery] string? search)
     {
         List<EmployeeResponseDTO> employees = await _employeesService.GetAllEmployeesAsync(department, search);

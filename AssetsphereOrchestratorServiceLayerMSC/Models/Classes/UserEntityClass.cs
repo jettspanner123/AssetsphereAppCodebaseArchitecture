@@ -1,4 +1,4 @@
-using AssetsphereOrchestratorServiceLayerMSC.Constants;
+using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
 
 namespace AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 
@@ -8,8 +8,8 @@ public sealed class UserEntityClass : BaseEntityClass
     public string PasswordHash { get; set; } = string.Empty;
     public string FirstName { get; set; } = string.Empty;
     public string LastName { get; set; } = string.Empty;
-    public string Role { get; set; } = ApplicationCON.RoleManager;
-    public string? Department { get; set; }
+    public UserRoleType Role { get; set; } = UserRoleType.ADMIN;
+    public DepartmentType? Department { get; set; }
     public string? AvatarUrl { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiryTime { get; set; }

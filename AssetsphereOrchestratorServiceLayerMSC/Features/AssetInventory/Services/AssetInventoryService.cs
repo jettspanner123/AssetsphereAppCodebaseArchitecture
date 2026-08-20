@@ -158,7 +158,7 @@ public sealed class AssetInventoryService
         if (request.Status != null) asset.Status = request.Status;
         if (request.AssignedEmployeeId != null) asset.AssignedEmployeeId = request.AssignedEmployeeId;
         if (request.AssignedEmployeeName != null) asset.AssignedEmployeeName = request.AssignedEmployeeName;
-        if (request.AssignedDepartment != null) asset.AssignedDepartment = request.AssignedDepartment;
+        if (request.AssignedDepartment.HasValue) asset.AssignedDepartment = request.AssignedDepartment.Value;
         if (request.Location != null) asset.Location = request.Location;
         if (request.PurchasePrice.HasValue) asset.PurchasePrice = request.PurchasePrice.Value;
         if (request.CurrentBookValue.HasValue) asset.CurrentBookValue = request.CurrentBookValue.Value;
@@ -225,7 +225,7 @@ public sealed class AssetInventoryService
 
         asset.AssignedEmployeeId = request.EmployeeId;
         asset.AssignedEmployeeName = request.EmployeeName;
-        if (!string.IsNullOrWhiteSpace(request.Department)) asset.AssignedDepartment = request.Department;
+        if (request.Department.HasValue) asset.AssignedDepartment = request.Department.Value;
         if (!string.IsNullOrWhiteSpace(request.Location)) asset.Location = request.Location;
         asset.Status = "Assigned";
         asset.UpdatedBy = updatedBy;

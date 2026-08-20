@@ -30,6 +30,8 @@ import ContextMenuSharedComponent, { ContextMenuItem } from '../../Shared/Compon
 import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
 import AssetInventoryCON from './Constants/AssetInventoryCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
+import AssetImportModalController from './Components/AssetImportModalController';
+import { ImportExecutionSummary } from './Services/AssetImportProcessorService';
 
 export interface AssetInventoryScreenControllerProps {
   assets: Asset[];
@@ -37,7 +39,7 @@ export interface AssetInventoryScreenControllerProps {
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
-  onImport?: (file: File) => void;
+  onImportAssets?: (importedAssets: Asset[]) => void;
   onDeleteAsset?: (asset: Asset) => void;
   overrideViewMode?: 'table' | 'grid' | 'kanban';
   overrideGridColumns?: 2 | 3;
@@ -55,7 +57,7 @@ export default function AssetInventoryScreenController({
   onOpenAddModal,
   onOpenQRBadgeModal,
   onExportCSV,
-  onImport,
+  onImportAssets,
   onDeleteAsset,
   overrideViewMode,
   overrideGridColumns,
@@ -66,7 +68,10 @@ export default function AssetInventoryScreenController({
   onGridColumnsChange,
   onSingleLineChange,
 }: AssetInventoryScreenControllerProps): React.JSX.Element {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [internalAssets, setInternalAssets] = useState<Asset[] | null>(null);
+  const activeAssets = internalAssets || assets;
+
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>(
@@ -76,27 +81,9 @@ export default function AssetInventoryScreenController({
     () => overrideSearchQuery || ''
   );
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Validate that the file is strictly CSV or Excel (.csv, .xlsx, .xls)
-    const validExtensions = ['.csv', '.xlsx', '.xls'];
-    const fileName = file.name.toLowerCase();
-    const isValid = validExtensions.some((ext) => fileName.endsWith(ext));
-
-    if (!isValid) {
-      alert('Invalid file format. Please upload only CSV (.csv) or Excel (.xlsx, .xls) files.');
-      e.target.value = '';
-      return;
-    }
-
-    if (onImport) {
-      onImport(file);
-    } else {
-      console.log('Selected import file:', file.name, file.type, file.size);
-    }
-    e.target.value = '';
+  const handleImportComplete = (processedAssets: Asset[], summary: ImportExecutionSummary) => {
+    setInternalAssets(processedAssets);
+    onImportAssets?.(processedAssets);
   };
 
   const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(
@@ -288,7 +275,7 @@ export default function AssetInventoryScreenController({
         },
       ];
 
-  const filteredAssets = assets.filter((ast) => {
+  const filteredAssets = activeAssets.filter((ast) => {
     if (selectedCategory !== 'ALL' && ast.category !== selectedCategory) return false;
     if (selectedLifecycle !== 'ALL' && ast.lifecycleStatus !== selectedLifecycle) return false;
     if (complianceFilter === 'COMPLIANT' && !ast.security?.isCompliant) return false;
@@ -372,21 +359,13 @@ export default function AssetInventoryScreenController({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            <input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv"
-              className="hidden"
-            />
-
             <ButtonSharedComponent
               variant="outline"
               size="sm"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => setIsImportModalOpen(true)}
               icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
             >
-              Import (CSV/Excel)
+              Import CSV
             </ButtonSharedComponent>
 
             <ButtonSharedComponent
@@ -862,6 +841,14 @@ export default function AssetInventoryScreenController({
         confirmText="Delete Asset"
         cancelText="Cancel"
         variant="danger"
+      />
+
+      {/* CSV Asset Import Multi-Step Wizard Modal */}
+      <AssetImportModalController
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        existingAssets={activeAssets}
+        onImportComplete={handleImportComplete}
       />
     </div>
   );

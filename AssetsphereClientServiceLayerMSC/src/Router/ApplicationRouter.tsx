@@ -528,11 +528,17 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const assets = MockDataSeederService.current.getAssets();
+    const [assets, setAssets] = useState<Asset[]>(() => MockDataSeederService.current.getAssets());
+
+    const handleImportAssets = (importedAssets: Asset[]) => {
+      setAssets(importedAssets);
+      MockDataSeederService.current.setAssets(importedAssets);
+    };
 
     return (
       <AssetInventoryScreenRoute
         assets={assets}
+        onImportAssets={handleImportAssets}
         onSelectAsset={(asset) =>
           navigate({
             to: '.',

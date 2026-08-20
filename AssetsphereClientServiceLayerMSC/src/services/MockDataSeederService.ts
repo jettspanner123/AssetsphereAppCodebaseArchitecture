@@ -1398,6 +1398,10 @@ export class MockDataSeederService {
     return [...this._assets];
   }
 
+  public setAssets(assets: Asset[]): void {
+    this._assets = [...assets];
+  }
+
   public getServiceTickets(): ServiceTicket[] {
     return [...this._serviceTickets];
   }

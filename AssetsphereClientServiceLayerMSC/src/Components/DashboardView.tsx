@@ -15,8 +15,6 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  AreaChart,
-  Area,
 } from 'recharts';
 import {
   DollarSign,
@@ -31,7 +29,10 @@ import {
   CheckCircle2,
   ChevronRight,
   ShieldAlert,
+  PieChart as PieChartIcon,
+  BarChart3,
 } from 'lucide-react';
+import EmptyStateSharedComponent from '../Shared/Components/EmptyStateSharedComponent';
 
 interface DashboardViewProps {
   assets: Asset[];
@@ -95,7 +96,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         <div className="flex items-center gap-3">
           <button
             onClick={onOpenAIAssistant}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-medium shadow-md shadow-indigo-600/20 transition-all"
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-medium shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
           >
             <Sparkles className="w-4 h-4 text-amber-300" />
             AI Optimization Plan
@@ -153,64 +154,81 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
             <h3 className="text-sm font-semibold text-white">Portfolio Category Distribution</h3>
             <span className="text-[10px] text-slate-500 font-mono">Count</span>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryChartData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={4}
-                >
-                  {categoryChartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{ backgroundColor: '#161618', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-64 w-full flex items-center justify-center">
+            {categoryChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryChartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={85}
+                    paddingAngle={4}
+                  >
+                    {categoryChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{ backgroundColor: '#161618', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyStateSharedComponent
+                icon={<PieChartIcon className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+                title="No Category Distribution Data"
+                description="Hardware and virtual asset categories are unindexed."
+                className="py-0 border-none bg-transparent shadow-none"
+              />
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-slate-800 text-xs">
-            {categoryChartData.map((c, idx) => (
-              <div key={c.name} className="flex items-center gap-2 text-slate-400">
-                <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
-                <span className="truncate">{c.name}:</span>
-                <span className="font-mono font-bold text-white ml-auto">{c.value}</span>
-              </div>
-            ))}
-          </div>
+          {categoryChartData.length > 0 && (
+            <div className="grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-slate-800 text-xs">
+              {categoryChartData.map((c, idx) => (
+                <div key={c.name} className="flex items-center gap-2 text-slate-400">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                  <span className="truncate">{c.name}:</span>
+                  <span className="font-mono font-bold text-white ml-auto">{c.value}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Department Valuation Bar Chart */}
         <div className="bg-[#161618] border border-slate-800 rounded-xl p-6 flex flex-col lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-semibold text-white">Department Valuation ($ Book Value)</h3>
-            <button onClick={() => onNavigateTab('analytics')} className="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-medium">
+            <button onClick={() => onNavigateTab('analytics')} className="text-xs text-indigo-400 hover:underline flex items-center gap-1 font-medium cursor-pointer">
               View Financials <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={deptChartData}>
-                <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
-                <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} />
-                <Tooltip
-                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Valuation']}
-                  contentStyle={{ backgroundColor: '#161618', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
-                />
-                <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="h-64 w-full flex items-center justify-center">
+            {deptChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptChartData}>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={11} tickLine={false} />
+                  <YAxis stroke="#64748b" fontSize={11} tickFormatter={(v) => `$${v / 1000}k`} />
+                  <Tooltip
+                    formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Valuation']}
+                    contentStyle={{ backgroundColor: '#161618', borderColor: '#334155', borderRadius: '8px', color: '#fff', fontSize: '12px' }}
+                  />
+                  <Bar dataKey="value" fill="#6366f1" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyStateSharedComponent
+                icon={<BarChart3 className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+                title="No Departmental Valuation Data"
+                description="Financial capital allocation across departments is unindexed."
+                className="py-0 border-none bg-transparent shadow-none"
+              />
+            )}
           </div>
-          <p className="text-xs text-slate-500 mt-2">
-            Highest concentration of capital assets resides in Engineering and Executive Management.
-          </p>
         </div>
       </div>
 
@@ -225,31 +243,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </div>
               <h4 className="text-sm font-semibold text-white">AI Assistant Insights</h4>
             </div>
-            <button onClick={onOpenAIAssistant} className="text-xs text-indigo-400 hover:underline">
+            <button onClick={onOpenAIAssistant} className="text-xs text-indigo-400 hover:underline cursor-pointer">
               Ask Assistant
             </button>
           </div>
 
-          <div className="space-y-3">
-            {recommendations.slice(0, 3).map((rec) => (
-              <div key={rec.id} className="bg-slate-900/60 p-4 rounded-lg border border-slate-800 text-xs">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-semibold text-white flex items-center gap-2">
-                    <span className={`w-1.5 h-1.5 rounded-full ${rec.impact === 'High' ? 'bg-rose-500' : 'bg-amber-400'}`} />
-                    {rec.title}
-                  </span>
-                  <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-900 font-bold">
-                    {rec.estimatedCostOrSaving}
-                  </span>
+          {recommendations.length > 0 ? (
+            <div className="space-y-3">
+              {recommendations.slice(0, 3).map((rec) => (
+                <div key={rec.id} className="bg-slate-900/60 p-4 rounded-lg border border-slate-800 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-semibold text-white flex items-center gap-2">
+                      <span className={`w-1.5 h-1.5 rounded-full ${rec.impact === 'High' ? 'bg-rose-500' : 'bg-amber-400'}`} />
+                      {rec.title}
+                    </span>
+                    <span className="font-mono text-[10px] text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-900 font-bold">
+                      {rec.estimatedCostOrSaving}
+                    </span>
+                  </div>
+                  <p className="text-slate-400 leading-relaxed italic mt-1">"{rec.explanation}"</p>
                 </div>
-                <p className="text-slate-400 leading-relaxed italic mt-1">"{rec.explanation}"</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <EmptyStateSharedComponent
+              icon={<Sparkles className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+              title="No Active AI Recommendations"
+              description="No optimization recommendations indexed for current assets."
+              className="py-6 border-none bg-transparent shadow-none"
+            />
+          )}
 
           <button
             onClick={onOpenAIAssistant}
-            className="w-full py-2 bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20 text-xs font-semibold rounded border border-indigo-600/30 transition-all"
+            className="w-full py-2 bg-indigo-600/10 text-indigo-400 hover:bg-indigo-600/20 text-xs font-semibold rounded border border-indigo-600/30 transition-all cursor-pointer"
           >
             Run optimization plan
           </button>
@@ -273,13 +300,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   {campaign.verifiedAssetsCount} / {campaign.totalTargetAssets} Verified
                 </span>
                 <span className="font-bold text-indigo-400">
-                  {Math.round((campaign.verifiedAssetsCount / campaign.totalTargetAssets) * 100)}%
+                  {Math.round((campaign.verifiedAssetsCount / (campaign.totalTargetAssets || 1)) * 100)}%
                 </span>
               </div>
               <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
                 <div
                   className="bg-indigo-500 h-full rounded-full transition-all"
-                  style={{ width: `${(campaign.verifiedAssetsCount / campaign.totalTargetAssets) * 100}%` }}
+                  style={{ width: `${(campaign.verifiedAssetsCount / (campaign.totalTargetAssets || 1)) * 100}%` }}
                 />
               </div>
             </div>
@@ -288,31 +315,40 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           {/* Critical Assets Preview */}
           <div className="pt-2 border-t border-slate-800">
             <h4 className="text-xs font-semibold text-slate-400 mb-2">Priority Managed Assets</h4>
-            <div className="space-y-2">
-              {assets.slice(0, 3).map((ast) => (
-                <div
-                  key={ast.id}
-                  onClick={() => onSelectAsset(ast)}
-                  className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg hover:border-slate-700 cursor-pointer transition-all flex items-center justify-between text-xs"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center font-bold text-indigo-400 font-mono text-[10px]">
-                      {ast.assetNumber.slice(-4)}
-                    </div>
-                    <div>
-                      <div className="font-medium text-white">{ast.deviceName}</div>
-                      <div className="text-[10px] text-slate-500">
-                        {ast.assignedToEmployeeName || 'Unassigned'} • {ast.category}
+            {assets.length > 0 ? (
+              <div className="space-y-2">
+                {assets.slice(0, 3).map((ast) => (
+                  <div
+                    key={ast.id}
+                    onClick={() => onSelectAsset(ast)}
+                    className="p-3 bg-slate-900/60 border border-slate-800 rounded-lg hover:border-slate-700 cursor-pointer transition-all flex items-center justify-between text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-7 h-7 rounded bg-slate-800 flex items-center justify-center font-bold text-indigo-400 font-mono text-[10px]">
+                        {ast.assetNumber.slice(-4)}
+                      </div>
+                      <div>
+                        <div className="font-medium text-white">{ast.deviceName}</div>
+                        <div className="text-[10px] text-slate-500">
+                          {ast.assignedToEmployeeName || 'Unassigned'} • {ast.category}
+                        </div>
                       </div>
                     </div>
+                    <div className="text-right">
+                      <span className="font-mono font-bold text-white">${ast.currentValue.toLocaleString()}</span>
+                      <div className="text-[10px] text-emerald-400 font-bold">Health: {ast.health?.overallScore}%</div>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="font-mono font-bold text-white">${ast.currentValue.toLocaleString()}</span>
-                    <div className="text-[10px] text-emerald-400 font-bold">Health: {ast.health?.overallScore}%</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <EmptyStateSharedComponent
+                icon={<Box className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+                title="No Managed Assets"
+                description="No priority assets registered for verification preview."
+                className="py-6 border-none bg-transparent shadow-none"
+              />
+            )}
           </div>
         </div>
       </div>

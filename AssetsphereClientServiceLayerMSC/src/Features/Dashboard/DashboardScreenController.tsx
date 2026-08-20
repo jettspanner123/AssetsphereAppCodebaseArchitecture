@@ -25,10 +25,13 @@ import {
   ChevronRight,
   Activity,
   ArrowRight,
+  PieChart as PieChartIcon,
+  BarChart3,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
+import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
 import DashboardCON from './Constants/DashboardCON';
 
 export interface DashboardScreenControllerProps {
@@ -210,36 +213,45 @@ export default function DashboardScreenController({
               </p>
             </div>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={categoryChartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {categoryChartData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={DashboardCON.CHART_COLORS[index % DashboardCON.CHART_COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-surface-elevated)',
-                    borderColor: 'var(--color-hairline-strong)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    color: 'var(--color-ink)',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+          <div className="h-64 flex items-center justify-center">
+            {categoryChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={85}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {categoryChartData.map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={DashboardCON.CHART_COLORS[index % DashboardCON.CHART_COLORS.length]}
+                      />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--color-surface-elevated)',
+                      borderColor: 'var(--color-hairline-strong)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: 'var(--color-ink)',
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyStateSharedComponent
+                icon={<PieChartIcon className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+                title="No Category Distribution Data"
+                description="Hardware and virtual asset categories are unindexed. Enable mock data mode or register devices to populate category metrics."
+                className="w-full h-full py-4"
+              />
+            )}
           </div>
         </CardSharedComponent>
 
@@ -255,36 +267,45 @@ export default function DashboardScreenController({
               </p>
             </div>
           </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={deptChartData}>
-                <XAxis
-                  dataKey="name"
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#94a3b8"
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(v) => `$${v / 1000}k`}
-                />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: 'var(--color-surface-elevated)',
-                    borderColor: 'var(--color-hairline-strong)',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    color: 'var(--color-ink)',
-                  }}
-                  formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Valuation']}
-                />
-                <Bar dataKey="value" fill="#3b9eff" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="h-64 flex items-center justify-center">
+            {deptChartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={deptChartData}>
+                  <XAxis
+                    dataKey="name"
+                    stroke="#94a3b8"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="#94a3b8"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `$${v / 1000}k`}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'var(--color-surface-elevated)',
+                      borderColor: 'var(--color-hairline-strong)',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                      color: 'var(--color-ink)',
+                    }}
+                    formatter={(value: any) => [`$${Number(value).toLocaleString()}`, 'Valuation']}
+                  />
+                  <Bar dataKey="value" fill="#3b9eff" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <EmptyStateSharedComponent
+                icon={<BarChart3 className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+                title="No Departmental Valuation Data"
+                description="Financial capital allocation across departments is unindexed. Connect procurement ledgers or enable mock data mode."
+                className="w-full h-full py-4"
+              />
+            )}
           </div>
         </CardSharedComponent>
       </div>
@@ -297,80 +318,91 @@ export default function DashboardScreenController({
               Assets Requiring Physical Verification or Maintenance
             </h3>
           </div>
-          <ButtonSharedComponent
-            variant="ghost"
-            size="sm"
-            onClick={() => onNavigateTab('assets')}
-            icon={<ChevronRight className="w-3.5 h-3.5" />}
-          >
-            View Full Inventory
-          </ButtonSharedComponent>
+          {assets.length > 0 && (
+            <ButtonSharedComponent
+              variant="ghost"
+              size="sm"
+              onClick={() => onNavigateTab('assets')}
+              icon={<ChevronRight className="w-3.5 h-3.5" />}
+            >
+              View Full Inventory
+            </ButtonSharedComponent>
+          )}
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-300 dark:border-zinc-800 text-slate-500 dark:text-zinc-500 font-mono">
-                <th className="py-2.5 px-3">Asset Tag</th>
-                <th className="py-2.5 px-3">Device Name</th>
-                <th className="py-2.5 px-3">Category</th>
-                <th className="py-2.5 px-3">Health Score</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">
-              {assets.slice(0, 5).map((asset) => (
-                <tr key={asset.id} className="hover:bg-slate-100/50 dark:hover:bg-zinc-800/40 transition-colors">
-                  <td className="py-3 px-3 font-mono font-medium text-slate-900 dark:text-zinc-100">
-                    {asset.assetNumber}
-                  </td>
-                  <td className="py-3 px-3 font-medium text-slate-900 dark:text-white">
-                    {asset.deviceName}
-                  </td>
-                  <td className="py-3 px-3 text-slate-500 dark:text-zinc-400">
-                    {asset.category}
-                  </td>
-                  <td className="py-3 px-3 font-mono">
-                    <span
-                      className={`font-semibold ${
-                        (asset.health?.overallScore || 0) < 70
-                          ? 'text-rose-500'
-                          : (asset.health?.overallScore || 0) < 85
-                          ? 'text-amber-500'
-                          : 'text-emerald-500'
-                      }`}
-                    >
-                      {asset.health?.overallScore || 0}%
-                    </span>
-                  </td>
-                  <td className="py-3 px-3">
-                    <BadgeSharedComponent
-                      variant={
-                        asset.lifecycleStatus === 'In Use' || asset.lifecycleStatus === 'Assigned'
-                          ? 'success'
-                          : asset.lifecycleStatus === 'Repair' || asset.lifecycleStatus === 'Maintenance'
-                          ? 'warning'
-                          : 'neutral'
-                      }
-                      size="sm"
-                    >
-                      {asset.lifecycleStatus}
-                    </BadgeSharedComponent>
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    <button
-                      onClick={() => onSelectAsset(asset)}
-                      className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium"
-                    >
-                      Inspect
-                    </button>
-                  </td>
+        {assets.length > 0 ? (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-300 dark:border-zinc-800 text-slate-500 dark:text-zinc-500 font-mono">
+                  <th className="py-2.5 px-3">Asset Tag</th>
+                  <th className="py-2.5 px-3">Device Name</th>
+                  <th className="py-2.5 px-3">Category</th>
+                  <th className="py-2.5 px-3">Health Score</th>
+                  <th className="py-2.5 px-3">Status</th>
+                  <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">
+                {assets.slice(0, 5).map((asset) => (
+                  <tr key={asset.id} className="hover:bg-slate-100/50 dark:hover:bg-zinc-800/40 transition-colors">
+                    <td className="py-3 px-3 font-mono font-medium text-slate-900 dark:text-zinc-100">
+                      {asset.assetNumber}
+                    </td>
+                    <td className="py-3 px-3 font-medium text-slate-900 dark:text-white">
+                      {asset.deviceName}
+                    </td>
+                    <td className="py-3 px-3 text-slate-500 dark:text-zinc-400">
+                      {asset.category}
+                    </td>
+                    <td className="py-3 px-3 font-mono">
+                      <span
+                        className={`font-semibold ${
+                          (asset.health?.overallScore || 0) < 70
+                            ? 'text-rose-500'
+                            : (asset.health?.overallScore || 0) < 85
+                            ? 'text-amber-500'
+                            : 'text-emerald-500'
+                        }`}
+                      >
+                        {asset.health?.overallScore || 0}%
+                      </span>
+                    </td>
+                    <td className="py-3 px-3">
+                      <BadgeSharedComponent
+                        variant={
+                          asset.lifecycleStatus === 'In Use' || asset.lifecycleStatus === 'Assigned'
+                            ? 'success'
+                            : asset.lifecycleStatus === 'Repair' || asset.lifecycleStatus === 'Maintenance'
+                            ? 'warning'
+                            : 'neutral'
+                        }
+                        size="sm"
+                      >
+                        {asset.lifecycleStatus}
+                      </BadgeSharedComponent>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        onClick={() => onSelectAsset(asset)}
+                        className="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium"
+                      >
+                        Inspect
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <EmptyStateSharedComponent
+            icon={<Box className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
+            title="No Active Asset Records"
+            description="There are currently no assets registered or indexed requiring physical verification or maintenance."
+            className="w-full py-8"
+          />
+        )}
       </CardSharedComponent>
     </div>
   );

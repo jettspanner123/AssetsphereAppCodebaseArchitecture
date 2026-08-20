@@ -29,7 +29,7 @@
     "src"
   ],
   "exclude": [
-    "src/components",
+    "src/Components",
     "node_modules",
     "dist"
   ]

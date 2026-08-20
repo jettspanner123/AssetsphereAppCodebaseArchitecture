@@ -8,6 +8,8 @@ export interface AssetInventoryScreenRouteProps {
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
+  onImport?: (file: File) => void;
+  onDeleteAsset?: (asset: Asset) => void;
   overrideViewMode?: 'table' | 'grid' | 'kanban';
   overrideGridColumns?: 2 | 3;
   overrideSingleLine?: boolean;
@@ -24,6 +26,8 @@ export default function AssetInventoryScreenRoute({
   onOpenAddModal,
   onOpenQRBadgeModal,
   onExportCSV,
+  onImport,
+  onDeleteAsset,
   overrideViewMode,
   overrideGridColumns,
   overrideSingleLine,
@@ -40,6 +44,8 @@ export default function AssetInventoryScreenRoute({
       onOpenAddModal={onOpenAddModal}
       onOpenQRBadgeModal={onOpenQRBadgeModal}
       onExportCSV={onExportCSV}
+      onImport={onImport}
+      onDeleteAsset={onDeleteAsset}
       overrideViewMode={overrideViewMode}
       overrideGridColumns={overrideGridColumns}
       overrideSingleLine={overrideSingleLine}

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Asset } from '../../types';
 import {
   Search,
   Plus,
   Download,
+  Upload,
   QrCode,
   Grid,
   List,
@@ -19,11 +20,14 @@ import {
   CheckSquare,
   Edit3,
   Trash2,
+  RotateCw,
+  Settings,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import ContextMenuSharedComponent, { ContextMenuItem } from '../../Shared/Components/ContextMenuSharedComponent';
+import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
 import AssetInventoryCON from './Constants/AssetInventoryCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 
@@ -33,6 +37,8 @@ export interface AssetInventoryScreenControllerProps {
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
+  onImport?: (file: File) => void;
+  onDeleteAsset?: (asset: Asset) => void;
   overrideViewMode?: 'table' | 'grid' | 'kanban';
   overrideGridColumns?: 2 | 3;
   overrideSingleLine?: boolean;
@@ -49,6 +55,8 @@ export default function AssetInventoryScreenController({
   onOpenAddModal,
   onOpenQRBadgeModal,
   onExportCSV,
+  onImport,
+  onDeleteAsset,
   overrideViewMode,
   overrideGridColumns,
   overrideSingleLine,
@@ -58,6 +66,7 @@ export default function AssetInventoryScreenController({
   onGridColumnsChange,
   onSingleLineChange,
 }: AssetInventoryScreenControllerProps): React.JSX.Element {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>(
@@ -66,6 +75,29 @@ export default function AssetInventoryScreenController({
   const [searchQuery, setSearchQuery] = useState<string>(
     () => overrideSearchQuery || ''
   );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate that the file is strictly CSV or Excel (.csv, .xlsx, .xls)
+    const validExtensions = ['.csv', '.xlsx', '.xls'];
+    const fileName = file.name.toLowerCase();
+    const isValid = validExtensions.some((ext) => fileName.endsWith(ext));
+
+    if (!isValid) {
+      alert('Invalid file format. Please upload only CSV (.csv) or Excel (.xlsx, .xls) files.');
+      e.target.value = '';
+      return;
+    }
+
+    if (onImport) {
+      onImport(file);
+    } else {
+      console.log('Selected import file:', file.name, file.type, file.size);
+    }
+    e.target.value = '';
+  };
 
   const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(
     () => overrideViewMode || UserPreferencesUtility.current.getInventoryViewMode('grid')
@@ -110,6 +142,20 @@ export default function AssetInventoryScreenController({
     asset: null,
   });
 
+  // Delete Confirmation State
+  const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
+
+  // Disable default native browser context menu across the page
+  React.useEffect(() => {
+    const disableNativeContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('contextmenu', disableNativeContextMenu);
+    return () => {
+      window.removeEventListener('contextmenu', disableNativeContextMenu);
+    };
+  }, []);
+
   const handleContextMenu = (e: React.MouseEvent, asset: Asset) => {
     e.preventDefault();
     e.stopPropagation();
@@ -118,6 +164,34 @@ export default function AssetInventoryScreenController({
       x: e.clientX,
       y: e.clientY,
       asset,
+    });
+  };
+
+  const handleContainerContextMenu = (e: React.MouseEvent) => {
+    // Completely disable default native browser context menu
+    e.preventDefault();
+
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    // Suppress custom context menu if right-clicking on buttons, inputs, toolbar cards, page headers, or table headers
+    const isInteractiveOrHeader = Boolean(
+      target.closest(
+        'button, input, select, textarea, a, th, [role="button"], [role="menuitem"], [data-no-context-menu], [data-toolbar], [data-header-summary]'
+      )
+    );
+
+    if (isInteractiveOrHeader) {
+      // Close any active menu and suppress opening
+      setContextMenu((prev) => ({ ...prev, isOpen: false }));
+      return;
+    }
+
+    setContextMenu({
+      isOpen: true,
+      x: e.clientX,
+      y: e.clientY,
+      asset: null,
     });
   };
 
@@ -142,7 +216,7 @@ export default function AssetInventoryScreenController({
           label: 'Select',
           icon: <CheckSquare className="w-3.5 h-3.5" />,
           onClick: () => {
-            // UI placeholder action as requested
+            // UI placeholder action
           },
         },
         {
@@ -160,7 +234,7 @@ export default function AssetInventoryScreenController({
           label: 'Edit',
           icon: <Edit3 className="w-3.5 h-3.5" />,
           onClick: () => {
-            // UI placeholder action as requested
+            // UI placeholder action
           },
         },
         {
@@ -170,11 +244,49 @@ export default function AssetInventoryScreenController({
           isDestructive: true,
           divider: true,
           onClick: () => {
-            // UI placeholder action as requested
+            if (contextMenu.asset) {
+              setAssetToDelete(contextMenu.asset);
+            }
           },
         },
       ]
-    : [];
+    : [
+        {
+          id: 'create',
+          label: 'Create / Register Asset',
+          icon: <Plus className="w-3.5 h-3.5" />,
+          shortcut: 'N',
+          onClick: () => {
+            onOpenAddModal();
+          },
+        },
+        {
+          id: 'selection-mode',
+          label: 'Selection Mode',
+          icon: <CheckSquare className="w-3.5 h-3.5" />,
+          onClick: () => {
+            // UI placeholder action
+          },
+        },
+        {
+          id: 'refresh',
+          label: 'Refresh',
+          icon: <RotateCw className="w-3.5 h-3.5" />,
+          shortcut: 'R',
+          onClick: () => {
+            // UI placeholder action
+          },
+        },
+        {
+          id: 'settings',
+          label: 'Settings',
+          icon: <Settings className="w-3.5 h-3.5" />,
+          divider: true,
+          onClick: () => {
+            // UI placeholder action
+          },
+        },
+      ];
 
   const filteredAssets = assets.filter((ast) => {
     if (selectedCategory !== 'ALL' && ast.category !== selectedCategory) return false;
@@ -201,9 +313,15 @@ export default function AssetInventoryScreenController({
   );
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6 min-h-[calc(100vh-140px)]"
+      onContextMenu={handleContainerContextMenu}
+    >
       {/* Page Title & Hero Summary Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
+      <div
+        data-header-summary="true"
+        className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800"
+      >
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             {AssetInventoryCON.TITLE}
@@ -238,7 +356,8 @@ export default function AssetInventoryScreenController({
       </div>
 
       {/* Control Toolbar Card */}
-      <CardSharedComponent className="space-y-4 p-4">
+      <div data-toolbar="true">
+        <CardSharedComponent className="space-y-4 p-4">
         {/* Row 1: Search Input & Primary Actions on Same Line */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
@@ -253,6 +372,23 @@ export default function AssetInventoryScreenController({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept=".csv, .xlsx, .xls, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, text/csv"
+              className="hidden"
+            />
+
+            <ButtonSharedComponent
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
+            >
+              Import (CSV/Excel)
+            </ButtonSharedComponent>
+
             <ButtonSharedComponent
               variant="outline"
               size="sm"
@@ -426,6 +562,7 @@ export default function AssetInventoryScreenController({
           </div>
         </div>
       </CardSharedComponent>
+      </div>
 
       {/* Fallback Empty State */}
       {filteredAssets.length === 0 && (
@@ -553,6 +690,7 @@ export default function AssetInventoryScreenController({
       {/* Grid View Mode with Dynamic Column Density (2 vs 3 per row) */}
       {viewMode === 'grid' && filteredAssets.length > 0 && (
         <div
+          onContextMenu={(e) => handleContainerContextMenu(e)}
           className={`grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
@@ -696,8 +834,34 @@ export default function AssetInventoryScreenController({
             <span className="font-mono text-[10px]">
               {contextMenu.asset.assetNumber} • {contextMenu.asset.deviceName}
             </span>
-          ) : undefined
+          ) : (
+            <span className="font-mono text-[10px] text-slate-400 dark:text-zinc-500 uppercase tracking-wider font-semibold">
+              Inventory Actions
+            </span>
+          )
         }
+      />
+
+      {/* Delete Asset Confirmation Modal */}
+      <ConfirmationModalSharedComponent
+        isOpen={Boolean(assetToDelete)}
+        onClose={() => setAssetToDelete(null)}
+        onConfirm={() => {
+          if (assetToDelete) {
+            onDeleteAsset?.(assetToDelete);
+            setAssetToDelete(null);
+          }
+        }}
+        title="Delete Hardware IT Asset"
+        subtitle={assetToDelete ? `Asset Tag: ${assetToDelete.assetNumber}` : undefined}
+        description={
+          assetToDelete
+            ? `Are you sure you want to permanently delete "${assetToDelete.deviceName}" (S/N: ${assetToDelete.serialNumber}) from the enterprise asset inventory registry? This action cannot be undone.`
+            : ''
+        }
+        confirmText="Delete Asset"
+        cancelText="Cancel"
+        variant="danger"
       />
     </div>
   );

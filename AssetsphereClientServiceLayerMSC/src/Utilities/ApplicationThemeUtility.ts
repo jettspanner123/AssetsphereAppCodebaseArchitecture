@@ -12,7 +12,7 @@ export default class ApplicationThemeUtility {
         return saved;
       }
     }
-    return ApplicationThemeCON.LIGHT; // Default to Light Mode
+    return ApplicationThemeCON.DARK; // Default to Dark Mode
   }
 
   public applyTheme(theme: string): void {

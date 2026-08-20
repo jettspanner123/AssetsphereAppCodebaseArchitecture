@@ -43,9 +43,9 @@ export default function AssetDetailModalController({
 }: AssetDetailModalControllerProps): React.JSX.Element {
   if (!asset) return <React.Fragment />;
 
-  const [activeTab, setActiveTab] = useState<
-    'specs' | 'procurement' | 'warranty' | 'security' | 'timeline' | 'ai_diagnostics'
-  >('specs');
+  type AssetDetailTab = 'specs' | 'procurement' | 'warranty' | 'security' | 'timeline' | 'ai_diagnostics';
+
+  const [activeTab, setActiveTab] = useState<AssetDetailTab>('specs');
 
   const [aiDiagnostics, setAiDiagnostics] = useState<AIDiagnosticsResult | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
@@ -92,6 +92,15 @@ export default function AssetDetailModalController({
       icon: <UserCheck className="w-4 h-4" />,
       signature: record.hasDigitalSignature ? `Digital Signature: ${record.employeeSignatureName}` : undefined,
     })) || []),
+  ];
+
+  const tabsList: { id: AssetDetailTab; label: string }[] = [
+    { id: 'specs', label: 'Hardware Specs' },
+    { id: 'procurement', label: 'Procurement & Finance' },
+    { id: 'warranty', label: 'Warranty & Telemetry' },
+    { id: 'security', label: 'Security & Compliance' },
+    { id: 'timeline', label: 'Chain of Custody' },
+    { id: 'ai_diagnostics', label: 'AI Risk Report' },
   ];
 
   return (
@@ -141,17 +150,10 @@ export default function AssetDetailModalController({
 
         {/* Tab Switcher */}
         <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs border-b border-slate-200 dark:border-zinc-800">
-          {[
-            { id: 'specs', label: 'Hardware Specs' },
-            { id: 'procurement', label: 'Procurement & Finance' },
-            { id: 'warranty', label: 'Warranty & Telemetry' },
-            { id: 'security', label: 'Security & Compliance' },
-            { id: 'timeline', label: 'Chain of Custody' },
-            { id: 'ai_diagnostics', label: 'AI Risk Report' },
-          ].map((tab) => (
+          {tabsList.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id)}
               className={`px-3 py-2 border-b-2 font-medium transition-colors cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-zinc-900 text-slate-900 dark:border-white dark:text-white font-semibold'

@@ -63,10 +63,15 @@ export default function ModalSharedComponent({
 
           {/* Dialog content */}
           <motion.div
+            layout
             initial={{ opacity: 0, scale: 0.96, y: 8 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 8 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{
+              duration: 0.25,
+              ease: [0.16, 1, 0.3, 1],
+              layout: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+            }}
             className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl overflow-hidden z-10 my-auto flex flex-col`}
           >
             {/* Header */}

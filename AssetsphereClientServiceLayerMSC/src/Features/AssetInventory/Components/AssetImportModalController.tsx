@@ -273,24 +273,19 @@ export default function AssetImportModalController({
             exit={{ opacity: 0, y: -8 }}
             className="space-y-5"
           >
-            {/* Header Switcher Section: Styled exactly like Deployment Environment Switcher */}
-            <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400">
-                  <Layers className="w-4 h-4" />
+            {/* Header Switcher Section: Clean non-card toggle without icons */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+              <div>
+                <div className="text-xs font-semibold text-slate-900 dark:text-zinc-100">
+                  Schema Detail Scope
                 </div>
-                <div>
-                  <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                    Schema Detail Scope
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-zinc-400">
-                    Switch between Essential vs Complete enterprise attributes
-                  </div>
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Switch between Essential vs Complete enterprise attributes
                 </div>
               </div>
 
               {/* Segmented Pill Switcher */}
-              <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8.5 w-full sm:w-64">
+              <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8.5 w-full sm:w-64 shrink-0">
                 <button
                   type="button"
                   onClick={() => setSchemaMode('optionA')}
@@ -316,34 +311,31 @@ export default function AssetImportModalController({
               </div>
             </div>
 
-            {/* File Info Bar & Auto-mapping Status */}
-            <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 text-xs">
+            {/* File Metadata Info Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/70 dark:border-zinc-800/70 text-xs text-slate-600 dark:text-zinc-400">
               <div className="flex items-center gap-2 truncate">
-                <FileSpreadsheet className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
-                <span className="font-medium font-mono text-slate-800 dark:text-zinc-200 truncate">
+                <span className="font-mono font-medium text-slate-800 dark:text-zinc-200 truncate">
                   {selectedFile?.name}
                 </span>
-                <span className="text-slate-400 dark:text-zinc-500">•</span>
-                <span className="text-slate-600 dark:text-zinc-400">
-                  {parsedData.rows.length} records detected ({parsedData.headers.length} columns)
+                <span className="text-slate-300 dark:text-zinc-700">•</span>
+                <span>
+                  {parsedData.rows.length} rows ({parsedData.headers.length} columns)
                 </span>
               </div>
-              <div className="flex items-center gap-1.5 text-indigo-700 dark:text-indigo-300 font-medium">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>
-                  Auto-mapped {autoMappedCount} of {activeFields.length} fields
-                </span>
+              <div className="text-[11px] font-mono text-slate-500 dark:text-zinc-400">
+                Mapped: {autoMappedCount}/{activeFields.length} fields
               </div>
             </div>
 
-            {/* Missing Required Warning (if any) */}
+            {/* Missing Required Warning (Subtle & Clean) */}
             {missingRequired.length > 0 && (
-              <div className="p-3 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/40 text-xs text-amber-800 dark:text-amber-300 flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-semibold block">Missing Required Field Mappings:</span>
-                  <span>
-                    Please map the following required column(s):{' '}
+              <div className="flex items-start gap-2 px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900/40 border border-slate-200/80 dark:border-zinc-800 text-xs text-slate-600 dark:text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0 mt-1.5" />
+                <div className="space-y-0.5">
+                  <span className="font-medium text-slate-800 dark:text-zinc-200">
+                    Unmapped required fields:
+                  </span>{' '}
+                  <span className="text-slate-500 dark:text-zinc-400">
                     {missingRequired.map((f) => f.label).join(', ')}
                   </span>
                 </div>
@@ -351,13 +343,13 @@ export default function AssetImportModalController({
             )}
 
             {/* Mapping Grid / Table */}
-            <div className="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
-              <div className="grid grid-cols-12 bg-slate-100/80 dark:bg-zinc-900 px-4 py-2.5 border-b border-slate-200 dark:border-zinc-800 text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-semibold">
+            <div className="border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xs">
+              <div className="grid grid-cols-12 bg-slate-100/80 dark:bg-zinc-900 px-4 py-2.5 border-b border-slate-200 dark:border-zinc-800 text-[11px] font-mono uppercase tracking-wider text-slate-500 dark:text-zinc-400 font-semibold rounded-t-xl">
                 <div className="col-span-6">AssetSphere Schema Field</div>
                 <div className="col-span-6">Uploaded CSV Column</div>
               </div>
 
-              <div className="divide-y divide-slate-100 dark:divide-zinc-800/80 max-h-80 overflow-y-auto">
+              <div className="divide-y divide-slate-100 dark:divide-zinc-800/80">
                 {activeFields.map((field) => {
                   const isMapped = Boolean(fieldMappings[field.key]);
                   return (
@@ -410,32 +402,42 @@ export default function AssetImportModalController({
               </div>
             </div>
 
-            {/* Options / Configuration: Override Existing Records Toggle */}
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-4">
-              <div className="space-y-0.5">
-                <div className="text-xs font-semibold text-slate-900 dark:text-zinc-100 flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-indigo-500" />
-                  <span>Override Existing Asset Records</span>
+            {/* Duplicate Asset Strategy: Clean non-card segmented selector */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-1 border-t border-slate-100 dark:border-zinc-800/80">
+              <div>
+                <div className="text-xs font-semibold text-slate-900 dark:text-zinc-100">
+                  Duplicate Asset Handling
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 max-w-xl">
-                  When enabled, if an imported serial number or asset tag already exists, its record will be updated with new CSV values. When disabled, duplicates are safely preserved and skipped.
-                </p>
+                <div className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Strategy when a row matches an existing Serial Number or Asset Tag
+                </div>
               </div>
 
-              {/* Styled Switch Toggle */}
-              <button
-                type="button"
-                onClick={() => setOverrideExisting(!overrideExisting)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                  overrideExisting ? 'bg-indigo-600' : 'bg-slate-300 dark:bg-zinc-700'
-                }`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                    overrideExisting ? 'translate-x-5' : 'translate-x-0'
+              {/* Segmented Pill Switcher */}
+              <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8.5 w-full sm:w-64 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setOverrideExisting(false)}
+                  className={`flex-1 py-1 h-6.5 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                    !overrideExisting
+                      ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                      : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                   }`}
-                />
-              </button>
+                >
+                  Skip Duplicates
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOverrideExisting(true)}
+                  className={`flex-1 py-1 h-6.5 rounded-md text-xs font-medium transition-all cursor-pointer text-center ${
+                    overrideExisting
+                      ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
+                      : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Overwrite Existing
+                </button>
+              </div>
             </div>
 
             {/* Navigation Buttons */}
@@ -570,8 +572,8 @@ export default function AssetImportModalController({
             </div>
 
             {/* Rows Table */}
-            <div className="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-              <div className="max-h-64 overflow-y-auto divide-y divide-slate-100 dark:divide-zinc-800/80 text-xs">
+            <div className="border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-xs">
+              <div className="divide-y divide-slate-100 dark:divide-zinc-800/80 text-xs">
                 {importSummary.items
                   .filter((item) => {
                     if (resultFilter === 'all') return true;

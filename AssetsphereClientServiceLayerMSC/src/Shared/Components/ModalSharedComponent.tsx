@@ -11,6 +11,7 @@ export interface ModalSharedComponentProps {
   footer?: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
   minHeight?: string;
+  scrollMode?: 'backdrop' | 'body';
 }
 
 export default function ModalSharedComponent({
@@ -22,6 +23,7 @@ export default function ModalSharedComponent({
   footer,
   maxWidth = '2xl',
   minHeight,
+  scrollMode = 'backdrop',
 }: ModalSharedComponentProps): React.JSX.Element {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -50,7 +52,7 @@ export default function ModalSharedComponent({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 overflow-y-auto">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -72,7 +74,7 @@ export default function ModalSharedComponent({
               ease: [0.16, 1, 0.3, 1],
               layout: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
             }}
-            className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl overflow-hidden z-10 my-auto flex flex-col`}
+            className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl z-10 my-auto sm:my-8 flex flex-col shrink-0`}
           >
             {/* Header */}
             {(title || subtitle) && (
@@ -99,7 +101,7 @@ export default function ModalSharedComponent({
             )}
 
             {/* Body */}
-            <div className={`p-6 flex-1 max-h-[85vh] overflow-y-auto ${minHeight ? minHeight : ''}`}>
+            <div className={`p-6 flex-1 ${scrollMode === 'body' ? 'max-h-[85vh] overflow-y-auto' : ''} ${minHeight ? minHeight : ''}`}>
               {children}
             </div>
 

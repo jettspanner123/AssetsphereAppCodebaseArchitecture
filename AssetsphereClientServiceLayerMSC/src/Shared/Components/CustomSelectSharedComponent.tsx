@@ -15,6 +15,10 @@ export interface CustomSelectSharedComponentProps {
   options: SelectOption[];
   onChange: (value: string) => void;
   placeholder?: string;
+  className?: string;
+  triggerClassName?: string;
+  dropdownClassName?: string;
+  size?: 'sm' | 'md';
 }
 
 export default function CustomSelectSharedComponent({
@@ -23,6 +27,10 @@ export default function CustomSelectSharedComponent({
   options,
   onChange,
   placeholder = 'Select option...',
+  className = 'w-full',
+  triggerClassName,
+  dropdownClassName,
+  size = 'md',
 }: CustomSelectSharedComponentProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -50,8 +58,10 @@ export default function CustomSelectSharedComponent({
     };
   }, [isOpen]);
 
+  const heightClass = size === 'sm' ? 'h-9 px-2.5' : 'h-10 px-3';
+
   return (
-    <div className="relative w-full" ref={dropdownRef}>
+    <div className={`relative ${className}`} ref={dropdownRef}>
       {label && (
         <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 mb-1 block">
           {label}
@@ -62,7 +72,7 @@ export default function CustomSelectSharedComponent({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full h-10 px-3 rounded-lg bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong hover:border-slate-300 dark:hover:border-zinc-700 transition-colors focus:outline-none text-xs flex items-center justify-between cursor-pointer select-none"
+        className={`${className.includes('w-') ? 'w-full' : ''} ${heightClass} rounded-lg bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors focus:outline-none text-xs flex items-center justify-between gap-2 cursor-pointer select-none ${triggerClassName || ''}`}
       >
         <div className="flex items-center gap-2 truncate font-medium">
           {selectedOption?.icon}
@@ -71,7 +81,7 @@ export default function CustomSelectSharedComponent({
           </span>
         </div>
         <ChevronDown
-          className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${
+          className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 shrink-0 ${
             isOpen ? 'rotate-180 text-slate-700 dark:text-zinc-200' : ''
           }`}
         />
@@ -85,7 +95,7 @@ export default function CustomSelectSharedComponent({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: 4 }}
             transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl p-1 text-xs space-y-0.5 max-h-56 overflow-y-auto"
+            className={`absolute left-0 right-0 min-w-[160px] top-full mt-1.5 z-50 bg-white dark:bg-[#0c0c0e] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl p-1 text-xs space-y-0.5 max-h-56 overflow-y-auto ${dropdownClassName || ''}`}
           >
             {options.map((option) => {
               const isSelected = option.value === value;

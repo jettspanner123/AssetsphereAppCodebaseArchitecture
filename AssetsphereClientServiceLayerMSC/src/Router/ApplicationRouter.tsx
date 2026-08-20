@@ -14,11 +14,20 @@ import {
 import ApplicationRouteCON from '../Constants/ApplicationRouteCON';
 import { DashboardSearchSchema, DashboardSearchParams } from './RouterSearchParamsModel';
 import MockDataSeederService from '../services/MockDataSeederService';
-import { Asset, Employee, SoftwareLicense, PurchaseOrder, ServiceTicket, Vendor } from '../types';
+import {
+  Asset,
+  Employee,
+  SoftwareLicense,
+  PurchaseOrder,
+  ServiceTicket,
+  Vendor,
+  VerificationCampaign,
+  AIRecommendation,
+  TabType,
+} from '../types';
 import ApplicationThemeUtility from '../Utilities/ApplicationThemeUtility';
 import UserPreferencesUtility from '../Utilities/UserPreferencesUtility';
 import ExportUtility from '../Utilities/ExportUtility';
-import { TabType } from '../types';
 
 // Route Screen Components
 import LoginScreenRoute from '../Routes/LoginScreenRoute';
@@ -56,6 +65,49 @@ const rootRoute = createRootRoute({
 
 function RootLayout(): React.JSX.Element {
   return <Outlet />;
+}
+
+// ==========================================
+// 1.1 Dashboard Shared Context
+// ==========================================
+export interface DashboardContextType {
+  showMockData: boolean;
+  assets: Asset[];
+  employees: Employee[];
+  licenses: SoftwareLicense[];
+  orders: PurchaseOrder[];
+  tickets: ServiceTicket[];
+  vendors: Vendor[];
+  recommendations: AIRecommendation[];
+  campaign: VerificationCampaign;
+  onImportAssets: (importedAssets: Asset[]) => void;
+  onSaveAsset: (asset: Partial<Asset>) => void;
+  onDeleteAsset: (asset: Asset) => void;
+}
+
+export const DashboardContext = React.createContext<DashboardContextType | null>(null);
+
+export function useDashboard(): DashboardContextType {
+  const ctx = React.useContext(DashboardContext);
+  if (!ctx) {
+    const showMockData = UserPreferencesUtility.current.getShowMockData(true);
+    const mockAssets = MockDataSeederService.current.getAssets();
+    return {
+      showMockData,
+      assets: showMockData ? mockAssets : [],
+      employees: showMockData ? MockDataSeederService.current.getEmployees() : [],
+      licenses: showMockData ? MockDataSeederService.current.getSoftwareLicenses() : [],
+      orders: showMockData ? MockDataSeederService.current.getPurchaseOrders() : [],
+      tickets: showMockData ? MockDataSeederService.current.getServiceTickets() : [],
+      vendors: showMockData ? MockDataSeederService.current.getVendors() : [],
+      recommendations: showMockData ? MockDataSeederService.current.getAIRecommendations() : [],
+      campaign: MockDataSeederService.current.getVerificationCampaigns()[0],
+      onImportAssets: () => {},
+      onSaveAsset: () => {},
+      onDeleteAsset: () => {},
+    };
+  }
+  return ctx;
 }
 
 // ==========================================
@@ -316,6 +368,15 @@ export function DashboardShell(): React.JSX.Element {
     handleCloseAddAsset();
   };
 
+  const handleImportAssets = (importedAssets: Asset[]) => {
+    setMockAssetsList(importedAssets);
+    MockDataSeederService.current.setAssets(importedAssets);
+  };
+
+  const handleDeleteAsset = (asset: Asset) => {
+    setMockAssetsList((prev) => prev.filter((a) => a.id !== asset.id));
+  };
+
   // Selected entities for modals derived from search params
   const selectedAssetForDetail = search.selectedAssetId
     ? assets.find((a) => a.id === search.selectedAssetId || a.assetNumber === search.selectedAssetId) || null
@@ -329,87 +390,104 @@ export function DashboardShell(): React.JSX.Element {
   const isQRScannerOpen = Boolean(search.scanner);
 
   return (
-    <NavigationController
-      activeTab={activeTab}
-      onSelectTab={handleSelectTab}
-      globalSearch={search.search || ''}
-      onSearchChange={handleSearchChange}
-      onOpenNewAsset={handleOpenAddAsset}
-      onOpenScanner={handleOpenScanner}
-      currentTheme={currentTheme}
-      onToggleTheme={handleToggleTheme}
-      deploymentMode={deploymentMode}
-      onToggleDeploymentMode={handleToggleDeploymentMode}
-      unreadCount={unreadAlertCount}
-      isNotificationsOpen={isNotificationsOpen}
-      onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
-      nonCompliantCount={nonCompliantCount}
-      openTicketCount={openTicketCount}
-      unreadAlertCount={unreadAlertCount}
-      showMockData={showMockData}
-      onToggleShowMockData={handleToggleShowMockData}
-      onSignOut={() => setIsSignOutModalOpen(true)}
+    <DashboardContext.Provider
+      value={{
+        showMockData,
+        assets,
+        employees,
+        licenses,
+        orders,
+        tickets,
+        vendors,
+        recommendations,
+        campaign,
+        onImportAssets: handleImportAssets,
+        onSaveAsset: handleSaveAsset,
+        onDeleteAsset: handleDeleteAsset,
+      }}
     >
-      <Outlet />
+      <NavigationController
+        activeTab={activeTab}
+        onSelectTab={handleSelectTab}
+        globalSearch={search.search || ''}
+        onSearchChange={handleSearchChange}
+        onOpenNewAsset={handleOpenAddAsset}
+        onOpenScanner={handleOpenScanner}
+        currentTheme={currentTheme}
+        onToggleTheme={handleToggleTheme}
+        deploymentMode={deploymentMode}
+        onToggleDeploymentMode={handleToggleDeploymentMode}
+        unreadCount={unreadAlertCount}
+        isNotificationsOpen={isNotificationsOpen}
+        onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
+        nonCompliantCount={nonCompliantCount}
+        openTicketCount={openTicketCount}
+        unreadAlertCount={unreadAlertCount}
+        showMockData={showMockData}
+        onToggleShowMockData={handleToggleShowMockData}
+        onSignOut={() => setIsSignOutModalOpen(true)}
+      >
+        <Outlet />
 
-      {/* Global Asset Detail Modal (Synchronized with URL search params) */}
-      <AssetDetailModalController
-        asset={selectedAssetForDetail}
-        onClose={handleCloseAssetDetail}
-        onOpenQRBadgeModal={(ast) => handleOpenQRBadge(ast)}
-        onEditAsset={(ast) => {
-          handleCloseAssetDetail();
-          handleOpenAddAsset();
-        }}
-      />
+        {/* Global Asset Detail Modal (Synchronized with URL search params) */}
+        <AssetDetailModalController
+          asset={selectedAssetForDetail}
+          onClose={handleCloseAssetDetail}
+          onOpenQRBadgeModal={(ast) => handleOpenQRBadge(ast)}
+          onEditAsset={(ast) => {
+            handleCloseAssetDetail();
+            handleOpenAddAsset();
+          }}
+        />
 
-      {/* Global Asset Form Modal */}
-      <AssetFormModalController
-        isOpen={isAssetFormOpen}
-        onClose={handleCloseAddAsset}
-        onSave={handleSaveAsset}
-        initialAsset={null}
-      />
+        {/* Global Asset Form Modal */}
+        <AssetFormModalController
+          isOpen={isAssetFormOpen}
+          onClose={handleCloseAddAsset}
+          onSave={handleSaveAsset}
+          initialAsset={null}
+        />
 
-      {/* Global QR Badge Modal */}
-      <QRBadgeModalController
-        asset={selectedAssetForQR}
-        onClose={handleCloseQRBadge}
-      />
+        {/* Global QR Badge Modal */}
+        <QRBadgeModalController
+          asset={selectedAssetForQR}
+          onClose={handleCloseQRBadge}
+        />
 
-      {/* Global QR Scanner Modal */}
-      <QRScannerModalController
-        isOpen={isQRScannerOpen}
-        onClose={handleCloseScanner}
-        assets={assets}
-        onVerifyAsset={(assetId) => {
-          handleCloseScanner();
-          navigate({
-            to: '.',
-            search: (prev: any) => ({
-              ...prev,
-              selectedAssetId: assetId,
-            }),
-          });
-        }}
-      />
+        {/* Global QR Scanner Modal */}
+        <QRScannerModalController
+          isOpen={isQRScannerOpen}
+          onClose={handleCloseScanner}
+          assets={assets}
+          onVerifyAsset={(assetId) => {
+            handleCloseScanner();
+            navigate({
+              to: '.',
+              search: (prev: any) => ({
+                ...prev,
+                selectedAssetId: assetId,
+              }),
+            });
+          }}
+        />
 
-      {/* Sign Out Confirmation Modal */}
-      <ConfirmationModalSharedComponent
-        isOpen={isSignOutModalOpen}
-        onClose={() => setIsSignOutModalOpen(false)}
-        onConfirm={() => {
-          setIsSignOutModalOpen(false);
-          handleSignOut();
-        }}
-        title="Sign Out of AssetSphere Enterprise"
-        subtitle="Active Session Management & Security Lock"
-        description="Are you sure you want to terminate your active session? You will need to re-authenticate with your corporate credentials to access asset registries, telemetry, and service desks."
-        confirmText="Sign Out"
-        cancelText="Stay Logged In"
-        variant="danger"
-      />
-    </NavigationController>
+        {/* Sign Out Confirmation Modal */}
+        <ConfirmationModalSharedComponent
+          isOpen={isSignOutModalOpen}
+          onClose={() => setIsSignOutModalOpen(false)}
+          onConfirm={() => {
+            setIsSignOutModalOpen(false);
+            handleSignOut();
+          }}
+          title="Sign Out of AssetSphere Enterprise"
+          subtitle="Active Session Management & Security Lock"
+          description="Are you sure you want to terminate your active session? You will need to re-authenticate with your corporate credentials to access asset registries, telemetry, and service desks."
+          confirmText="Sign Out"
+          cancelText="Stay Logged In"
+          variant="danger"
+        />
+      </NavigationController>
+    </DashboardContext.Provider>
   );
 }
 
@@ -487,10 +565,7 @@ const dashboardOverviewRoute = createRoute({
   path: '/',
   component: function DashboardOverviewComponent() {
     const navigate = useNavigate();
-    const assets = MockDataSeederService.current.getAssets();
-    const tickets = MockDataSeederService.current.getServiceTickets();
-    const recommendations = MockDataSeederService.current.getAIRecommendations();
-    const campaign = MockDataSeederService.current.getVerificationCampaigns()[0];
+    const { assets, tickets, recommendations, campaign } = useDashboard();
 
     return (
       <DashboardOverviewScreenRoute
@@ -528,17 +603,13 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const [assets, setAssets] = useState<Asset[]>(() => MockDataSeederService.current.getAssets());
-
-    const handleImportAssets = (importedAssets: Asset[]) => {
-      setAssets(importedAssets);
-      MockDataSeederService.current.setAssets(importedAssets);
-    };
+    const { assets, onImportAssets, onDeleteAsset } = useDashboard();
 
     return (
       <AssetInventoryScreenRoute
         assets={assets}
-        onImportAssets={handleImportAssets}
+        onImportAssets={onImportAssets}
+        onDeleteAsset={onDeleteAsset}
         onSelectAsset={(asset) =>
           navigate({
             to: '.',
@@ -600,8 +671,7 @@ const employeesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'employees',
   component: function EmployeesComponent() {
-    const employees = MockDataSeederService.current.getEmployees();
-    const assets = MockDataSeederService.current.getAssets();
+    const { employees, assets } = useDashboard();
     return <EmployeesScreenRoute employees={employees} assets={assets} />;
   },
 });
@@ -611,7 +681,7 @@ const softwareLicensesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'software-licenses',
   component: function SoftwareLicensesComponent() {
-    const licenses = MockDataSeederService.current.getSoftwareLicenses();
+    const { licenses } = useDashboard();
     return <SoftwareLicensesScreenRoute licenses={licenses} />;
   },
 });
@@ -630,7 +700,7 @@ const procurementRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'procurement',
   component: function ProcurementComponent() {
-    const orders = MockDataSeederService.current.getPurchaseOrders();
+    const { orders } = useDashboard();
     return <ProcurementScreenRoute orders={orders} />;
   },
 });
@@ -640,7 +710,7 @@ const serviceDeskRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'service-desk',
   component: function ServiceDeskComponent() {
-    const tickets = MockDataSeederService.current.getServiceTickets();
+    const { tickets } = useDashboard();
     return <ServiceDeskScreenRoute tickets={tickets} />;
   },
 });
@@ -650,7 +720,7 @@ const vendorsRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'vendors',
   component: function VendorsComponent() {
-    const vendors = MockDataSeederService.current.getVendors();
+    const { vendors } = useDashboard();
     return <VendorsScreenRoute vendors={vendors} />;
   },
 });
@@ -660,7 +730,7 @@ const complianceRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'compliance',
   component: function ComplianceComponent() {
-    const assets = MockDataSeederService.current.getAssets();
+    const { assets } = useDashboard();
     return <ComplianceScreenRoute assets={assets} />;
   },
 });
@@ -671,7 +741,7 @@ const verificationCampaignRoute = createRoute({
   path: 'verification-campaign',
   component: function CampaignComponent() {
     const navigate = useNavigate();
-    const campaign = MockDataSeederService.current.getVerificationCampaigns()[0];
+    const { campaign } = useDashboard();
     return (
       <VerificationCampaignScreenRoute
         campaign={campaign}
@@ -691,7 +761,7 @@ const aiCopilotRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'ai-copilot',
   component: function AIAssistantComponent() {
-    const assets = MockDataSeederService.current.getAssets();
+    const { assets } = useDashboard();
     return <AIAssistantScreenRoute assets={assets} />;
   },
 });
@@ -701,7 +771,7 @@ const analyticsRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'analytics',
   component: function AnalyticsComponent() {
-    const assets = MockDataSeederService.current.getAssets();
+    const { assets } = useDashboard();
     return <AnalyticsScreenRoute assets={assets} />;
   },
 });

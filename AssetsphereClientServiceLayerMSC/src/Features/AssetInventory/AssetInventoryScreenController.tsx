@@ -22,16 +22,19 @@ import {
   Trash2,
   RotateCw,
   Settings,
+  Laptop,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
+import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
 import ContextMenuSharedComponent, { ContextMenuItem } from '../../Shared/Components/ContextMenuSharedComponent';
 import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
 import AssetInventoryCON from './Constants/AssetInventoryCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import AssetImportModalController from './Components/AssetImportModalController';
 import { ImportExecutionSummary } from './Services/AssetImportProcessorService';
+import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
 
 export interface AssetInventoryScreenControllerProps {
   assets: Asset[];
@@ -69,8 +72,7 @@ export default function AssetInventoryScreenController({
   onSingleLineChange,
 }: AssetInventoryScreenControllerProps): React.JSX.Element {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [internalAssets, setInternalAssets] = useState<Asset[] | null>(null);
-  const activeAssets = internalAssets || assets;
+  const activeAssets = assets;
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
@@ -82,7 +84,6 @@ export default function AssetInventoryScreenController({
   );
 
   const handleImportComplete = (processedAssets: Asset[], summary: ImportExecutionSummary) => {
-    setInternalAssets(processedAssets);
     onImportAssets?.(processedAssets);
   };
 
@@ -299,6 +300,17 @@ export default function AssetInventoryScreenController({
     0
   );
 
+  const lifecycleOptions: SelectOption[] = AssetInventoryCON.LIFECYCLE_OPTIONS.map((opt) => ({
+    value: opt,
+    label: opt === 'ALL' ? 'All Lifecycles' : opt,
+  }));
+
+  const securityOptions: SelectOption[] = [
+    { value: 'ALL', label: 'All Devices' },
+    { value: 'COMPLIANT', label: 'Compliant Only' },
+    { value: 'NON_COMPLIANT', label: 'Non-Compliant Only' },
+  ];
+
   return (
     <div
       className="space-y-6 min-h-[calc(100vh-140px)]"
@@ -412,30 +424,24 @@ export default function AssetInventoryScreenController({
           <div className="flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-2">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Lifecycle:</span>
-              <select
+              <CustomSelectSharedComponent
                 value={selectedLifecycle}
-                onChange={(e) => setSelectedLifecycle(e.target.value)}
-                className="h-9 px-3 rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none"
-              >
-                {AssetInventoryCON.LIFECYCLE_OPTIONS.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
+                options={lifecycleOptions}
+                onChange={(val) => setSelectedLifecycle(val)}
+                size="sm"
+                className="w-36 sm:w-40"
+              />
             </div>
 
             <div className="flex items-center gap-2">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Security:</span>
-              <select
+              <CustomSelectSharedComponent
                 value={complianceFilter}
-                onChange={(e) => setComplianceFilter(e.target.value)}
-                className="h-9 px-3 rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none"
-              >
-                <option value="ALL">All Devices</option>
-                <option value="COMPLIANT">Compliant Only</option>
-                <option value="NON_COMPLIANT">Non-Compliant Only</option>
-              </select>
+                options={securityOptions}
+                onChange={(val) => setComplianceFilter(val)}
+                size="sm"
+                className="w-40 sm:w-44"
+              />
             </div>
           </div>
 
@@ -545,14 +551,19 @@ export default function AssetInventoryScreenController({
 
       {/* Fallback Empty State */}
       {filteredAssets.length === 0 && (
-        <CardSharedComponent className="p-12 text-center space-y-2">
-          <p className="text-base font-semibold text-slate-900 dark:text-white font-serif-headline">
-            No Hardware Assets Found
-          </p>
-          <p className="text-xs text-slate-500 dark:text-zinc-400">
-            No items matched your current filter criteria or search query.
-          </p>
-        </CardSharedComponent>
+        <EmptyStateSharedComponent
+          icon={<Laptop className="w-6 h-6 text-slate-400 dark:text-zinc-500" />}
+          title={
+            searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+              ? 'No Matching Hardware Assets'
+              : 'No Hardware Assets in Registry'
+          }
+          description={
+            searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+              ? 'No assets matched your search query or active filter criteria. Try clearing search filters or changing parameters.'
+              : 'Your enterprise hardware asset registry is currently empty. Register your first device or import assets via CSV.'
+          }
+        />
       )}
 
       {/* Main Content Area View Modes */}

@@ -216,12 +216,17 @@ export default function AnimatedThemeToggleSharedComponent({
     root.style.setProperty('--magicui-theme-vt-clip-from', clipPath[0]);
 
     const cleanup = () => {
+      clearTimeout(safetyTimer);
       isTransitioningRef.current = false;
       delete root.dataset.magicuiThemeVt;
       root.style.removeProperty('--magicui-theme-toggle-vt-duration');
       root.style.removeProperty('--magicui-theme-vt-clip-from');
       cancelAnim();
     };
+
+    // Failsafe: if the View Transition never finishes (e.g. navigation mid-animation),
+    // force cleanup so the page doesn't stay clipped to circle(0%).
+    const safetyTimer = setTimeout(cleanup, duration + 200);
 
     isTransitioningRef.current = true;
     const transition = (document as any).startViewTransition(() => {

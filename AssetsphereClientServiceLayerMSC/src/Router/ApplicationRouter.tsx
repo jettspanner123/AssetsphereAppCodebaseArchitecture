@@ -48,7 +48,6 @@ import { LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel'
 // 1. Root Route Definition
 // ==========================================
 const rootRoute = createRootRoute({
-  validateSearch: (rawSearch: Record<string, unknown>) => DashboardSearchSchema.parse(rawSearch),
   component: RootLayout,
 });
 

@@ -1,6 +1,71 @@
-@AssetsphereOrchestratorServiceLayerMSC_HostAddress = http://localhost:5125
+@Host = http://localhost:5000
 
-GET {{AssetsphereOrchestratorServiceLayerMSC_HostAddress}}/weatherforecast/
-Accept: application/json
+### 1. Authentication - Login
+# @name login
+POST {{Host}}/Api/V1/Authentication/Login
+Content-Type: application/json
 
-###
+{
+  "email": "admin@assetsphere.internal",
+  "password": "AssetsphereAdmin2026!"
+}
+
+### Store token from login
+@authToken = {{login.response.body.data.accessToken}}
+
+### 2. Authentication - Get Current Profile (Me)
+GET {{Host}}/Api/V1/Authentication/Me
+Authorization: Bearer {{authToken}}
+
+### 3. Asset Inventory - Get All Assets
+GET {{Host}}/Api/V1/AssetInventory
+Authorization: Bearer {{authToken}}
+
+### 4. Asset Inventory - Get Asset By Category
+GET {{Host}}/Api/V1/AssetInventory?category=Computing
+Authorization: Bearer {{authToken}}
+
+### 5. Asset Inventory - Quick Search
+GET {{Host}}/Api/V1/AssetInventory?search=MacBook
+Authorization: Bearer {{authToken}}
+
+### 6. Dashboard - Summary Metrics
+GET {{Host}}/Api/V1/Dashboard/Summary
+Authorization: Bearer {{authToken}}
+
+### 7. Dashboard - Analytics Breakdown
+GET {{Host}}/Api/V1/Dashboard/Analytics
+Authorization: Bearer {{authToken}}
+
+### 8. Employees - Get All Employees
+GET {{Host}}/Api/V1/Employees
+Authorization: Bearer {{authToken}}
+
+### 9. Software Licenses - Get All Licenses
+GET {{Host}}/Api/V1/SoftwareLicenses
+Authorization: Bearer {{authToken}}
+
+### 10. Cloud Infrastructure - Get Resources
+GET {{Host}}/Api/V1/CloudInfrastructure
+Authorization: Bearer {{authToken}}
+
+### 11. Procurement - Get Purchase Orders
+GET {{Host}}/Api/V1/Procurement
+Authorization: Bearer {{authToken}}
+
+### 12. Service Desk - Get Open Tickets
+GET {{Host}}/Api/V1/ServiceDesk
+Authorization: Bearer {{authToken}}
+
+### 13. AI Assistant - Recommendations
+GET {{Host}}/Api/V1/AIAssistant/Recommendations
+Authorization: Bearer {{authToken}}
+
+### 14. AI Assistant - Query Copilot
+POST {{Host}}/Api/V1/AIAssistant/Query
+Authorization: Bearer {{authToken}}
+Content-Type: application/json
+
+{
+  "query": "How many laptop and computing assets do we have?"
+}

@@ -2,146 +2,178 @@
 
 ## General
 
-- (e.g. Use as much code splitting, into components or controller as you can, the code space must be need and clean).
-- (e.g. Always use singleon pattern. (when possible))
+- (e.g. Use as much code splitting, into components or controller as you can, the code space must be neat and clean).
+- (e.g. Always use singleton pattern when possible).
 
   ```csharp
-  // Defination
-    public sealed class Singleton {
-        private static readonly Singleton _current = new Singleton();
-        public static Singleton Current => _current;
+  // Definition
+  public sealed class Singleton 
+  {
+      private static readonly Singleton _current = new Singleton();
+      public static Singleton Current => _current;
 
-        private Singleton() {
+      private Singleton() 
+      {
+      }
 
-        }
-        public void SayHello() {
-            // SOmething here
-        }
-    }
-  // Useage
-  Sinleton.Instance.SayHello();
+      public void SayHello() 
+      {
+          // Something here
+      }
+  }
+
+  // Usage
+  Singleton.Current.SayHello();
   ```
 
 - Everything should be fully typed:
   ```csharp
-    string name = "Jett";
-    int age = 25;
-    double height = 6.1;
-    float weight = 90.5f;
-    bool isActive = true;
-    char grade = 'A';
-    decimal price = 99.99m;
-    long population = 1_000_000L;
+  string name = "Jett";
+  int age = 25;
+  double height = 6.1;
+  float weight = 90.5f;
+  bool isActive = true;
+  char grade = 'A';
+  decimal price = 99.99m;
+  long population = 1_000_000L;
   ```
+
+---
 
 ## File Structure
 
-- (e.g. All enums, structs, interfaces, and classes used for data transfer, state options, or data representations must be stored in the `app/Features/${folderName}/Models/` folder inside each feature, and the file name should be in PascalCase.)
-- (e.g. Every features folder should have some files, if the name of the folder is `Features/Authentication`, then this is the files / folder it should have.)
-  Controller: `Features/Authentication/AuthenticationController.cs`
-  Service Folder: `Features/Authentication/Services/AuthenticationService.cs`
-  Constants Folder: `Features/Authentioation/Constants`
-  Models Folder: `Features/Authentication/Models`
-  Utils Folder: `Features/Authentication/Utilities`
-- (e.g. If a feature specific files/class/utility/tool is created, then it should be in a folder inside the feature only, but if a tool/class/type/interface/function/util is create that will be used in more then one feature then it should be place in one of these global folders )
-  Global Service Folder: `Service/`
-        - All the files names should be Pascal Case and should end with `*Service.cs`.
-  Global Constants Folder: `Constants/`
-        - All the files names should be Pascal Case and should end with `*CON.cs`.
-  Global Models Folder: `Models/`
-    - Global Interface Folder: `Models/Interfaces/`
-        - All the files names should be Pascal Case and should end with `*Interface.cs`.
-    - Global Types Folder: `Models/Types/`
-        - All the files names should be Pascal Case and should end with `*Type.cs`.
-    - Global DTOs Folder: `Models/DTOs/`
-        - All the files names should be Pascal Case and should end with `*DTO.cs`.
-    - Global Classes Folder: `Models/Classes/`
-        - All the files names should be Pascal Case and should end with `*Class.cs`.
-    - Global Records Folder: `Models/Records/`
-        - All the files names should be Pascal Case and should end with `*Record.cs`.
-  Global Utils Folder: `Utilities/`
-        - All the files names should be Pascal Case and should end with `*Utility.cs`.
-  Global Utils Folder: `Middlewares/`
-        - All the files names should be Pascal Case and should end with `*Middleware.cs`.
-  Global Helper Folder: `Helpers/`
-        - All the files names should be Pascal Case and should end with `*Helper.cs`.
-        - All the classes in these files should follow singleton pattern.
-  Global Helper Folder: `Exceptions/`
-        - All the files names should be Pascal Case and should end with `*CException.cs`.
-  Global Helper Folder: `Validators/`
-        - All the files names should be Pascal Case and should end with `*CValidator.cs` if it's a custom validator and `*SValidator.cs` if it's system validator.
-        - Each validator class should be singleton, and should have only one function `validate()`, it should always return true | false ( nothing else ).
-        - Each validation class should do only one type of validation.
-        ```csharp
+- All enums, structs, interfaces, and classes used for data transfer, state options, or data representations must be stored in the `Features/${folderName}/Models/` folder inside each feature, and the file name should be in PascalCase.
+- Every feature folder must follow this standardized layout (e.g., if the feature is `Authentication`):
+  - **Controller**: `Features/Authentication/AuthenticationController.cs`
+  - **Service Folder**: `Features/Authentication/Services/AuthenticationService.cs`
+  - **Assertion Folder**: `Features/Authentication/Assertion/AuthenticationAssertion.cs`
+  - **Constants Folder**: `Features/Authentication/Constants/`
+  - **Models Folder**: `Features/Authentication/Models/`
+  - **Utils Folder**: `Features/Authentication/Utilities/`
 
-            // Defination
-           public sealed class AgeSValidator {
-               private static readonly Singleton _current = new Singleton();
-               public static Singleton Current => _current;
+- If a file/class/utility/tool is used across more than one feature, place it in the appropriate global folder:
+  - **Global Service Folder**: `Service/`
+    - All file names must be PascalCase and end with `*Service.cs`.
+  - **Global Constants Folder**: `Constants/`
+    - All file names must be PascalCase and end with `*CON.cs`.
+  - **Global Models Folder**: `Models/`
+    - **Global Interface Folder**: `Models/Interfaces/*Interface.cs`
+    - **Global Types Folder**: `Models/Types/*Type.cs`
+    - **Global DTOs Folder**: `Models/DTOs/*DTO.cs`
+    - **Global Classes Folder**: `Models/Classes/*Class.cs`
+    - **Global Records Folder**: `Models/Records/*Record.cs`
+  - **Global Utils Folder**: `Utilities/*Utility.cs`
+  - **Global Middlewares Folder**: `Middlewares/*Middleware.cs`
+  - **Global Helper Folder**: `Helpers/*Helper.cs` (All helper classes must follow the singleton pattern).
+  - **Global Exceptions Folder**: `Exceptions/*CException.cs` (Custom exceptions).
+  - **Global Validators Folder**: `Validators/*CValidator.cs` (custom) or `*SValidator.cs` (system).
+    - Each validator class must be a singleton with a single `bool Validate(...)` method returning `true` or `false`.
+    - Each validation class must perform only one type of validation.
 
-               private Singleton() {
+---
 
-               }
-               public bool Validate() {
-                    // SOmething here
-               } 
-           } 
+## Assertion Pattern & Controller Request Validation
 
+- Controllers must use `try-catch` blocks on every endpoint, returning structured `ApiResponseClass<T>` envelopes for all success and error paths.
+- **Do not write direct `if (request == null)` boilerplate in controllers.** Instead, use the Feature Assertion Singleton class.
+- **File Name**: `${FeatureName}Assertion.cs` (e.g. `AuthenticationAssertion.cs`, `AssetInventoryAssertion.cs`)
+- **File Location**: `Features/${FeatureName}/Assertion/${FeatureName}Assertion.cs`
+- **Pattern**: Singleton class with `Current` instance.
 
-           // Usage
-
-           if(AgeSValidator.Current.Validate(18)) // Do Something
-        ```
-
- ```
-
-## Strict Rules
-
-- Nothing should be staticaly typed anywhere in the files.
-- If a route endpoint is defined, the it should be like this `/Authentication/Login` as a simple string, it should be stored in a class.
+### Assertion Definition:
 ```csharp
+namespace AssetsphereOrchestratorServiceLayerMSC.Features.Authentication.Assertion;
 
-    // Wrong 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class UserController : ControllerBase
+public sealed class AuthenticationAssertion
+{
+    private static readonly AuthenticationAssertion _current = new AuthenticationAssertion();
+    public static AuthenticationAssertion Current => _current;
+
+    private AuthenticationAssertion()
     {
-        [HttpPost("login")]
-        public IActionResult Login([FromBody] LoginRequest request)
+    }
+
+    public void CheckForNullRequest<T>(T? request, string errorMessage = "Request body cannot be empty.")
+    {
+        if (request is null)
         {
+            throw new ValidationCException(errorMessage);
         }
     }
 
-    // Right
-    [ApiController]
-    [Route(ApplicationRouteFactor.Current.Authentication.ControllerURL)]
-    public class UserController : ControllerBase
+    public void AssertLoginRequest(LoginRequestDTO? request)
     {
-        [HttpPost(ApplicationRouteFactor.Current.Authentication.Login)]
-        public IActionResult Login([FromBody] LoginRequest request)
+        CheckForNullRequest(request, "Login request body cannot be empty.");
+
+        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
         {
+            throw new ValidationCException(new List<string>
+            {
+                "Both email and password must be provided."
+            });
         }
     }
-
-    // Declaration
-    public sealed class ApplicationRouteFactory
-    {
-        private static readonly ApplicationRouteFactory _current =
-            new ApplicationRouteFactory();
-
-        public static ApplicationRouteFactory Current => _current;
-
-        private ApplicationRouteFactory()
-        {
-        }
-
-        public AuthenticationRoutes Authentication { get; } = new();
-
-        public sealed class AuthenticationRoutes
-        {
-            public string ControllerURL { get; } = "Api/V1/Authentication";
-            public string Login { get; } = "Login";
-        }
-    }
+}
 ```
-- This `ApplicationRouteFactor.cs` should be in the global `Factories/` folder please.
+
+### Controller Usage:
+```csharp
+[HttpPost(ApplicationRouteFactory.AuthenticationRoutes.Login)]
+[AllowAnonymous]
+public async Task<ActionResult<ApiResponseClass<AuthResponseDTO>>> Login([FromBody] LoginRequestDTO? request)
+{
+    try
+    {
+        AuthenticationAssertion.Current.CheckForNullRequest(request);
+        AuthenticationAssertion.Current.AssertLoginRequest(request);
+
+        AuthResponseDTO response = await _authenticationService.LoginAsync(request);
+        return Ok(ApiResponseClass<AuthResponseDTO>.Succeeded(response, "Login successful.", 200));
+    }
+    catch (ValidationCException valEx)
+    {
+        _logger.LogWarning("Login validation failed: {Message}", valEx.Message);
+        return BadRequest(ApiResponseClass<AuthResponseDTO>.Failed(valEx.Message, valEx.ValidationErrors, 400));
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Unexpected error during login.");
+        return StatusCode(500, ApiResponseClass<AuthResponseDTO>.Failed(
+            "An unexpected error occurred while processing the login request.",
+            new List<string> { ex.Message },
+            500
+        ));
+    }
+}
+```
+
+---
+
+## Strict Route Factory Rules
+
+- Never hardcode route strings in controllers.
+- All controller route endpoints must reference the singleton `ApplicationRouteFactory.cs` located in `Factories/`.
+
+```csharp
+// Wrong 
+[ApiController]
+[Route("api/[controller]")]
+public class UserController : ControllerBase
+{
+    [HttpPost("login")]
+    public IActionResult Login([FromBody] LoginRequest request)
+    {
+    }
+}
+
+// Right
+[ApiController]
+[Route(ApplicationRouteFactory.AuthenticationRoutes.ControllerURL)]
+public class AuthenticationController : ControllerBase
+{
+    [HttpPost(ApplicationRouteFactory.AuthenticationRoutes.Login)]
+    public IActionResult Login([FromBody] LoginRequest request)
+    {
+    }
+}
+```

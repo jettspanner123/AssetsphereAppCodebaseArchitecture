@@ -19,6 +19,10 @@ export default class LoginScreenCON {
   public static readonly MICROSOFT_SSO_LABEL: string = 'Sign in with Microsoft';
   public static readonly DIVIDER_TEXT: string = 'or continue with enterprise sso';
 
+  // Bottom Navigation
+  public static readonly DONT_HAVE_ACCOUNT_TEXT: string = "Don't have an account?";
+  public static readonly SIGN_UP_LINK_TEXT: string = 'Create an account';
+
   // Validation Error Messages
   public static readonly ERROR_EMAIL_REQUIRED: string = 'Email address is required.';
   public static readonly ERROR_EMAIL_INVALID: string = 'Please enter a valid work email address.';

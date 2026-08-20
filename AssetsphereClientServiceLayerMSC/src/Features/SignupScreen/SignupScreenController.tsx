@@ -1,39 +1,41 @@
 import React, { useState } from 'react';
-import LoginScreenCardStaticComponent from './Components/static/LoginScreenCardStaticComponent';
-import LoginScreenCON from './Constants/LoginScreenCON';
-import { LoginCredentials, LoginFormErrors, LoginAuthState } from './Models/LoginScreenModel';
-import LoginScreenService from './Services/LoginScreenService';
+import SignupScreenCardStaticComponent from './Components/static/SignupScreenCardStaticComponent';
+import SignupScreenCON from './Constants/SignupScreenCON';
+import { SignupFormData, SignupFormErrors, SignupAuthState } from './Models/SignupScreenModel';
+import SignupScreenService from './Services/SignupScreenService';
 import AnimatedThemeToggleSharedComponent from '../../Shared/Components/AnimatedThemeToggleSharedComponent';
 
-export interface LoginScreenControllerProps {
+export interface SignupScreenControllerProps {
   currentTheme: string;
   onToggleTheme: () => void;
-  onLoginSuccess: (authState: LoginAuthState) => void;
-  onNavigateSignup?: () => void;
+  onSignupSuccess: (authState: SignupAuthState) => void;
+  onNavigateLogin?: () => void;
 }
 
-export default function LoginScreenController({
+export default function SignupScreenController({
   currentTheme,
   onToggleTheme,
-  onLoginSuccess,
-  onNavigateSignup,
-}: LoginScreenControllerProps): React.JSX.Element {
-  const [credentials, setCredentials] = useState<LoginCredentials>({
+  onSignupSuccess,
+  onNavigateLogin,
+}: SignupScreenControllerProps): React.JSX.Element {
+  const [formData, setFormData] = useState<SignupFormData>({
+    fullName: '',
     email: '',
     password: '',
-    rememberMe: true,
+    confirmPassword: '',
+    acceptTerms: true,
   });
 
-  const [errors, setErrors] = useState<LoginFormErrors>({});
+  const [errors, setErrors] = useState<SignupFormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isMicrosoftLoading, setIsMicrosoftLoading] = useState<boolean>(false);
 
-  const handleFieldChange = (field: keyof LoginCredentials, value: string | boolean) => {
-    setCredentials((prev) => ({
+  const handleFieldChange = (field: keyof SignupFormData, value: string | boolean) => {
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
-    if (errors[field as keyof LoginFormErrors] || errors.general) {
+    if (errors[field as keyof SignupFormErrors] || errors.general) {
       setErrors((prev) => ({
         ...prev,
         [field]: undefined,
@@ -44,7 +46,7 @@ export default function LoginScreenController({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validationErrors = LoginScreenService.current.validate(credentials);
+    const validationErrors = SignupScreenService.current.validate(formData);
 
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -53,10 +55,10 @@ export default function LoginScreenController({
 
     try {
       setIsLoading(true);
-      const authState = await LoginScreenService.current.authenticateWithCredentials(credentials);
-      onLoginSuccess(authState);
+      const authState = await SignupScreenService.current.registerWithCredentials(formData);
+      onSignupSuccess(authState);
     } catch {
-      setErrors({ general: 'Authentication failed. Please verify your credentials and try again.' });
+      setErrors({ general: 'Registration failed. Please try again or contact IT support.' });
     } finally {
       setIsLoading(false);
     }
@@ -65,8 +67,8 @@ export default function LoginScreenController({
   const handleMicrosoftLogin = async () => {
     try {
       setIsMicrosoftLoading(true);
-      const authState = await LoginScreenService.current.authenticateWithMicrosoft();
-      onLoginSuccess(authState);
+      const authState = await SignupScreenService.current.authenticateWithMicrosoft();
+      onSignupSuccess(authState);
     } catch {
       setErrors({ general: 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.' });
     } finally {
@@ -76,7 +78,7 @@ export default function LoginScreenController({
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-[#000000] text-slate-900 dark:text-zinc-100 flex flex-col justify-between relative overflow-hidden transition-colors selection:bg-[#0C2086]/20">
-      {/* Ambient background glow effects matching DESIGN.md */}
+      {/* Ambient background glow effects */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#0C2086]/10 dark:from-[#0C2086]/20 to-transparent blur-3xl pointer-events-none -z-0" />
       <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-sky-500/5 dark:from-indigo-900/10 to-transparent blur-3xl pointer-events-none -z-0" />
 
@@ -91,21 +93,21 @@ export default function LoginScreenController({
 
       {/* Main Centered Form Container */}
       <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
-        <LoginScreenCardStaticComponent
-          credentials={credentials}
+        <SignupScreenCardStaticComponent
+          formData={formData}
           errors={errors}
           isLoading={isLoading}
           isMicrosoftLoading={isMicrosoftLoading}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}
-          onNavigateSignup={onNavigateSignup}
+          onNavigateLogin={onNavigateLogin}
         />
       </main>
 
       {/* Bottom Footer */}
       <footer className="relative z-10 w-full px-6 py-4 text-center text-xs text-slate-400 dark:text-zinc-600 font-mono">
-        <p>{LoginScreenCON.COPYRIGHT_TEXT}</p>
+        <p>{SignupScreenCON.COPYRIGHT_TEXT}</p>
       </footer>
     </div>
   );

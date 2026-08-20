@@ -31,6 +31,7 @@ import ExportUtility from '../Utilities/ExportUtility';
 
 // Route Screen Components
 import LoginScreenRoute from '../Routes/LoginScreenRoute';
+import SignupScreenRoute from '../Routes/SignupScreenRoute';
 import DashboardOverviewScreenRoute from '../Routes/DashboardOverviewScreenRoute';
 import AssetInventoryScreenRoute from '../Routes/AssetInventoryScreenRoute';
 import EmployeesScreenRoute from '../Routes/EmployeesScreenRoute';
@@ -519,7 +520,46 @@ const loginRoute = createRoute({
       <LoginScreenRoute
         currentTheme={theme}
         onToggleTheme={handleToggle}
+        onNavigateSignup={() => navigate({ to: ApplicationRouteCON.SIGNUP })}
         onLoginSuccess={(authState) => {
+          LoginScreenService.current.authenticateWithCredentials({
+            email: authState.userEmail || '',
+            password: '***',
+            rememberMe: true,
+          });
+          navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+        }}
+      />
+    );
+  },
+});
+
+// Signup / Registration Route
+const signupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: ApplicationRouteCON.SIGNUP,
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (session) {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+    }
+  },
+  component: function SignupComponent() {
+    const navigate = useNavigate();
+    const savedTheme = ApplicationThemeUtility.current.getSavedTheme();
+    const [theme, setTheme] = useState<string>(savedTheme);
+
+    const handleToggle = () => {
+      const next = ApplicationThemeUtility.current.toggleTheme(theme);
+      setTheme(next);
+    };
+
+    return (
+      <SignupScreenRoute
+        currentTheme={theme}
+        onToggleTheme={handleToggle}
+        onNavigateLogin={() => navigate({ to: ApplicationRouteCON.LOGIN })}
+        onSignupSuccess={(authState) => {
           LoginScreenService.current.authenticateWithCredentials({
             email: authState.userEmail || '',
             password: '***',
@@ -811,6 +851,7 @@ const settingsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
+  signupRoute,
   dashboardLayoutRoute.addChildren([
     dashboardOverviewRoute,
     assetInventoryRoute,

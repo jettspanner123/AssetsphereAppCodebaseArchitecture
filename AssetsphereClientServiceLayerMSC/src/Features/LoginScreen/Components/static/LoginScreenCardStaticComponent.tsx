@@ -13,6 +13,7 @@ export interface LoginScreenCardStaticComponentProps {
   onFieldChange: (field: keyof LoginCredentials, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
+  onNavigateSignup?: () => void;
 }
 
 export default function LoginScreenCardStaticComponent({
@@ -23,6 +24,7 @@ export default function LoginScreenCardStaticComponent({
   onFieldChange,
   onSubmit,
   onMicrosoftLogin,
+  onNavigateSignup,
 }: LoginScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -180,6 +182,22 @@ export default function LoginScreenCardStaticComponent({
               {isLoading ? LoginScreenCON.SUBMIT_BUTTON_LOADING : LoginScreenCON.SUBMIT_BUTTON_LABEL}
             </span>
           </ButtonSharedComponent>
+        </div>
+
+        {/* Don't have an account navigation link */}
+        <div className="text-center pt-2">
+          <span className="text-xs text-slate-500 dark:text-zinc-400">
+            {LoginScreenCON.DONT_HAVE_ACCOUNT_TEXT}{' '}
+          </span>
+          {onNavigateSignup && (
+            <button
+              type="button"
+              onClick={onNavigateSignup}
+              className="text-xs font-semibold text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 cursor-pointer transition-colors"
+            >
+              {LoginScreenCON.SIGN_UP_LINK_TEXT}
+            </button>
+          )}
         </div>
       </form>
 

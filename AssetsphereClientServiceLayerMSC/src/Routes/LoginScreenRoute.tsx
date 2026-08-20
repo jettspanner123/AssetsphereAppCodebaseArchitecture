@@ -7,6 +7,7 @@ export interface LoginScreenRouteProps {
   onToggleTheme: () => void;
   onLoginSuccess: (authState: LoginAuthState) => void;
   onNavigateSignup?: () => void;
+  onNavigateForgotPassword?: () => void;
 }
 
 export default function LoginScreenRoute({
@@ -14,6 +15,7 @@ export default function LoginScreenRoute({
   onToggleTheme,
   onLoginSuccess,
   onNavigateSignup,
+  onNavigateForgotPassword,
 }: LoginScreenRouteProps): React.JSX.Element {
   return (
     <LoginScreenController
@@ -21,6 +23,7 @@ export default function LoginScreenRoute({
       onToggleTheme={onToggleTheme}
       onLoginSuccess={onLoginSuccess}
       onNavigateSignup={onNavigateSignup}
+      onNavigateForgotPassword={onNavigateForgotPassword}
     />
   );
 }

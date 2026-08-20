@@ -14,6 +14,7 @@ export interface LoginScreenCardStaticComponentProps {
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
   onNavigateSignup?: () => void;
+  onNavigateForgotPassword?: () => void;
 }
 
 export default function LoginScreenCardStaticComponent({
@@ -25,6 +26,7 @@ export default function LoginScreenCardStaticComponent({
   onSubmit,
   onMicrosoftLogin,
   onNavigateSignup,
+  onNavigateForgotPassword,
 }: LoginScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
@@ -35,13 +37,22 @@ export default function LoginScreenCardStaticComponent({
     >
       {/* Header */}
       <div className="text-center mb-6">
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 mb-3 shadow-md bg-white dark:bg-zinc-900">
+        <div
+          style={{ viewTransitionName: 'auth-logo' }}
+          className="inline-flex items-center justify-center w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 mb-3 shadow-md bg-white dark:bg-zinc-900"
+        >
           <img src={weplmLogo} alt="Assetsphere Logo" className="w-full h-full object-cover" />
         </div>
-        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100 font-serif-headline">
+        <h2
+          style={{ viewTransitionName: 'auth-title' }}
+          className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-zinc-100 font-serif-headline"
+        >
           {LoginScreenCON.CARD_TITLE}
         </h2>
-        <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+        <p
+          style={{ viewTransitionName: 'auth-description' }}
+          className="text-xs text-slate-500 dark:text-zinc-400 mt-1"
+        >
           {LoginScreenCON.CARD_DESCRIPTION}
         </p>
       </div>
@@ -121,6 +132,7 @@ export default function LoginScreenCardStaticComponent({
             </label>
             <button
               type="button"
+              onClick={onNavigateForgotPassword}
               className="text-[11px] font-medium text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 cursor-pointer"
             >
               {LoginScreenCON.FORGOT_PASSWORD_LABEL}
@@ -172,7 +184,7 @@ export default function LoginScreenCardStaticComponent({
         </div>
 
         {/* Primary Accent Button */}
-        <div className="pt-2">
+        <div style={{ viewTransitionName: 'auth-submit-btn' }} className="pt-2">
           <ButtonSharedComponent
             variant="primary"
             size="md"

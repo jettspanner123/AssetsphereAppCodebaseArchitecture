@@ -32,6 +32,7 @@ import ExportUtility from '../Utilities/ExportUtility';
 // Route Screen Components
 import LoginScreenRoute from '../Routes/LoginScreenRoute';
 import SignupScreenRoute from '../Routes/SignupScreenRoute';
+import ForgotPasswordScreenRoute from '../Routes/ForgotPasswordScreenRoute';
 import DashboardOverviewScreenRoute from '../Routes/DashboardOverviewScreenRoute';
 import AssetInventoryScreenRoute from '../Routes/AssetInventoryScreenRoute';
 import EmployeesScreenRoute from '../Routes/EmployeesScreenRoute';
@@ -526,11 +527,22 @@ const loginRoute = createRoute({
       }
     };
 
+    const handleNavigateForgotPassword = () => {
+      if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          navigate({ to: ApplicationRouteCON.FORGOT_PASSWORD });
+        });
+      } else {
+        navigate({ to: ApplicationRouteCON.FORGOT_PASSWORD });
+      }
+    };
+
     return (
       <LoginScreenRoute
         currentTheme={theme}
         onToggleTheme={handleToggle}
         onNavigateSignup={handleNavigateSignup}
+        onNavigateForgotPassword={handleNavigateForgotPassword}
         onLoginSuccess={(authState) => {
           LoginScreenService.current.authenticateWithCredentials({
             email: authState.userEmail || '',
@@ -587,6 +599,46 @@ const signupRoute = createRoute({
           });
           navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
         }}
+      />
+    );
+  },
+});
+
+// Forgot Password Route
+const forgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: ApplicationRouteCON.FORGOT_PASSWORD,
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (session) {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+    }
+  },
+  component: function ForgotPasswordComponent() {
+    const navigate = useNavigate();
+    const savedTheme = ApplicationThemeUtility.current.getSavedTheme();
+    const [theme, setTheme] = useState<string>(savedTheme);
+
+    const handleToggle = () => {
+      const next = ApplicationThemeUtility.current.toggleTheme(theme);
+      setTheme(next);
+    };
+
+    const handleNavigateLogin = () => {
+      if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          navigate({ to: ApplicationRouteCON.LOGIN });
+        });
+      } else {
+        navigate({ to: ApplicationRouteCON.LOGIN });
+      }
+    };
+
+    return (
+      <ForgotPasswordScreenRoute
+        currentTheme={theme}
+        onToggleTheme={handleToggle}
+        onNavigateLogin={handleNavigateLogin}
       />
     );
   },
@@ -872,6 +924,7 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   signupRoute,
+  forgotPasswordRoute,
   dashboardLayoutRoute.addChildren([
     dashboardOverviewRoute,
     assetInventoryRoute,
@@ -892,6 +945,7 @@ const routeTree = rootRoute.addChildren([
 export const applicationRouter = createRouter({
   routeTree,
   defaultPreload: 'intent',
+  defaultViewTransition: true,
 });
 
 declare module '@tanstack/react-router' {

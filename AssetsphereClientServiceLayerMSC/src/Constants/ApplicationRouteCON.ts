@@ -2,6 +2,7 @@ export default class ApplicationRouteCON {
   public static readonly ROOT: string = '/';
   public static readonly LOGIN: string = '/login';
   public static readonly SIGNUP: string = '/signup';
+  public static readonly FORGOT_PASSWORD: string = '/forgot-password';
 
   // Dashboard Nested Routes
   public static readonly DASHBOARD_ROOT: string = '/dashboard';

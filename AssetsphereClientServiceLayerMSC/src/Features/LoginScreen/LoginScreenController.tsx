@@ -10,6 +10,7 @@ export interface LoginScreenControllerProps {
   onToggleTheme: () => void;
   onLoginSuccess: (authState: LoginAuthState) => void;
   onNavigateSignup?: () => void;
+  onNavigateForgotPassword?: () => void;
 }
 
 export default function LoginScreenController({
@@ -17,6 +18,7 @@ export default function LoginScreenController({
   onToggleTheme,
   onLoginSuccess,
   onNavigateSignup,
+  onNavigateForgotPassword,
 }: LoginScreenControllerProps): React.JSX.Element {
   const [credentials, setCredentials] = useState<LoginCredentials>({
     email: '',
@@ -100,6 +102,7 @@ export default function LoginScreenController({
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}
           onNavigateSignup={onNavigateSignup}
+          onNavigateForgotPassword={onNavigateForgotPassword}
         />
       </main>
 

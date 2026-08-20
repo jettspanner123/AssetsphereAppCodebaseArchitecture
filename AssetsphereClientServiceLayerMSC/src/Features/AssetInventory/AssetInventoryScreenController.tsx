@@ -15,10 +15,15 @@ import {
   WrapText,
   DollarSign,
   HardDrive,
+  Eye,
+  CheckSquare,
+  Edit3,
+  Trash2,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
+import ContextMenuSharedComponent, { ContextMenuItem } from '../../Shared/Components/ContextMenuSharedComponent';
 import AssetInventoryCON from './Constants/AssetInventoryCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 
@@ -91,6 +96,85 @@ export default function AssetInventoryScreenController({
     UserPreferencesUtility.current.setInventorySingleLine(val);
     onSingleLineChange?.(val);
   };
+
+  // Right-Click Context Menu State
+  const [contextMenu, setContextMenu] = useState<{
+    isOpen: boolean;
+    x: number;
+    y: number;
+    asset: Asset | null;
+  }>({
+    isOpen: false,
+    x: 0,
+    y: 0,
+    asset: null,
+  });
+
+  const handleContextMenu = (e: React.MouseEvent, asset: Asset) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      isOpen: true,
+      x: e.clientX,
+      y: e.clientY,
+      asset,
+    });
+  };
+
+  const handleCloseContextMenu = () => {
+    setContextMenu((prev) => ({ ...prev, isOpen: false }));
+  };
+
+  const contextMenuItems: ContextMenuItem[] = contextMenu.asset
+    ? [
+        {
+          id: 'view',
+          label: 'View Details',
+          icon: <Eye className="w-3.5 h-3.5" />,
+          onClick: () => {
+            if (contextMenu.asset) {
+              onSelectAsset(contextMenu.asset);
+            }
+          },
+        },
+        {
+          id: 'select',
+          label: 'Select',
+          icon: <CheckSquare className="w-3.5 h-3.5" />,
+          onClick: () => {
+            // UI placeholder action as requested
+          },
+        },
+        {
+          id: 'qr',
+          label: 'Generate QR Badge',
+          icon: <QrCode className="w-3.5 h-3.5" />,
+          onClick: () => {
+            if (contextMenu.asset) {
+              onOpenQRBadgeModal(contextMenu.asset);
+            }
+          },
+        },
+        {
+          id: 'edit',
+          label: 'Edit',
+          icon: <Edit3 className="w-3.5 h-3.5" />,
+          onClick: () => {
+            // UI placeholder action as requested
+          },
+        },
+        {
+          id: 'delete',
+          label: 'Delete',
+          icon: <Trash2 className="w-3.5 h-3.5" />,
+          isDestructive: true,
+          divider: true,
+          onClick: () => {
+            // UI placeholder action as requested
+          },
+        },
+      ]
+    : [];
 
   const filteredAssets = assets.filter((ast) => {
     if (selectedCategory !== 'ALL' && ast.category !== selectedCategory) return false;
@@ -376,7 +460,8 @@ export default function AssetInventoryScreenController({
                 {filteredAssets.map((asset) => (
                   <tr
                     key={asset.id}
-                    className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors group"
+                    onContextMenu={(e) => handleContextMenu(e, asset)}
+                    className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors group cursor-context-menu"
                   >
                     <td className={`py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-zinc-100 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       {asset.assetNumber}
@@ -479,6 +564,7 @@ export default function AssetInventoryScreenController({
               key={asset.id}
               hoverable
               onClick={() => onSelectAsset(asset)}
+              onContextMenu={(e) => handleContextMenu(e, asset)}
               className="p-6 flex flex-col justify-between space-y-6"
             >
               {/* 1. Header: Device Name & Manufacturer/Category */}
@@ -569,6 +655,7 @@ export default function AssetInventoryScreenController({
                       key={asset.id}
                       hoverable
                       onClick={() => onSelectAsset(asset)}
+                      onContextMenu={(e) => handleContextMenu(e, asset)}
                       className="p-4 space-y-3"
                     >
                       <div>
@@ -596,6 +683,22 @@ export default function AssetInventoryScreenController({
           })}
         </div>
       )}
+
+      {/* Custom Right-Click Context Menu */}
+      <ContextMenuSharedComponent
+        isOpen={contextMenu.isOpen}
+        x={contextMenu.x}
+        y={contextMenu.y}
+        onClose={handleCloseContextMenu}
+        items={contextMenuItems}
+        header={
+          contextMenu.asset ? (
+            <span className="font-mono text-[10px]">
+              {contextMenu.asset.assetNumber} • {contextMenu.asset.deviceName}
+            </span>
+          ) : undefined
+        }
+      />
     </div>
   );
 }

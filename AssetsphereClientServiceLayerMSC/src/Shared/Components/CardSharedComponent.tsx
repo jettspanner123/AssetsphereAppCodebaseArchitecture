@@ -6,6 +6,7 @@ export interface CardSharedComponentProps {
   glow?: 'none' | 'orange' | 'blue' | 'green' | 'red';
   className?: string;
   onClick?: () => void;
+  onContextMenu?: (e: React.MouseEvent<HTMLDivElement>) => void;
   hoverable?: boolean;
   key?: React.Key;
 }
@@ -15,6 +16,7 @@ export default function CardSharedComponent({
   variant = 'card',
   className = '',
   onClick,
+  onContextMenu,
   hoverable = false,
 }: CardSharedComponentProps): React.JSX.Element {
   let surfaceStyle = '';
@@ -33,6 +35,7 @@ export default function CardSharedComponent({
   return (
     <div
       onClick={onClick}
+      onContextMenu={onContextMenu}
       className={`rounded-xl p-5 relative transition-all duration-200 ${surfaceStyle} ${hoverClass} ${className}`}
     >
       {children}

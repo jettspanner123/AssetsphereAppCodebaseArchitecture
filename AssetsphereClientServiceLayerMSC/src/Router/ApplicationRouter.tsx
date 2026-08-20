@@ -516,11 +516,21 @@ const loginRoute = createRoute({
       setTheme(next);
     };
 
+    const handleNavigateSignup = () => {
+      if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          navigate({ to: ApplicationRouteCON.SIGNUP });
+        });
+      } else {
+        navigate({ to: ApplicationRouteCON.SIGNUP });
+      }
+    };
+
     return (
       <LoginScreenRoute
         currentTheme={theme}
         onToggleTheme={handleToggle}
-        onNavigateSignup={() => navigate({ to: ApplicationRouteCON.SIGNUP })}
+        onNavigateSignup={handleNavigateSignup}
         onLoginSuccess={(authState) => {
           LoginScreenService.current.authenticateWithCredentials({
             email: authState.userEmail || '',
@@ -554,11 +564,21 @@ const signupRoute = createRoute({
       setTheme(next);
     };
 
+    const handleNavigateLogin = () => {
+      if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+        (document as any).startViewTransition(() => {
+          navigate({ to: ApplicationRouteCON.LOGIN });
+        });
+      } else {
+        navigate({ to: ApplicationRouteCON.LOGIN });
+      }
+    };
+
     return (
       <SignupScreenRoute
         currentTheme={theme}
         onToggleTheme={handleToggle}
-        onNavigateLogin={() => navigate({ to: ApplicationRouteCON.LOGIN })}
+        onNavigateLogin={handleNavigateLogin}
         onSignupSuccess={(authState) => {
           LoginScreenService.current.authenticateWithCredentials({
             email: authState.userEmail || '',

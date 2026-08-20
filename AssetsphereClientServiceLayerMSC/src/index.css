@@ -116,3 +116,26 @@
   mix-blend-mode: normal;
 }
 
+/* View Transitions for Auth Form Card & Element Morphing */
+::view-transition-group(auth-card),
+::view-transition-group(auth-field-email),
+::view-transition-group(auth-field-password) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+::view-transition-old(auth-card),
+::view-transition-new(auth-card) {
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+

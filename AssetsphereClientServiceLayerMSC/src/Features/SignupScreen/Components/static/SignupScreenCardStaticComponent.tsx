@@ -30,7 +30,10 @@ export default function SignupScreenCardStaticComponent({
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 
   return (
-    <div className="w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-slate-200 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 transition-colors">
+    <div
+      style={{ viewTransitionName: 'auth-card' }}
+      className="w-full max-w-xl bg-white dark:bg-[#0a0a0c] border border-slate-200 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 transition-colors"
+    >
       {/* Header */}
       <div className="text-center mb-6">
         <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 mb-3 shadow-md bg-white dark:bg-zinc-900">
@@ -114,7 +117,7 @@ export default function SignupScreenCardStaticComponent({
           </div>
 
           {/* Email Input */}
-          <div>
+          <div style={{ viewTransitionName: 'auth-field-email' }}>
             <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1.5 font-sans">
               {SignupScreenCON.EMAIL_LABEL}
             </label>
@@ -146,7 +149,7 @@ export default function SignupScreenCardStaticComponent({
         {/* Row 2: Password and Confirm Password side by side */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Password Input */}
-          <div>
+          <div style={{ viewTransitionName: 'auth-field-password' }}>
             <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1.5 font-sans">
               {SignupScreenCON.PASSWORD_LABEL}
             </label>

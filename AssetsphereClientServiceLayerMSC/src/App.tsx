@@ -26,6 +26,9 @@ import SettingsScreenController from './Features/Settings/SettingsScreenControll
 import QRBadgeModalController from './Features/QRScanner/QRBadgeModalController';
 import QRScannerModalController from './Features/QRScanner/QRScannerModalController';
 import ModalSharedComponent from './Shared/Components/ModalSharedComponent';
+import LoginScreenController from './Features/LoginScreen/LoginScreenController';
+import LoginScreenService from './Features/LoginScreen/Services/LoginScreenService';
+import { LoginAuthState } from './Features/LoginScreen/Models/LoginScreenModel';
 
 export default function App(): React.JSX.Element {
   // Theme State
@@ -42,6 +45,20 @@ export default function App(): React.JSX.Element {
   const handleToggleTheme = () => {
     const next = ApplicationThemeUtility.current.toggleTheme(currentTheme);
     setCurrentTheme(next);
+  };
+
+  // Authentication Session State (Simulated / LocalStorage Persisted)
+  const [authSession, setAuthSession] = useState<LoginAuthState | null>(() =>
+    LoginScreenService.current.getSavedSession()
+  );
+
+  const handleLoginSuccess = (session: LoginAuthState) => {
+    setAuthSession(session);
+  };
+
+  const handleSignOut = () => {
+    LoginScreenService.current.clearSession();
+    setAuthSession(null);
   };
 
   // Show Mock Data Toggle State (Persisted via UserPreferencesUtility)
@@ -228,6 +245,16 @@ export default function App(): React.JSX.Element {
     ExportUtility.current.exportAssetsToCSV(assets);
   };
 
+  if (!authSession) {
+    return (
+      <LoginScreenController
+        currentTheme={currentTheme}
+        onToggleTheme={handleToggleTheme}
+        onLoginSuccess={handleLoginSuccess}
+      />
+    );
+  }
+
   return (
     <NavigationController
       activeTab={activeTab}
@@ -248,6 +275,7 @@ export default function App(): React.JSX.Element {
       unreadAlertCount={unreadAlertCount}
       showMockData={showMockData}
       onToggleShowMockData={handleToggleShowMockData}
+      onSignOut={handleSignOut}
     >
       {/* Tab Screen Routing */}
       {activeTab === 'dashboard' && (

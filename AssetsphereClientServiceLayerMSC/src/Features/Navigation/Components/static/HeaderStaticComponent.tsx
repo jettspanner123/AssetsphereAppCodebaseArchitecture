@@ -25,6 +25,7 @@ export interface HeaderStaticComponentProps {
   onNavigateSettings?: () => void;
   showMockData?: boolean;
   onToggleShowMockData?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function HeaderStaticComponent({
@@ -45,6 +46,7 @@ export default function HeaderStaticComponent({
   onNavigateSettings,
   showMockData,
   onToggleShowMockData,
+  onSignOut,
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
@@ -147,6 +149,7 @@ export default function HeaderStaticComponent({
             onToggleTheme={onToggleTheme}
             showMockData={showMockData}
             onToggleShowMockData={onToggleShowMockData}
+            onSignOut={onSignOut}
           />
         </div>
       </div>

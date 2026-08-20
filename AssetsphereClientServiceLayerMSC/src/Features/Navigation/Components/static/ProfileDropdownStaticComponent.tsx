@@ -27,6 +27,7 @@ export interface ProfileDropdownStaticComponentProps {
   onToggleTheme: () => void;
   showMockData?: boolean;
   onToggleShowMockData?: () => void;
+  onSignOut?: () => void;
 }
 
 export default function ProfileDropdownStaticComponent({
@@ -40,6 +41,7 @@ export default function ProfileDropdownStaticComponent({
   onToggleTheme,
   showMockData = true,
   onToggleShowMockData,
+  onSignOut,
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
   const isDark = currentTheme === ApplicationThemeCON.DARK;
   const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
@@ -285,7 +287,11 @@ export default function ProfileDropdownStaticComponent({
               <button
                 onClick={() => {
                   onClose();
-                  alert('Signed out of AssetSphere Enterprise.');
+                  if (onSignOut) {
+                    onSignOut();
+                  } else {
+                    alert('Signed out of AssetSphere Enterprise.');
+                  }
                 }}
                 className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer font-medium"
               >

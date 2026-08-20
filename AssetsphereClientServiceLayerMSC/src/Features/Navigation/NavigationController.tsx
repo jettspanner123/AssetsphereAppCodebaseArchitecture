@@ -28,6 +28,7 @@ export default function NavigationController({
   unreadAlertCount,
   showMockData,
   onToggleShowMockData,
+  onSignOut,
 }: NavigationControllerProps): React.JSX.Element {
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200">
@@ -49,6 +50,7 @@ export default function NavigationController({
         onNavigateSettings={() => onSelectTab('settings')}
         showMockData={showMockData}
         onToggleShowMockData={onToggleShowMockData}
+        onSignOut={onSignOut}
       />
       <div className="flex-1 flex w-full items-start">
         <SidebarStaticComponent

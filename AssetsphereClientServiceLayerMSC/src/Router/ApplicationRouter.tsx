@@ -42,6 +42,8 @@ import AssetDetailModalController from '../Features/AssetDetail/AssetDetailModal
 import AssetFormModalController from '../Features/AssetForm/AssetFormModalController';
 import QRBadgeModalController from '../Features/QRScanner/QRBadgeModalController';
 import QRScannerModalController from '../Features/QRScanner/QRScannerModalController';
+import ConfirmationModalSharedComponent from '../Shared/Components/ConfirmationModalSharedComponent';
+import { LogOut } from 'lucide-react';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
 import { LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
 
@@ -115,6 +117,7 @@ export function DashboardShell(): React.JSX.Element {
 
   // Notification states
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
 
   // Portfolio State Sourced from MockDataSeederService
   const [mockAssetsList, setMockAssetsList] = useState<Asset[]>(() =>
@@ -345,7 +348,7 @@ export function DashboardShell(): React.JSX.Element {
       unreadAlertCount={unreadAlertCount}
       showMockData={showMockData}
       onToggleShowMockData={handleToggleShowMockData}
-      onSignOut={handleSignOut}
+      onSignOut={() => setIsSignOutModalOpen(true)}
     >
       <Outlet />
 
@@ -389,6 +392,22 @@ export function DashboardShell(): React.JSX.Element {
             }),
           });
         }}
+      />
+
+      {/* Sign Out Confirmation Modal */}
+      <ConfirmationModalSharedComponent
+        isOpen={isSignOutModalOpen}
+        onClose={() => setIsSignOutModalOpen(false)}
+        onConfirm={() => {
+          setIsSignOutModalOpen(false);
+          handleSignOut();
+        }}
+        title="Sign Out of AssetSphere Enterprise"
+        subtitle="Active Session Management & Security Lock"
+        description="Are you sure you want to terminate your active session? You will need to re-authenticate with your corporate credentials to access asset registries, telemetry, and service desks."
+        confirmText="Sign Out"
+        cancelText="Stay Logged In"
+        variant="danger"
       />
     </NavigationController>
   );

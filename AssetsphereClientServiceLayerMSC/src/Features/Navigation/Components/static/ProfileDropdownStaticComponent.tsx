@@ -14,6 +14,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
+import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
 import ENValidator from '../../../../Utilities/ENValidator';
 
 export interface ProfileDropdownStaticComponentProps {
@@ -139,7 +140,13 @@ export default function ProfileDropdownStaticComponent({
 
                 <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-8 w-full">
                   <button
-                    onClick={() => isDark && onToggleTheme()}
+                    onClick={(e) =>
+                      isDark &&
+                      ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                        e.currentTarget,
+                        onToggleTheme
+                      )
+                    }
                     className={`flex-1 flex items-center justify-center gap-1.5 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       !isDark
                         ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
@@ -150,7 +157,13 @@ export default function ProfileDropdownStaticComponent({
                     <span>Light Mode</span>
                   </button>
                   <button
-                    onClick={() => !isDark && onToggleTheme()}
+                    onClick={(e) =>
+                      !isDark &&
+                      ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                        e.currentTarget,
+                        onToggleTheme
+                      )
+                    }
                     className={`flex-1 flex items-center justify-center gap-1.5 py-1 h-6 rounded-md text-xs font-medium transition-all cursor-pointer ${
                       isDark
                         ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'

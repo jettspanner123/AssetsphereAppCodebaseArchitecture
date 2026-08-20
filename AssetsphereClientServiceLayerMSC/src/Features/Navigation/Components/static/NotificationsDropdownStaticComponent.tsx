@@ -11,7 +11,8 @@ import {
   Clock,
   Check,
 } from 'lucide-react';
-import { TabType } from '../../../../components/Sidebar';
+import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
+import { TabType } from '../../../../types';
 
 export interface NotificationItem {
   id: string;
@@ -86,7 +87,7 @@ export default function NotificationsDropdownStaticComponent({
       subtitle: 'Executive Studio Display 27" warranty expires in 14 days.',
       assetTag: 'AST-1005',
       timestamp: 'Yesterday',
-      targetTab: 'assets',
+      targetTab: 'inventory',
       isRead: true,
     },
     {
@@ -97,7 +98,7 @@ export default function NotificationsDropdownStaticComponent({
       subtitle: '112 of 148 assets verified. 3 physical location discrepancies flagged.',
       assetTag: 'CMP-2024-Q1',
       timestamp: '2d ago',
-      targetTab: 'audit',
+      targetTab: 'verification',
       isRead: true,
     },
   ]);

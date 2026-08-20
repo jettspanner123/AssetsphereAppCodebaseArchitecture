@@ -20,7 +20,17 @@
         "./*"
       ]
     },
+    "strict": true,
+    "strictNullChecks": true,
     "allowImportingTsExtensions": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/components",
+    "node_modules",
+    "dist"
+  ]
 }

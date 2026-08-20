@@ -4,7 +4,7 @@ import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedCom
 import ProfileDropdownStaticComponent from './ProfileDropdownStaticComponent';
 import NotificationsDropdownStaticComponent from './NotificationsDropdownStaticComponent';
 import NavigationCON from '../../Constants/NavigationCON';
-import { TabType } from '../../../../components/Sidebar';
+import { TabType } from '../../../../types';
 import weplmLogo from '../../../../assets/weplm.jpeg';
 
 export interface HeaderStaticComponentProps {

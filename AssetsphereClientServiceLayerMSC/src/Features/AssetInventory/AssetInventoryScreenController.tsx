@@ -28,6 +28,14 @@ export interface AssetInventoryScreenControllerProps {
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
+  overrideViewMode?: 'table' | 'grid' | 'kanban';
+  overrideGridColumns?: 2 | 3;
+  overrideSingleLine?: boolean;
+  overrideComplianceFilter?: string;
+  overrideSearchQuery?: string;
+  onViewModeChange?: (mode: 'table' | 'grid' | 'kanban') => void;
+  onGridColumnsChange?: (cols: 2 | 3) => void;
+  onSingleLineChange?: (val: boolean) => void;
 }
 
 export default function AssetInventoryScreenController({
@@ -36,35 +44,52 @@ export default function AssetInventoryScreenController({
   onOpenAddModal,
   onOpenQRBadgeModal,
   onExportCSV,
+  overrideViewMode,
+  overrideGridColumns,
+  overrideSingleLine,
+  overrideComplianceFilter,
+  overrideSearchQuery,
+  onViewModeChange,
+  onGridColumnsChange,
+  onSingleLineChange,
 }: AssetInventoryScreenControllerProps): React.JSX.Element {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
-  const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-
-  const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(() =>
-    UserPreferencesUtility.current.getInventoryViewMode('grid')
+  const [complianceFilter, setComplianceFilter] = useState<string>(
+    () => overrideComplianceFilter || 'ALL'
   );
-  const [gridColumns, setGridColumnsState] = useState<2 | 3>(() =>
-    UserPreferencesUtility.current.getInventoryGridColumns(2)
+  const [searchQuery, setSearchQuery] = useState<string>(
+    () => overrideSearchQuery || ''
+  );
+
+  const [viewMode, setViewModeState] = useState<'table' | 'grid' | 'kanban'>(
+    () => overrideViewMode || UserPreferencesUtility.current.getInventoryViewMode('grid')
+  );
+  const [gridColumns, setGridColumnsState] = useState<2 | 3>(
+    () => overrideGridColumns || UserPreferencesUtility.current.getInventoryGridColumns(2)
   );
   const [isSingleLineMode, setIsSingleLineModeState] = useState<boolean>(() =>
-    UserPreferencesUtility.current.getInventorySingleLine(true)
+    overrideSingleLine !== undefined
+      ? overrideSingleLine
+      : UserPreferencesUtility.current.getInventorySingleLine(true)
   );
 
   const setViewMode = (mode: 'table' | 'grid' | 'kanban') => {
     setViewModeState(mode);
     UserPreferencesUtility.current.setInventoryViewMode(mode);
+    onViewModeChange?.(mode);
   };
 
   const setGridColumns = (cols: 2 | 3) => {
     setGridColumnsState(cols);
     UserPreferencesUtility.current.setInventoryGridColumns(cols);
+    onGridColumnsChange?.(cols);
   };
 
   const setIsSingleLineMode = (val: boolean) => {
     setIsSingleLineModeState(val);
     UserPreferencesUtility.current.setInventorySingleLine(val);
+    onSingleLineChange?.(val);
   };
 
   const filteredAssets = assets.filter((ast) => {

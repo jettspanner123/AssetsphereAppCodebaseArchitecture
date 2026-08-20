@@ -1,4 +1,4 @@
-import { TabType } from '../components/Sidebar';
+import { TabType } from '../types';
 
 export default class UserPreferencesUtility {
   public static current: UserPreferencesUtility = new UserPreferencesUtility();

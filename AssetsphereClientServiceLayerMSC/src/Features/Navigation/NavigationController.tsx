@@ -28,6 +28,7 @@ export default function NavigationController({
   unreadAlertCount,
   showMockData,
   onToggleShowMockData,
+  onNavigateDevDashboard,
   onSignOut,
 }: NavigationControllerProps): React.JSX.Element {
   return (
@@ -48,6 +49,7 @@ export default function NavigationController({
         openTicketCount={openTicketCount}
         onNavigateTab={onSelectTab}
         onNavigateSettings={() => onSelectTab('settings')}
+        onNavigateDevDashboard={onNavigateDevDashboard}
         showMockData={showMockData}
         onToggleShowMockData={onToggleShowMockData}
         onSignOut={onSignOut}

@@ -46,6 +46,7 @@ import VerificationCampaignScreenRoute from '../Routes/VerificationCampaignScree
 import AIAssistantScreenRoute from '../Routes/AIAssistantScreenRoute';
 import AnalyticsScreenRoute from '../Routes/AnalyticsScreenRoute';
 import SettingsScreenRoute from '../Routes/SettingsScreenRoute';
+import DevDashboardScreenRoute from '../Routes/DevDashboardScreenRoute';
 
 // Modals
 import NavigationController from '../Features/Navigation/NavigationController';
@@ -427,6 +428,7 @@ export function DashboardShell(): React.JSX.Element {
         unreadAlertCount={unreadAlertCount}
         showMockData={showMockData}
         onToggleShowMockData={handleToggleShowMockData}
+        onNavigateDevDashboard={() => navigate({ to: ApplicationRouteCON.DEV_DASHBOARD })}
         onSignOut={() => setIsSignOutModalOpen(true)}
       >
         <Outlet />
@@ -917,6 +919,52 @@ const settingsRoute = createRoute({
   },
 });
 
+// Developer Dashboard Standalone Route (/dev/dashboard)
+const devDashboardRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'dev/dashboard',
+  component: function DevDashboardComponent() {
+    const navigate = useNavigate();
+
+    const savedTheme = ApplicationThemeUtility.current.getSavedTheme();
+    const [theme, setTheme] = useState(savedTheme);
+    const [deploymentMode, setDeploymentMode] = useState<
+      'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync'
+    >('Enterprise Cloud Sync');
+    const [showMockData, setShowMockDataState] = useState<boolean>(() =>
+      UserPreferencesUtility.current.getShowMockData(true)
+    );
+
+    return (
+      <DevDashboardScreenRoute
+        currentTheme={theme}
+        onToggleTheme={() => {
+          const next = ApplicationThemeUtility.current.toggleTheme(theme);
+          setTheme(next);
+        }}
+        deploymentMode={deploymentMode}
+        onToggleDeploymentMode={() =>
+          setDeploymentMode((p) =>
+            p === 'Self-Hosted Air-Gapped' ? 'Enterprise Cloud Sync' : 'Self-Hosted Air-Gapped'
+          )
+        }
+        showMockData={showMockData}
+        onToggleShowMockData={() => {
+          const next = !showMockData;
+          setShowMockDataState(next);
+          UserPreferencesUtility.current.setShowMockData(next);
+        }}
+        onNavigateAppDashboard={() => navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW })}
+        onNavigateSettings={() => navigate({ to: ApplicationRouteCON.DASHBOARD_SETTINGS })}
+        onSignOut={() => {
+          LoginScreenService.current.clearSession();
+          navigate({ to: ApplicationRouteCON.LOGIN });
+        }}
+      />
+    );
+  },
+});
+
 // ==========================================
 // 4. Construct Router Tree
 // ==========================================
@@ -925,6 +973,7 @@ const routeTree = rootRoute.addChildren([
   loginRoute,
   signupRoute,
   forgotPasswordRoute,
+  devDashboardRoute,
   dashboardLayoutRoute.addChildren([
     dashboardOverviewRoute,
     assetInventoryRoute,

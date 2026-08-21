@@ -20,6 +20,9 @@ export default class ApplicationRouteCON {
   public static readonly DASHBOARD_ANALYTICS: string = '/dashboard/analytics';
   public static readonly DASHBOARD_SETTINGS: string = '/dashboard/settings';
 
+  // Developer Dashboard Route
+  public static readonly DEV_DASHBOARD: string = '/dev/dashboard';
+
   // Query Parameter Keys
   public static readonly PARAM_SEARCH: string = 'search';
   public static readonly PARAM_SELECTED_ASSET_ID: string = 'selectedAssetId';

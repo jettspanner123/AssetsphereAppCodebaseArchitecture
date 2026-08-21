@@ -12,6 +12,7 @@ import {
   Database,
   EyeOff,
   Trash2,
+  Code2,
 } from 'lucide-react';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
@@ -24,6 +25,7 @@ export interface ProfileDropdownStaticComponentProps {
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
   onNavigateSettings?: () => void;
+  onNavigateDevDashboard?: () => void;
   currentTheme: string;
   onToggleTheme: () => void;
   showMockData?: boolean;
@@ -38,6 +40,7 @@ export default function ProfileDropdownStaticComponent({
   deploymentMode,
   onToggleDeploymentMode,
   onNavigateSettings,
+  onNavigateDevDashboard,
   currentTheme,
   onToggleTheme,
   showMockData = true,
@@ -213,6 +216,22 @@ export default function ProfileDropdownStaticComponent({
                 <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-slate-400 dark:text-zinc-500 block px-1">
                   Development Tools
                 </span>
+
+                {/* Developer Dashboard Navigation Trigger */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    onClose();
+                    onNavigateDevDashboard?.();
+                  }}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-[#0C2086] hover:bg-[#081765] text-white transition-all cursor-pointer font-medium text-xs shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Code2 className="w-3.5 h-3.5 shrink-0 text-white" />
+                    <span className="text-white font-semibold">Developer Dashboard</span>
+                  </div>
+                  <span className="text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-white/20 text-white">/dev</span>
+                </button>
 
                 {/* Mock Data Toggle */}
                 <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">

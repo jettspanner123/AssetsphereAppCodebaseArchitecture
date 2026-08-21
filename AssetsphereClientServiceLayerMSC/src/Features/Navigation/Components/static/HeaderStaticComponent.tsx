@@ -23,6 +23,7 @@ export interface HeaderStaticComponentProps {
   openTicketCount?: number;
   onNavigateTab?: (tab: TabType) => void;
   onNavigateSettings?: () => void;
+  onNavigateDevDashboard?: () => void;
   showMockData?: boolean;
   onToggleShowMockData?: () => void;
   onSignOut?: () => void;
@@ -44,6 +45,7 @@ export default function HeaderStaticComponent({
   openTicketCount = 0,
   onNavigateTab,
   onNavigateSettings,
+  onNavigateDevDashboard,
   showMockData,
   onToggleShowMockData,
   onSignOut,
@@ -145,6 +147,7 @@ export default function HeaderStaticComponent({
             deploymentMode={deploymentMode}
             onToggleDeploymentMode={onToggleDeploymentMode}
             onNavigateSettings={onNavigateSettings}
+            onNavigateDevDashboard={onNavigateDevDashboard}
             currentTheme={currentTheme}
             onToggleTheme={onToggleTheme}
             showMockData={showMockData}

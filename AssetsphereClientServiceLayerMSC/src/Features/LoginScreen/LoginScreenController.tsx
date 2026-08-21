@@ -57,8 +57,12 @@ export default function LoginScreenController({
       setIsLoading(true);
       const authState = await LoginScreenService.current.authenticateWithCredentials(credentials);
       onLoginSuccess(authState);
-    } catch {
-      setErrors({ general: 'Authentication failed. Please verify your credentials and try again.' });
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Authentication failed. Please verify your credentials and try again.';
+      setErrors({ general: errorMessage });
     } finally {
       setIsLoading(false);
     }
@@ -69,8 +73,10 @@ export default function LoginScreenController({
       setIsMicrosoftLoading(true);
       const authState = await LoginScreenService.current.authenticateWithMicrosoft();
       onLoginSuccess(authState);
-    } catch {
-      setErrors({ general: 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.' });
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.';
+      setErrors({ general: errorMessage });
     } finally {
       setIsMicrosoftLoading(false);
     }

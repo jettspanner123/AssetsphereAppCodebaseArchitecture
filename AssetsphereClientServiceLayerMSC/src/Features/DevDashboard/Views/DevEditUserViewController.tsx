@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UserCheck, ShieldAlert, CheckCircle2, RefreshCw } from 'lucide-react';
-import MockDataSeederService from '../../../services/MockDataSeederService';
+import MockDataSeederService from '@/src/Services/MockDataSeederService';
 import { Employee } from '../../../types';
 import InputSharedComponent from '../../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';

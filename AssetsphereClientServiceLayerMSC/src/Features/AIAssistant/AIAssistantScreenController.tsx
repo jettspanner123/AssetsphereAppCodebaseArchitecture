@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Asset } from '../../types';
-import { askAIAssistant } from '../../services/aiService';
+import { askAIAssistant } from '@/src/Services/aiService';
 import {
   Send,
   Bot,

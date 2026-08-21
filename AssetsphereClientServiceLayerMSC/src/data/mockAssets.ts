@@ -1,4 +1,4 @@
-import MockDataSeederService from '../services/MockDataSeederService';
+import MockDataSeederService from '@/src/Services/MockDataSeederService';
 import {
   Asset,
   Employee,

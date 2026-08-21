@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Asset } from '../types';
-import { askAIAssistant } from '../services/aiService';
+import { askAIAssistant } from '../Services/aiService';
 import { Sparkles, Send, Bot, User, RefreshCw, HelpCircle, ShieldCheck } from 'lucide-react';
 
 interface AIAssistantViewProps {

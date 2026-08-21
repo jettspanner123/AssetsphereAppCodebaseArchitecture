@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Asset, TimelineEvent, ChainOfCustodyRecord } from '../types';
-import { fetchAssetDiagnostics, AIDiagnosticsResult } from '../services/aiService';
+import { fetchAssetDiagnostics, AIDiagnosticsResult } from '../Services/aiService';
 import {
   X,
   QrCode,

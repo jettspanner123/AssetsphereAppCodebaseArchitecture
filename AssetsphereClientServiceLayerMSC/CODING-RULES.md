@@ -98,18 +98,19 @@ Add your rules below. Kiro will follow these before writing any code.
 
 - (e.g. If a component that will have other Components in it should have the name `*ScreenController`, and should be in PascalCase, example, fileName: HomeScreenController.tsx, componentName: HomeScreenController)
 - (e.g. If a component that does not have any other component in it should have the name `*ScreenComponent`, and should be in PascalCase, fileName: ButtonComponent.tsx, componentName: ButtonComponent)
-- (e.g. All the constants should be stored in the `app/Features/${folderName}/Constants`)
+- (e.g. All the constants should be stored in the `app/Features/${folderName}/Constants` or global `Constants/`)
   - The name of the constant file should end with `*CON`, should be in PascalCase, all the constant value in the constant class should be in full caps ( and should be public static readonly ).
   - **Strict Rule: No constants or static configuration arrays (e.g., list of options, tab setups, static layout lists) should reside inside controller or UI component files. They must always be defined in the constants file ending with `*CON` and imported.**
+  - **Strict Rule: All `localStorage` key strings (e.g. `'ASSETSPHERE_ACCESS_TOKEN'`, `'ASSETSPHERE_REFRESH_TOKEN'`, `'ASSETSPHERE_AUTH_SESSION'`) must be defined inside a constant file ending with `*CON` in the `Constants/` folder, and the string values of those keys MUST BE IN ALL CAPS.**
 
   ```typescript
   // Definition
-  export default class HomeScreenCON {
-    public static readonly PAGE_NAME: string = "HomeScreen";
+  export default class ApplicationLocalStorageCON {
+    public static readonly ACCESS_TOKEN_STORAGE_KEY: string = "ASSETSPHERE_ACCESS_TOKEN";
   }
 
   // Usage
-  const something = HomeScreenCON.PAGE_NAME;
+  const tokenKey = ApplicationLocalStorageCON.ACCESS_TOKEN_STORAGE_KEY;
   ```
 
 - (e.g. All the controller views should be stored in the `app/Features/${folderName}/Controllers`)

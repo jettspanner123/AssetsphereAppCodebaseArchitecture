@@ -10,7 +10,7 @@ import {
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
-import MockDataSeederService from '../../services/MockDataSeederService';
+import MockDataSeederService from '@/src/Services/MockDataSeederService';
 
 export default function CloudInfrastructureScreenController(): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Asset } from '../../types';
-import { fetchAssetDiagnostics, AIDiagnosticsResult } from '../../services/aiService';
-import MockDataSeederService from '../../services/MockDataSeederService';
+import { fetchAssetDiagnostics, AIDiagnosticsResult } from '@/src/Services/aiService';
+import MockDataSeederService from '@/src/Services/MockDataSeederService';
 import {
   QrCode,
   Sparkles,

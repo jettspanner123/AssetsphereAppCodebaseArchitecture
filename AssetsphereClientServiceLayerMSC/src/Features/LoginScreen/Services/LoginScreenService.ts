@@ -8,7 +8,7 @@ import {
 } from '../Models/LoginScreenModel';
 import LoginScreenCON from '../Constants/LoginScreenCON';
 import ApplicationNetworkAPIConfiguration from '../../../Configurations/ApplicationNetworkAPIConfiguration';
-import ApplicationLocalStorageService from '../../../services/ApplicationLocalStorageService';
+import ApplicationLocalStorageService from '@/src/Services/ApplicationLocalStorageService';
 
 export default class LoginScreenService {
   public static current: LoginScreenService = new LoginScreenService();

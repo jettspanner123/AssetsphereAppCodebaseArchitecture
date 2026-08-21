@@ -1,4 +1,5 @@
 import { LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
+import ApplicationLocalStorageCON from '../Constants/ApplicationLocalStorageCON';
 
 export interface AuthTokens {
   accessToken: string;
@@ -9,9 +10,9 @@ export interface AuthTokens {
 export default class ApplicationLocalStorageService {
   public static current: ApplicationLocalStorageService = new ApplicationLocalStorageService();
 
-  private readonly accessTokenStorageKey: string = 'assetsphere_access_token';
-  private readonly refreshTokenStorageKey: string = 'assetsphere_refresh_token';
-  private readonly authSessionStorageKey: string = 'assetsphere_auth_session';
+  private readonly accessTokenStorageKey: string = ApplicationLocalStorageCON.ACCESS_TOKEN_STORAGE_KEY;
+  private readonly refreshTokenStorageKey: string = ApplicationLocalStorageCON.REFRESH_TOKEN_STORAGE_KEY;
+  private readonly authSessionStorageKey: string = ApplicationLocalStorageCON.AUTH_SESSION_STORAGE_KEY;
 
   // Access Token Management
   public getAccessToken(): string | null {

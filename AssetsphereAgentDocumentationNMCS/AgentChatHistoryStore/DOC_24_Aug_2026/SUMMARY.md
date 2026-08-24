@@ -16,6 +16,16 @@
 13. Created comprehensive developer documentation in [`AssetsphereAgentDocumentationNMCS/AddingNewFeatureStore/ADD_NEW_ROLE_BASED_ACCESS.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAgentDocumentationNMCS/AddingNewFeatureStore/ADD_NEW_ROLE_BASED_ACCESS.md) detailing the step-by-step process of adding new roles across the backend and frontend.
 14. Completely populated and synchronized the root [`CONTEXT.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/CONTEXT.md) master architecture blueprint with modern badges, system matrices, project directories, tech stacks, and execution guides.
 15. Created [`ApplicationToasterSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ApplicationToasterSharedComponent.tsx) with reactive `MutationObserver` theme synchronization (dark/light), responsive position (`bottom-right` on desktop, `bottom-center` on mobile), close dismiss button, and customized AssetSphere corporate styling.
+16. Positioned toast dismiss button on the top-most left corner with offset padding and enabled swipe/drag-to-slide gesture dismiss capabilities.
+17. Built end-to-end Device Registration flow with hardware specifications (Processor, RAM, Storage, Screen Size), removed department allocation, enforced backend `[Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]` RBAC, and persisted to Supabase with real-time cache updates.
+18. Implemented Strict RAM (GB only numerical input), Dynamic Multi-Storage Drive list (`NVMe SSD`, `SATA SSD`, `HDD`, `eMMC`, `External SSD`), Purchase Currency Selector (`USD`/`INR`), and Optional Administrative Notes with full backend persistence.
+19. Upgraded Storage Capacity inputs to numeric values with a dropdown unit selector (`GB`/`TB`) and synced preset chips.
+20. Configured full-screen bottom slide-up animation (`y: 100vh` to `0` and reverse exit) with smooth physics for modals.
+21. Integrated themed `CustomSelectSharedComponent` for storage drive unit selection (`GB` / `TB`) matching corporate UI aesthetic.
+22. Refined modal slide animation to pure vertical translation (`y: 100vh` to `0` and reverse) with 0 scale or opacity morphing.
+23. Configured directional modal exit: standard bottom slide-down on cross/dismiss/escape (`y: 100vh`) vs. top slide-up on Cancel button (`y: -100vh`).
+24. Configured upward exit animation (`y: -100vh`) upon successful form registration submission.
+25. Added animated progress spinner indicator (`Loader2`) and `isLoading` loading states to `ButtonSharedComponent` and `AssetFormModalController`.
 
 ## Implementation Details
 1. **Activity Log Setup**: Initialized `DOC_24_Aug_2026/SUMMARY.md` to track and document all features, refactors, and architectural updates performed on 24 Aug 2026.
@@ -85,3 +95,45 @@
 15. **Themed Responsive Toast System**:
    - Built [`ApplicationToasterSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ApplicationToasterSharedComponent.tsx) with a `MutationObserver` on `document.documentElement` class list for real-time light/dark theme synchronization during theme toggle animations.
    - Configured responsive viewport listener for `bottom-right` desktop and `bottom-center` mobile positioning, added a close dismiss button, and styled toast cards with AssetSphere corporate typography, translucent glass backgrounds, and status indicator icons.
+16. **Floating Corner Dismiss Badge & Slide-to-Dismiss Gestures**:
+   - Pinned `[data-close-button]` directly to the top-most left vertex (`top: 0; left: 0; transform: translate(-50%, -50%)`) as a circular badge with subtle drop shadow and scale hover effect.
+   - Enabled interactive swipe/slide-to-dismiss behavior with `cursor: grab`, `touch-action: pan-y`, and drag physics.
+17. **End-to-End Device Registration Flow with Specifications & RBAC**:
+   - Redesigned [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx) with required equipment fields, removed department allocation, and added hybrid preset chips + write-in fields for Processor, RAM, Storage, and Screen Size.
+   - Built frontend [`AssetInventoryService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Services/AssetInventoryService.ts) and connected `useCreateAssetMutation` in [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts).
+   - Protected backend write endpoints in [`AssetInventoryController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/AssetInventory/AssetInventoryController.cs) with `[Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]`.
+   - Verified that `USER` role receives `HTTP 403 Forbidden` on asset creation, while `OPERATOR`, `DEVELOPER`, and `ADMIN` successfully persist records to PostgreSQL `AS_AssetsTBL` with JSONB hardware specs.
+   - Resolved `ReferenceError: Cannot access 'AssetQueryService' before initialization` in [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts) by ordering sub-service class definitions prior to the master client singleton.
+18. **Strict RAM (GB), Multi-Drive Storage Arrays, Currency & Notes**:
+   - Enforced numerical-only RAM input with an immutable `"GB"` badge and presets (`8`, `16`, `32`, `64`, `128`, `256`), eliminating unit typos.
+   - Built interactive multi-storage drive configuration allowing primary and secondary drives (`NVMe SSD`, `SATA SSD`, `HDD`, `eMMC`, `External SSD`) with capacity chips and delete actions.
+   - Added purchase cost currency selector (`USD - $` and `INR - ₹`) dynamically formatting labels.
+   - Added optional administrative & provisioning notes textarea and persisted directly to PostgreSQL `notes` in `AS_AssetsTBL`.
+19. **Storage Capacity Dropdown Unit Selector (GB / TB)**:
+   - Configured number-only input for each storage drive paired with a dropdown unit selector (`GB` or `TB`).
+   - Synced capacity quick-preset chips (`256 GB`, `512 GB`, `1 TB`, `2 TB`, `4 TB`, `16 TB`) to update both numeric value and unit cleanly.
+20. **Off-Screen Bottom Slide-Up Modal Animation**:
+   - Enhanced [`ModalSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ModalSharedComponent.tsx) with `animationType="slide-up"` utilizing `initial={{ opacity: 0, y: '100vh' }}` (completely below viewport) and `exit={{ opacity: 0, y: '100vh' }}` with smooth spring physics (`damping: 30, stiffness: 300`).
+21. **Custom Themed Dropdown for Drive Units (GB / TB)**:
+   - Replaced native `<select>` in [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx) with [`CustomSelectSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/CustomSelectSharedComponent.tsx) for storage unit selection, bringing smooth Framer Motion dropdown physics and unified dark/light theme consistency.
+22. **Pure Vertical Slide Animation (Zero Opacity/Scale Distortion)**:
+   - Updated `ModalSharedComponent.tsx` slide-up animation to purely translate along the Y axis (`initial: { y: '100vh' }`, `animate: { y: 0 }`, `exit: { y: '100vh' }`) without opacity or scale transitions on the card.
+23. **Directional Dismissal Physics (Cross vs. Cancel Button)**:
+   - Updated [`ModalSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ModalSharedComponent.tsx) and [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx) with directional exits:
+     - **Cross Button / Backdrop / Escape**: Slides down off-screen towards the bottom (`y: 100vh`).
+     - **Cancel Button**: Slides upward off-screen towards the top (`y: -100vh`).
+24. **Upward Exit on Successful Submission**:
+   - Configured [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx) to set `exitDirection='up'` upon form submission, ensuring the modal slides up off-screen (`y: -100vh`) when a device is successfully registered.
+25. **Animated Progress Loading Spinner in Submit Button**:
+   - Integrated Lucide's `Loader2` animated spinning indicator into [`ButtonSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ButtonSharedComponent.tsx) with `isLoading` and `loadingText` ("Registering Device..." / "Saving Specs...").
+   - Wired `createAssetMutation.isPending` from [`ApplicationRouter.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx) directly into [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx), disabling the button and displaying the progress spinner while the backend mutation is processing.
+
+
+
+
+
+
+
+
+
+

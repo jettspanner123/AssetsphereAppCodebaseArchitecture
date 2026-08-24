@@ -133,13 +133,24 @@ export type LifecycleStatus =
 
 export type DepreciationMethod = 'Straight Line' | 'Written Down Value' | 'Custom Formula';
 
+export interface StorageDrive {
+  id: string;
+  capacity: string;
+  type: 'NVMe SSD' | 'SATA SSD' | 'HDD' | 'eMMC' | 'External SSD' | 'Other';
+}
+
 export interface HardwareSpecs {
   cpu?: string;
+  processor?: string;
   generation?: string;
   ramGbs?: number;
+  ram?: string;
   storageGbs?: number;
   storageType?: 'SSD' | 'HDD' | 'NVMe' | 'SAN/NAS';
+  storage?: string;
+  storageDrives?: StorageDrive[];
   gpu?: string;
+  graphics?: string;
   screenSize?: string;
   resolution?: string;
   touchSupport?: boolean;

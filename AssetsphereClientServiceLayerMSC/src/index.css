@@ -201,6 +201,14 @@
 [data-sonner-toast] {
   border-radius: 12px !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2) !important;
+  cursor: grab !important;
+  touch-action: pan-y pinch-zoom !important;
+  user-select: none !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
+}
+
+[data-sonner-toast]:active {
+  cursor: grabbing !important;
 }
 
 [data-sonner-toast] [data-title] {
@@ -215,19 +223,30 @@
   margin-top: 2px !important;
 }
 
+/* Top-left dismiss button floating badge */
 [data-sonner-toast] [data-close-button] {
   background: var(--normal-bg) !important;
-  border-color: var(--normal-border) !important;
+  border: 1px solid var(--normal-border) !important;
   color: var(--normal-text) !important;
-  opacity: 0.7 !important;
-  transition: opacity 0.15s ease !important;
-  border-radius: 6px !important;
-  top: 10px !important;
-  right: 10px !important;
+  opacity: 0.85 !important;
+  transition: all 0.15s ease !important;
+  border-radius: 9999px !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: auto !important;
+  transform: translate(-50%, -50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  z-index: 50 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
 }
 
 [data-sonner-toast] [data-close-button]:hover {
   opacity: 1 !important;
+  transform: translate(-50%, -50%) scale(1.15) !important;
 }
 
 

@@ -60,6 +60,7 @@ import { toast } from 'sonner';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
 import { LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
 import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
+import TanstackQueryClientService from '../Services/TanstackQueryClientService';
 
 // ==========================================
 // 1. Root Route Definition
@@ -362,33 +363,59 @@ export function DashboardShell(): React.JSX.Element {
     ExportUtility.current.exportAssetsToCSV(assets);
   };
 
+  const createAssetMutation = TanstackQueryClientService.current.assets.useCreateAssetMutation({
+    onSuccess: (createdAsset) => {
+      setMockAssetsList((prev) => [createdAsset, ...prev]);
+      toast.success('Device Registered Successfully', {
+        description: `Asset ${createdAsset.assetNumber} (${createdAsset.deviceName}) has been saved to the database.`,
+      });
+      handleCloseAddAsset();
+    },
+    onError: (error: any) => {
+      toast.error('Registration Failed', {
+        description: error.message || 'Unable to register device. Please check your permissions.',
+      });
+    },
+  });
+
   const handleSaveAsset = (assetData: Partial<Asset>) => {
-    if (assetData.id) {
+    if (assetData.id && !assetData.id.startsWith('AST-')) {
       setMockAssetsList((prev) =>
         prev.map((a) => (a.id === assetData.id ? ({ ...a, ...assetData } as Asset) : a))
       );
+      toast.success('Asset Updated', {
+        description: `Asset ${assetData.assetNumber || assetData.deviceName} updated.`,
+      });
+      handleCloseAddAsset();
     } else {
-      const newAsset: Asset = {
-        id: `AST-${Date.now().toString().slice(-4)}`,
-        assetNumber: `AST-${Date.now().toString().slice(-4)}`,
-        deviceName: assetData.deviceName || 'New Hardware Node',
-        category: assetData.category || 'Laptops',
-        manufacturer: assetData.manufacturer || 'Dell',
-        model: assetData.model || 'Enterprise Spec',
-        serialNumber: assetData.serialNumber || `SN-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
-        barcodeValue: `BAR-${Math.floor(100000 + Math.random() * 900000)}`,
-        lifecycleStatus: assetData.lifecycleStatus || 'In Use',
-        currentLocation: assetData.currentLocation || 'HQ-Floor 2',
-        assignedToEmployeeName: assetData.assignedToEmployeeName || 'Unassigned',
-        department: assetData.department || 'Engineering',
-        businessUnit: 'Technology Infrastructure',
-        costCenter: 'CC-ENG-402',
-        currentValue: 1800,
-        ...assetData,
-      } as Asset;
-      setMockAssetsList((prev) => [newAsset, ...prev]);
+      const ramNumber = assetData.hardwareSpecs?.ramGbs || 16;
+      const ramString = `${ramNumber} GB`;
+      const drives = assetData.hardwareSpecs?.storageDrives || [
+        { capacity: '512 GB', type: 'NVMe SSD' },
+      ];
+      const aggregatedStorage = assetData.hardwareSpecs?.storage ||
+        drives.map((d) => `${d.capacity} ${d.type}`).join(' + ');
+
+      createAssetMutation.mutate({
+        serialNumber: assetData.serialNumber || `SN-${Date.now()}`,
+        category: assetData.category || 'Computing',
+        subtype: assetData.subtype || 'Laptop',
+        modelName: assetData.deviceName || 'Enterprise IT Device',
+        manufacturer: assetData.manufacturer || 'Enterprise Vendor',
+        purchasePrice: assetData.procurement?.purchaseCost || 1499,
+        currency: assetData.procurement?.currency || 'USD',
+        location: assetData.currentLocation || 'HQ Warehouse',
+        notes: assetData.aiNotes,
+        specs: {
+          processor: assetData.hardwareSpecs?.cpu || 'Apple M3 Pro',
+          ramGbs: ramNumber,
+          ram: ramString,
+          storage: aggregatedStorage,
+          storageDrives: drives,
+          screenSize: assetData.hardwareSpecs?.screenSize || '16.0"',
+        },
+      });
     }
-    handleCloseAddAsset();
   };
 
   const handleImportAssets = (importedAssets: Asset[]) => {
@@ -467,6 +494,7 @@ export function DashboardShell(): React.JSX.Element {
         {/* Global Asset Form Modal */}
         <AssetFormModalController
           isOpen={isAssetFormOpen}
+          isLoading={createAssetMutation.isPending}
           onClose={handleCloseAddAsset}
           onSave={handleSaveAsset}
           initialAsset={null}

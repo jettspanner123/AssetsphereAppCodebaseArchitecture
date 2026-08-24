@@ -82,38 +82,56 @@ public sealed class AssetInventoryService
 
     public async Task<AssetResponseDTO> CreateAssetAsync(AssetCreateDTO request, string createdBy)
     {
-        if (!AssetTagSValidator.Current.Validate(request.AssetTag))
+        string assetTag = string.IsNullOrWhiteSpace(request.AssetTag)
+            ? $"AST-{DateTime.UtcNow.Year}-{Random.Shared.Next(1000, 9999)}"
+            : request.AssetTag.Trim().ToUpper();
+
+        if (!AssetTagSValidator.Current.Validate(assetTag))
         {
             throw new ValidationCException("Asset Tag is invalid or improperly formatted.");
         }
 
-        bool tagExists = await _dbContext.Assets.AnyAsync(a => a.AssetTag.ToLower() == request.AssetTag.Trim().ToLower());
+        bool tagExists = await _dbContext.Assets.AnyAsync(a => a.AssetTag.ToLower() == assetTag.ToLower());
         if (tagExists)
         {
             throw new ValidationCException(AssetInventoryCON.DuplicateAssetTag);
         }
 
+        string? specsJson = request.HardwareSpecsJson;
+        if (string.IsNullOrWhiteSpace(specsJson) && request.Specs != null)
+        {
+            specsJson = System.Text.Json.JsonSerializer.Serialize(request.Specs);
+        }
+
+        string procurementJson = request.ProcurementInfoJson ?? System.Text.Json.JsonSerializer.Serialize(new
+        {
+            purchaseCost = request.PurchasePrice,
+            currency = string.IsNullOrWhiteSpace(request.Currency) ? "USD" : request.Currency.Trim().ToUpper(),
+            purchaseDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
+            vendorName = request.Manufacturer
+        });
+
         AssetEntityClass newAsset = new AssetEntityClass
         {
             Id = Guid.NewGuid(),
-            AssetTag = request.AssetTag.Trim().ToUpper(),
+            AssetTag = assetTag,
             SerialNumber = request.SerialNumber.Trim(),
-            Category = request.Category,
-            Subtype = request.Subtype,
-            ModelName = request.ModelName.Trim(),
-            Manufacturer = request.Manufacturer.Trim(),
-            Status = request.Status,
+            Category = string.IsNullOrWhiteSpace(request.Category) ? "Computing" : request.Category.Trim(),
+            Subtype = string.IsNullOrWhiteSpace(request.Subtype) ? "Hardware Device" : request.Subtype.Trim(),
+            ModelName = string.IsNullOrWhiteSpace(request.ModelName) ? request.SerialNumber.Trim() : request.ModelName.Trim(),
+            Manufacturer = string.IsNullOrWhiteSpace(request.Manufacturer) ? "Enterprise Vendor" : request.Manufacturer.Trim(),
+            Status = string.IsNullOrWhiteSpace(request.Status) ? "Inventory" : request.Status.Trim(),
             AssignedEmployeeId = request.AssignedEmployeeId,
             AssignedEmployeeName = request.AssignedEmployeeName,
             AssignedDepartment = request.AssignedDepartment,
-            Location = request.Location,
+            Location = string.IsNullOrWhiteSpace(request.Location) ? "HQ Warehouse" : request.Location.Trim(),
             PurchasePrice = request.PurchasePrice,
-            CurrentBookValue = request.CurrentBookValue,
+            CurrentBookValue = request.CurrentBookValue > 0 ? request.CurrentBookValue : request.PurchasePrice,
             DepreciationMethod = request.DepreciationMethod,
             UsefulLifeMonths = request.UsefulLifeMonths,
             SalvageValue = request.SalvageValue,
-            HardwareSpecsJson = request.HardwareSpecsJson,
-            ProcurementInfoJson = request.ProcurementInfoJson,
+            HardwareSpecsJson = specsJson,
+            ProcurementInfoJson = procurementJson,
             WarrantyInfoJson = request.WarrantyInfoJson,
             SecurityAndComplianceJson = request.SecurityAndComplianceJson,
             NetworkConfigJson = request.NetworkConfigJson,
@@ -266,6 +284,33 @@ public sealed class AssetInventoryService
 
     private static AssetResponseDTO MapToDTO(AssetEntityClass asset)
     {
+        HardwareSpecsDTO? specs = null;
+        if (!string.IsNullOrWhiteSpace(asset.HardwareSpecsJson))
+        {
+            try
+            {
+                specs = System.Text.Json.JsonSerializer.Deserialize<HardwareSpecsDTO>(asset.HardwareSpecsJson);
+            }
+            catch
+            {
+                // Fallback to null on parsing discrepancy
+            }
+        }
+
+        string currency = "USD";
+        if (!string.IsNullOrWhiteSpace(asset.ProcurementInfoJson))
+        {
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(asset.ProcurementInfoJson);
+                if (doc.RootElement.TryGetProperty("currency", out var prop))
+                {
+                    currency = prop.GetString() ?? "USD";
+                }
+            }
+            catch { }
+        }
+
         return new AssetResponseDTO
         {
             Id = asset.Id,
@@ -281,10 +326,12 @@ public sealed class AssetInventoryService
             AssignedDepartment = asset.AssignedDepartment,
             Location = asset.Location,
             PurchasePrice = asset.PurchasePrice,
+            Currency = currency,
             CurrentBookValue = asset.CurrentBookValue,
             DepreciationMethod = asset.DepreciationMethod,
             UsefulLifeMonths = asset.UsefulLifeMonths,
             SalvageValue = asset.SalvageValue,
+            Specs = specs,
             HardwareSpecsJson = asset.HardwareSpecsJson,
             ProcurementInfoJson = asset.ProcurementInfoJson,
             WarrantyInfoJson = asset.WarrantyInfoJson,

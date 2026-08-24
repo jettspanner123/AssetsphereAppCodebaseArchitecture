@@ -12,6 +12,8 @@ export interface ModalSharedComponentProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
   minHeight?: string;
   scrollMode?: 'backdrop' | 'body';
+  animationType?: 'scale' | 'slide-up';
+  exitDirection?: 'down' | 'up';
 }
 
 export default function ModalSharedComponent({
@@ -24,6 +26,8 @@ export default function ModalSharedComponent({
   maxWidth = '2xl',
   minHeight,
   scrollMode = 'backdrop',
+  animationType = 'slide-up',
+  exitDirection = 'down',
 }: ModalSharedComponentProps): React.JSX.Element {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,6 +53,26 @@ export default function ModalSharedComponent({
   if (maxWidth === '4xl') widthClass = 'max-w-4xl';
   if (maxWidth === '5xl') widthClass = 'max-w-5xl';
 
+  const isSlideUp = animationType === 'slide-up';
+
+  const modalVariants = {
+    initial: {
+      y: isSlideUp ? '100vh' : 8,
+      opacity: isSlideUp ? 1 : 0,
+      scale: isSlideUp ? 1 : 0.96,
+    },
+    animate: {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+    },
+    exit: {
+      y: isSlideUp ? (exitDirection === 'up' ? '-100vh' : '100vh') : 8,
+      opacity: isSlideUp ? 1 : 0,
+      scale: isSlideUp ? 1 : 0.96,
+    },
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -58,21 +82,22 @@ export default function ModalSharedComponent({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
             onClick={onClose}
             className="fixed inset-0 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm"
           />
 
           {/* Dialog content */}
           <motion.div
-            layout
-            initial={{ opacity: 0, scale: 0.96, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 8 }}
+            variants={modalVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
             transition={{
-              duration: 0.25,
-              ease: [0.16, 1, 0.3, 1],
-              layout: { duration: 0.45, ease: [0.16, 1, 0.3, 1] },
+              type: 'spring',
+              damping: 30,
+              stiffness: 300,
+              mass: 0.8,
             }}
             className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl z-10 my-auto sm:my-8 flex flex-col shrink-0`}
           >

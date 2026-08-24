@@ -5,6 +5,14 @@ export interface NetworkAPIEndpoints {
     me: string;
     refreshToken: string;
   };
+  assetInventory: {
+    base: string;
+    getAll: string;
+    getById: (id: string) => string;
+    create: string;
+    update: (id: string) => string;
+    delete: (id: string) => string;
+  };
 }
 
 export interface ApplicationNetworkAPIConfigurationDetails {
@@ -34,6 +42,14 @@ export default class ApplicationNetworkAPIConfiguration {
           register: `${this.defaultBaseUrl}/Api/V1/Authentication/Register`,
           me: `${this.defaultBaseUrl}/Api/V1/Authentication/Me`,
           refreshToken: `${this.defaultBaseUrl}/Api/V1/Authentication/RefreshToken`,
+        },
+        assetInventory: {
+          base: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
+          getAll: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
+          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
+          create: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
+          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
+          delete: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
         },
       },
     };

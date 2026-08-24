@@ -2,9 +2,27 @@ using AssetsphereOrchestratorServiceLayerMSC.Models.Types;
 
 namespace AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
 
+public sealed class StorageDriveDTO
+{
+    public string Capacity { get; set; } = "512 GB";
+    public string Type { get; set; } = "NVMe SSD";
+}
+
+public sealed class HardwareSpecsDTO
+{
+    public string? Processor { get; set; }
+    public int? RamGbs { get; set; }
+    public string? Ram { get; set; }
+    public string? Storage { get; set; }
+    public List<StorageDriveDTO>? StorageDrives { get; set; }
+    public string? ScreenSize { get; set; }
+    public string? Resolution { get; set; }
+    public string? Graphics { get; set; }
+}
+
 public sealed class AssetCreateDTO
 {
-    public string AssetTag { get; set; } = string.Empty;
+    public string? AssetTag { get; set; }
     public string SerialNumber { get; set; } = string.Empty;
     public string Category { get; set; } = "Computing";
     public string Subtype { get; set; } = "Laptop";
@@ -16,10 +34,12 @@ public sealed class AssetCreateDTO
     public DepartmentType? AssignedDepartment { get; set; }
     public string Location { get; set; } = "HQ Floor 4";
     public decimal PurchasePrice { get; set; } = 0.0m;
+    public string Currency { get; set; } = "USD";
     public decimal CurrentBookValue { get; set; } = 0.0m;
     public string DepreciationMethod { get; set; } = "Straight Line";
     public int UsefulLifeMonths { get; set; } = 36;
     public decimal SalvageValue { get; set; } = 0.0m;
+    public HardwareSpecsDTO? Specs { get; set; }
     public string? HardwareSpecsJson { get; set; }
     public string? ProcurementInfoJson { get; set; }
     public string? WarrantyInfoJson { get; set; }
@@ -46,10 +66,12 @@ public sealed class AssetUpdateDTO
     public DepartmentType? AssignedDepartment { get; set; }
     public string? Location { get; set; }
     public decimal? PurchasePrice { get; set; }
+    public string? Currency { get; set; }
     public decimal? CurrentBookValue { get; set; }
     public string? DepreciationMethod { get; set; }
     public int? UsefulLifeMonths { get; set; }
     public decimal? SalvageValue { get; set; }
+    public HardwareSpecsDTO? Specs { get; set; }
     public string? HardwareSpecsJson { get; set; }
     public string? ProcurementInfoJson { get; set; }
     public string? WarrantyInfoJson { get; set; }
@@ -77,10 +99,12 @@ public sealed class AssetResponseDTO
     public DepartmentType? AssignedDepartment { get; set; }
     public string Location { get; set; } = string.Empty;
     public decimal PurchasePrice { get; set; }
+    public string Currency { get; set; } = "USD";
     public decimal CurrentBookValue { get; set; }
     public string DepreciationMethod { get; set; } = string.Empty;
     public int UsefulLifeMonths { get; set; }
     public decimal SalvageValue { get; set; }
+    public HardwareSpecsDTO? Specs { get; set; }
     public string? HardwareSpecsJson { get; set; }
     public string? ProcurementInfoJson { get; set; }
     public string? WarrantyInfoJson { get; set; }

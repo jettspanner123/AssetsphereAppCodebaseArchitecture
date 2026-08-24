@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../Types/AssetType';
+import { Asset, AssetCategory, AssetSubtype, LifecycleStatus, StorageDrive } from '../../Types/AssetType';
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import InputSharedComponent from '../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
-import { Plus } from 'lucide-react';
+import { Plus, Cpu, HardDrive, MemoryStick, Monitor, Sparkles, Trash2, FileText } from 'lucide-react';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
 
 const CATEGORY_OPTIONS: SelectOption[] = [
@@ -16,18 +16,68 @@ const CATEGORY_OPTIONS: SelectOption[] = [
   { value: 'Infrastructure', label: 'Infrastructure', sublabel: 'UPS, Racks & Power Distribution' },
 ];
 
-const DEPARTMENT_OPTIONS: SelectOption[] = [
-  { value: 'Engineering', label: 'Engineering', sublabel: 'Software & Infrastructure Development' },
-  { value: 'Design', label: 'Design', sublabel: 'UX Research & Product Design' },
-  { value: 'Product', label: 'Product', sublabel: 'Product Management & Growth' },
-  { value: 'Finance', label: 'Finance', sublabel: 'Global Financial Planning & Treasury' },
-  { value: 'Human Resources', label: 'Human Resources', sublabel: 'People Operations & Talent' },
-  { value: 'IT Operations', label: 'IT Operations', sublabel: 'Enterprise Infrastructure & Support' },
+const CURRENCY_OPTIONS: SelectOption[] = [
+  { value: 'USD', label: 'USD - United States Dollar ($)' },
+  { value: 'INR', label: 'INR - Indian Rupee (₹)' },
 ];
+
+const STORAGE_UNIT_OPTIONS: SelectOption[] = [
+  { value: 'GB', label: 'GB' },
+  { value: 'TB', label: 'TB' },
+];
+
+const DRIVE_TYPE_OPTIONS: SelectOption[] = [
+  { value: 'NVMe SSD', label: 'NVMe M.2 SSD (High Speed)' },
+  { value: 'SATA SSD', label: 'SATA 2.5" SSD' },
+  { value: 'HDD', label: 'Mechanical Hard Drive (HDD)' },
+  { value: 'eMMC', label: 'eMMC Flash Storage' },
+  { value: 'External SSD', label: 'External / Removable SSD' },
+  { value: 'Other', label: 'Other Storage Array' },
+];
+
+const PROCESSOR_PRESETS = [
+  'Apple M3 Max',
+  'Apple M3 Pro',
+  'Apple M2',
+  'Intel Core i7 14th Gen',
+  'Intel Core i9-14900HX',
+  'AMD Ryzen 9 7950X',
+  'Intel Xeon Gold',
+];
+
+const RAM_NUMERIC_PRESETS = [8, 16, 32, 64, 128, 256];
+
+const DRIVE_PRESET_ITEMS = [
+  { sizeNumber: 256, unit: 'GB' as const, label: '256 GB' },
+  { sizeNumber: 512, unit: 'GB' as const, label: '512 GB' },
+  { sizeNumber: 1, unit: 'TB' as const, label: '1 TB' },
+  { sizeNumber: 2, unit: 'TB' as const, label: '2 TB' },
+  { sizeNumber: 4, unit: 'TB' as const, label: '4 TB' },
+  { sizeNumber: 16, unit: 'TB' as const, label: '16 TB' },
+];
+
+const SCREEN_SIZE_PRESETS = [
+  'None / Server',
+  '13.3"',
+  '14.0"',
+  '15.6"',
+  '16.0"',
+  '24.0"',
+  '27.0" 4K',
+  '32.0" 4K',
+];
+
+interface DriveFormItem {
+  id: string;
+  sizeNumber: number;
+  unit: 'GB' | 'TB';
+  type: string;
+}
 
 export interface AssetFormModalControllerProps {
   isOpen: boolean;
   initialAsset?: Asset | null;
+  isLoading?: boolean;
   onSave: (assetData: Partial<Asset>) => void;
   onClose: () => void;
 }
@@ -35,6 +85,7 @@ export interface AssetFormModalControllerProps {
 export default function AssetFormModalController({
   isOpen,
   initialAsset,
+  isLoading = false,
   onSave,
   onClose,
 }: AssetFormModalControllerProps): React.JSX.Element {
@@ -43,54 +94,161 @@ export default function AssetFormModalController({
     initialAsset?.assetNumber || `AST-2026-${Math.floor(1000 + Math.random() * 9000)}`
   );
   const [category, setCategory] = useState<AssetCategory>(initialAsset?.category || 'Computing');
-  const [subtype, setSubtype] = useState<AssetSubtype>(initialAsset?.subtype || 'Laptop');
   const [serialNumber, setSerialNumber] = useState(initialAsset?.serialNumber || '');
   const [manufacturer, setManufacturer] = useState(initialAsset?.manufacturer || '');
-  const [model, setModel] = useState(initialAsset?.model || '');
-  const [purchaseCost, setPurchaseCost] = useState(initialAsset?.procurement?.purchaseCost || 1200);
-  const [vendorName, setVendorName] = useState(initialAsset?.procurement?.vendorName || 'Insight Direct');
-  const [department, setDepartment] = useState(initialAsset?.department || 'Engineering');
-  const [lifecycleStatus, setLifecycleStatus] = useState<LifecycleStatus>(
+  const [purchaseCost, setPurchaseCost] = useState(initialAsset?.procurement?.purchaseCost || 1499);
+  const [currency, setCurrency] = useState<'USD' | 'INR'>(
+    (initialAsset?.procurement?.currency as 'USD' | 'INR') || 'USD'
+  );
+
+  // Hardware Specs State
+  const [processor, setProcessor] = useState(initialAsset?.hardwareSpecs?.cpu || 'Apple M3 Pro');
+  const [ramGbs, setRamGbs] = useState<number>(
+    initialAsset?.hardwareSpecs?.ramGbs || 32
+  );
+
+  // Multi-Storage Drives State with Numeric Size & GB/TB Unit Dropdown
+  const [storageDrives, setStorageDrives] = useState<DriveFormItem[]>(() => {
+    if (initialAsset?.hardwareSpecs?.storageDrives && initialAsset.hardwareSpecs.storageDrives.length > 0) {
+      return initialAsset.hardwareSpecs.storageDrives.map((d, index) => {
+        const isTb = d.capacity.toUpperCase().includes('TB');
+        const num = parseFloat(d.capacity.replace(/[^0-9.]/g, '')) || (isTb ? 1 : 512);
+        return {
+          id: d.id || `drive-${index + 1}`,
+          sizeNumber: num,
+          unit: isTb ? 'TB' : 'GB',
+          type: d.type || 'NVMe SSD',
+        };
+      });
+    }
+    return [{ id: 'drive-1', sizeNumber: 512, unit: 'GB', type: 'NVMe SSD' }];
+  });
+
+  const [screenSize, setScreenSize] = useState(initialAsset?.hardwareSpecs?.screenSize || '16.0"');
+  const [notes, setNotes] = useState(initialAsset?.aiNotes || '');
+  const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setExitDirection('down');
+    }
+  }, [isOpen]);
+
+  const [lifecycleStatus] = useState<LifecycleStatus>(
     initialAsset?.lifecycleStatus || 'Inventory'
   );
 
+  const handleCancel = () => {
+    setExitDirection('up');
+    setTimeout(() => {
+      onClose();
+    }, 0);
+  };
+
+  const handleHeaderClose = () => {
+    setExitDirection('down');
+    onClose();
+  };
+
+  // Multi-Storage Helpers
+  const handleAddStorageDrive = () => {
+    const newDriveId = `drive-${Date.now()}`;
+    setStorageDrives((prev) => [
+      ...prev,
+      { id: newDriveId, sizeNumber: 1, unit: 'TB', type: 'SATA SSD' },
+    ]);
+  };
+
+  const handleRemoveStorageDrive = (idToRemove: string) => {
+    setStorageDrives((prev) => prev.filter((d) => d.id !== idToRemove));
+  };
+
+  const handleUpdateDriveNumber = (id: string, sizeNumber: number) => {
+    setStorageDrives((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, sizeNumber } : d))
+    );
+  };
+
+  const handleUpdateDriveUnit = (id: string, unit: 'GB' | 'TB') => {
+    setStorageDrives((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, unit } : d))
+    );
+  };
+
+  const handleUpdateDriveType = (id: string, type: string) => {
+    setStorageDrives((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, type } : d))
+    );
+  };
+
+  const handleApplyDrivePreset = (id: string, sizeNumber: number, unit: 'GB' | 'TB') => {
+    setStorageDrives((prev) =>
+      prev.map((d) => (d.id === id ? { ...d, sizeNumber, unit } : d))
+    );
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!deviceName || !serialNumber) {
+    if (!deviceName.trim() || !serialNumber.trim()) {
       alert('Device Name and Serial Number are required.');
       return;
     }
 
+    setExitDirection('up');
+
+    const mappedStorageDrives: StorageDrive[] = storageDrives.map((d) => ({
+      id: d.id,
+      capacity: `${d.sizeNumber} ${d.unit}`,
+      type: d.type as any,
+    }));
+
+    const aggregatedStorage = mappedStorageDrives
+      .map((d, index) =>
+        mappedStorageDrives.length > 1
+          ? `[Drive ${index + 1}: ${d.capacity} ${d.type}]`
+          : `${d.capacity} ${d.type}`
+      )
+      .join(' + ');
+
     onSave({
       id: initialAsset?.id || `AST-${Date.now()}`,
-      deviceName,
+      deviceName: deviceName.trim(),
       assetNumber,
       category,
-      subtype,
-      serialNumber,
-      companyTag: `TAG-${serialNumber.slice(-4)}`,
-      hostname: `${department.slice(0, 3).toUpperCase()}-${deviceName.replace(/\s+/g, '-').toUpperCase()}`,
-      manufacturer: manufacturer || 'Enterprise Vendor',
-      model: model || deviceName,
-      brand: manufacturer || 'Enterprise',
+      subtype: (category === 'Mobile' ? 'Smartphones & Tablets' : 'Laptop') as AssetSubtype,
+      serialNumber: serialNumber.trim(),
+      companyTag: assetNumber,
+      hostname: `CORP-${deviceName.replace(/\s+/g, '-').toUpperCase()}`,
+      manufacturer: manufacturer.trim() || 'Enterprise Vendor',
+      model: deviceName.trim(),
+      brand: manufacturer.trim() || 'Enterprise',
       productFamily: category,
-      sku: `SKU-${serialNumber.slice(0, 6)}`,
-      releaseYear: 2024,
+      sku: `SKU-${serialNumber.slice(0, 6).toUpperCase()}`,
+      releaseYear: 2026,
       lifecycleStatus,
       currentLocation: 'HQ Warehouse',
-      department,
+      department: 'Unassigned',
       businessUnit: 'Corporate Operations',
       costCenter: 'CC-100-GEN',
       barcodeValue: serialNumber.replace(/[^0-9]/g, '') || '904100990011',
+      hardwareSpecs: {
+        cpu: processor,
+        ramGbs: Number(ramGbs) || 16,
+        ram: `${ramGbs} GB`,
+        storage: aggregatedStorage,
+        storageDrives: mappedStorageDrives,
+        screenSize: screenSize,
+        storageType: mappedStorageDrives.some((d) => d.type.includes('NVMe')) ? 'NVMe' : 'SSD',
+      },
       procurement: {
         purchaseDate: new Date().toISOString().split('T')[0],
         purchaseOrderNo: `PO-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-        vendorName,
+        vendorName: manufacturer || 'Direct Enterprise Vendor',
         invoiceNo: `INV-${Math.floor(10000 + Math.random() * 90000)}`,
         invoiceDate: new Date().toISOString().split('T')[0],
-        purchaseCost,
+        purchaseCost: Number(purchaseCost) || 0,
         gstPct: 8.5,
-        currency: 'USD',
+        currency: currency,
         budgetCode: 'CAPEX-2026',
         costCenter: 'CC-100-GEN',
         isCapitalized: true,
@@ -100,40 +258,42 @@ export default function AssetFormModalController({
         warrantyStart: new Date().toISOString().split('T')[0],
         warrantyEnd: new Date(Date.now() + 3 * 365 * 86400000).toISOString().split('T')[0],
         hasExtendedWarranty: true,
-        vendorContactName: vendorName,
+        vendorContactName: manufacturer || 'Enterprise Support',
         supportPhone: '+1-800-555-0199',
-        slaDetails: '24x7 4hr Response',
+        slaDetails: '24x7 4hr Response Time',
         responseTimeHours: 4,
-        escalationContact: 'support@vendor.com',
+        escalationContact: 'support@assetsphere.internal',
       },
       security: {
         antivirusStatus: 'Active',
         vpnClientStatus: 'Installed',
         bitlockerEnabled: true,
         encryptionStatus: 'Encrypted',
-        patchLevel: 'Windows 11 23H2 (Build 22631)',
-        securityBaselineScore: 95,
-        complianceScore: 98,
+        patchLevel: 'Current (KB-2026-08)',
+        securityBaselineScore: 98,
+        complianceScore: 99,
         isCompliant: true,
       },
       network: {
-        officeLocation: 'HQ Office',
+        officeLocation: 'HQ Warehouse',
       },
       health: {
-        overallScore: 95,
+        overallScore: 98,
         batteryHealthPct: 100,
-        deviceAgeMonths: 1,
+        deviceAgeMonths: 0,
         repairCount: 0,
         warrantyStatus: 'Active',
         downtimeHoursTotal: 0,
-        performanceIndex: 98,
-        securityCompliancePct: 100,
+        performanceIndex: 99,
+        smartStatus: 'GOOD',
+        securityCompliancePct: 99,
       },
-      currentValue: purchaseCost,
+      currentValue: Number(purchaseCost) || 0,
       depreciationMethod: 'Straight Line',
-      usefulLifeYears: 4,
-      salvageValue: 100,
-      totalCostOfOwnership: purchaseCost + 200,
+      usefulLifeYears: 3,
+      salvageValue: Math.round((Number(purchaseCost) || 0) * 0.1),
+      totalCostOfOwnership: Number(purchaseCost) || 0,
+      aiNotes: notes.trim() || undefined,
       timeline: [],
       chainOfCustody: [],
     });
@@ -142,71 +302,307 @@ export default function AssetFormModalController({
   return (
     <ModalSharedComponent
       isOpen={isOpen}
-      onClose={onClose}
-      title={initialAsset ? 'Edit IT Asset Specification' : 'Register New Enterprise IT Asset'}
-      subtitle={`Asset Tag Assigned: ${assetNumber}`}
+      onClose={handleHeaderClose}
+      title={initialAsset ? 'Edit Enterprise IT Asset' : 'Register New Enterprise IT Asset'}
+      subtitle={`Auto-Generated Asset Identifier: ${assetNumber}`}
       maxWidth="3xl"
-      minHeight="min-h-[460px]"
+      minHeight="min-h-[580px]"
+      animationType="slide-up"
+      exitDirection={exitDirection}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full min-h-[420px] text-xs">
-        <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <InputSharedComponent
-              label="Device Name / Model Title *"
-              value={deviceName}
-              onChange={(e) => setDeviceName(e.target.value)}
-              placeholder="e.g. MacBook Pro 16 M3 Max"
-              required
-            />
-            <InputSharedComponent
-              label="Serial Number (S/N) *"
-              value={serialNumber}
-              onChange={(e) => setSerialNumber(e.target.value)}
-              placeholder="e.g. C02G4109MD6N"
-              required
-            />
+      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full min-h-[520px] text-xs space-y-6">
+        <div className="space-y-5">
+          {/* General Equipment Information */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-semibold tracking-wider text-slate-500 dark:text-zinc-400 uppercase flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-[#0C2086] dark:text-blue-400" />
+              General Equipment Information
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <InputSharedComponent
+                label="Device Name / Model Title *"
+                value={deviceName}
+                onChange={(e) => setDeviceName(e.target.value)}
+                placeholder="e.g. MacBook Pro 16 M3 Max"
+                required
+              />
+              <InputSharedComponent
+                label="Serial Number (S/N) *"
+                value={serialNumber}
+                onChange={(e) => setSerialNumber(e.target.value)}
+                placeholder="e.g. C02G4109MD6N"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <CustomSelectSharedComponent
+                label="Equipment Category *"
+                value={category}
+                options={CATEGORY_OPTIONS}
+                onChange={(val) => setCategory(val as AssetCategory)}
+              />
+
+              <InputSharedComponent
+                label="Manufacturer Brand"
+                value={manufacturer}
+                onChange={(e) => setManufacturer(e.target.value)}
+                placeholder="e.g. Apple / Dell / Cisco"
+              />
+            </div>
+
+            {/* Financial Cost & Currency Selector */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+              <InputSharedComponent
+                label={`Original Purchase Cost (${currency === 'INR' ? '₹' : '$'})`}
+                type="number"
+                min="0"
+                step="any"
+                value={purchaseCost}
+                onChange={(e) => setPurchaseCost(Number(e.target.value))}
+              />
+
+              <CustomSelectSharedComponent
+                label="Purchase Currency"
+                value={currency}
+                options={CURRENCY_OPTIONS}
+                onChange={(val) => setCurrency(val as 'USD' | 'INR')}
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <CustomSelectSharedComponent
-              label="Equipment Category"
-              value={category}
-              options={CATEGORY_OPTIONS}
-              onChange={(val) => setCategory(val as AssetCategory)}
-            />
+          {/* Hardware Specifications Section */}
+          <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-800/80">
+            <h4 className="text-[11px] font-semibold tracking-wider text-slate-500 dark:text-zinc-400 uppercase flex items-center gap-1.5">
+              <Cpu className="w-3.5 h-3.5 text-emerald-500" />
+              Hardware Specifications & Performance Details
+            </h4>
 
-            <CustomSelectSharedComponent
-              label="Department Allocation"
-              value={department}
-              options={DEPARTMENT_OPTIONS}
-              onChange={(val) => setDepartment(val)}
-            />
-          </div>
+            {/* Processor (CPU) */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <Cpu className="w-3.5 h-3.5 text-blue-500" />
+                Processor (CPU) Architecture
+              </label>
+              <InputSharedComponent
+                value={processor}
+                onChange={(e) => setProcessor(e.target.value)}
+                placeholder="e.g. Apple M3 Max / Intel Core i9-14900HX"
+              />
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {PROCESSOR_PRESETS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setProcessor(item)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                      processor === item
+                        ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
+                        : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <InputSharedComponent
-              label="Manufacturer Brand"
-              value={manufacturer}
-              onChange={(e) => setManufacturer(e.target.value)}
-              placeholder="e.g. Apple / Dell / Cisco"
-            />
-            <InputSharedComponent
-              label="Original Purchase Cost ($)"
-              type="number"
-              value={purchaseCost}
-              onChange={(e) => setPurchaseCost(Number(e.target.value))}
-            />
+            {/* System Memory (RAM) - Strict GB Only */}
+            <div className="space-y-2">
+              <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <MemoryStick className="w-3.5 h-3.5 text-indigo-500" />
+                System Memory (RAM in Gigabytes)
+              </label>
+              
+              <div className="relative flex items-center">
+                <input
+                  type="number"
+                  min="1"
+                  max="4096"
+                  value={ramGbs || ''}
+                  onChange={(e) => setRamGbs(Math.max(1, Number(e.target.value)))}
+                  placeholder="e.g. 32"
+                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 pr-12 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                />
+                <div className="absolute right-2.5 px-2 py-0.5 bg-slate-200 dark:bg-zinc-700 rounded text-[10px] font-semibold text-slate-700 dark:text-zinc-300 pointer-events-none select-none">
+                  GB
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {RAM_NUMERIC_PRESETS.map((val) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setRamGbs(val)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                      ramGbs === val
+                        ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
+                        : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                    }`}
+                  >
+                    {val} GB
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Dynamic Multi-Storage Drives Configuration (Number + GB/TB Select) */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                  <HardDrive className="w-3.5 h-3.5 text-amber-500" />
+                  Storage Drive Configuration (Dual / Multi-Drive Support)
+                </label>
+                <button
+                  type="button"
+                  onClick={handleAddStorageDrive}
+                  className="text-[11px] font-semibold text-[#0C2086] dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  Add Secondary Drive
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {storageDrives.map((drive, idx) => (
+                  <div
+                    key={drive.id}
+                    className="p-3 rounded-lg border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-900/60 space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10.5px] font-semibold text-slate-600 dark:text-zinc-400 uppercase tracking-wide">
+                        {idx === 0 ? 'Primary Drive' : `Secondary Drive #${idx + 1}`}
+                      </span>
+                      {storageDrives.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveStorageDrive(drive.id)}
+                          className="text-rose-500 hover:text-rose-700 dark:hover:text-rose-400 text-[10px] font-medium flex items-center gap-1 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Remove Drive
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {/* Storage Capacity with Number Input + GB/TB Unit Dropdown */}
+                      <div className="flex flex-col gap-1.5 w-full">
+                        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400">
+                          Storage Capacity
+                        </label>
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            min="1"
+                            max="10000"
+                            value={drive.sizeNumber || ''}
+                            onChange={(e) => handleUpdateDriveNumber(drive.id, Math.max(1, Number(e.target.value)))}
+                            placeholder="e.g. 512"
+                            className="w-full h-10 text-sm px-3 py-2 rounded-md bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong focus:outline-hidden focus:border-zinc-900 dark:focus:border-white font-mono transition-colors duration-200"
+                          />
+                          <CustomSelectSharedComponent
+                            value={drive.unit}
+                            options={STORAGE_UNIT_OPTIONS}
+                            onChange={(val) => handleUpdateDriveUnit(drive.id, val as 'GB' | 'TB')}
+                            className="w-24 shrink-0"
+                            dropdownClassName="!min-w-[90px]"
+                          />
+                        </div>
+                      </div>
+
+                      <CustomSelectSharedComponent
+                        label="Drive Type"
+                        value={drive.type}
+                        options={DRIVE_TYPE_OPTIONS}
+                        onChange={(val) => handleUpdateDriveType(drive.id, val)}
+                      />
+                    </div>
+
+                    {/* Quick Capacity Preset Chips */}
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {DRIVE_PRESET_ITEMS.map((preset) => {
+                        const isSelected = drive.sizeNumber === preset.sizeNumber && drive.unit === preset.unit;
+                        return (
+                          <button
+                            key={preset.label}
+                            type="button"
+                            onClick={() => handleApplyDrivePreset(drive.id, preset.sizeNumber, preset.unit)}
+                            className={`px-1.5 py-0.5 rounded text-[9.5px] font-medium border transition-all ${
+                              isSelected
+                                ? 'bg-[#0C2086] text-white border-[#0C2086]'
+                                : 'bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-700'
+                            }`}
+                          >
+                            {preset.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Display / Screen Size */}
+            <div className="space-y-2 pt-2">
+              <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <Monitor className="w-3.5 h-3.5 text-cyan-500" />
+                Display / Screen Size
+              </label>
+              <InputSharedComponent
+                value={screenSize}
+                onChange={(e) => setScreenSize(e.target.value)}
+                placeholder="e.g. 16.0-inch Liquid Retina XDR"
+              />
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {SCREEN_SIZE_PRESETS.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setScreenSize(item)}
+                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                      screenSize === item
+                        ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
+                        : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                    }`}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Administrative Notes Section */}
+            <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-zinc-800/80">
+              <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                <FileText className="w-3.5 h-3.5 text-amber-500" />
+                Administrative & Provisioning Notes (Optional)
+              </label>
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add special provisioning instructions, warranty exceptions, or location tags..."
+                rows={3}
+                className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all resize-y"
+              />
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 mt-8 border-t border-slate-200 dark:border-zinc-800 shrink-0">
-          <ButtonSharedComponent variant="outline" size="sm" onClick={onClose}>
+        {/* Modal Action Buttons */}
+        <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0">
+          <ButtonSharedComponent variant="outline" size="sm" onClick={handleCancel}>
             Cancel
           </ButtonSharedComponent>
           <ButtonSharedComponent
             type="submit"
             variant="primary"
             size="sm"
+            isLoading={isLoading}
+            loadingText={initialAsset ? 'Saving Specs...' : 'Registering Device...'}
             className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
             icon={<Plus className="w-3.5 h-3.5 !text-white" />}
           >

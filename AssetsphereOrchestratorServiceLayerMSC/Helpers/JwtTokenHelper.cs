@@ -33,6 +33,7 @@ public sealed class JwtTokenHelper
             new Claim(ClaimTypes.Email, user.Email),
             new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
             new Claim(ClaimTypes.Role, user.Role.ToString()),
+            new Claim("role", user.Role.ToString()),
             new Claim("Department", user.Department?.ToString() ?? ""),
             new Claim("AvatarUrl", user.AvatarUrl ?? "")
         };

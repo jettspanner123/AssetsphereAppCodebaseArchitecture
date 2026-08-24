@@ -8,6 +8,8 @@ import { LoginCredentials, LoginAuthState } from '../Features/LoginScreen/Models
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
 import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models/SignupScreenModel';
 import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
+import { Asset } from '../Types/AssetType';
+import { CreateAssetRequest } from '../Features/AssetInventory/Services/AssetInventoryService';
 
 export class AuthenticationQueryService {
   // Login Mutations
@@ -81,6 +83,32 @@ export class AuthenticationQueryService {
   }
 }
 
+export class AssetQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useCreateAssetMutation(
+    options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
+  ): UseMutationResult<Asset, Error, CreateAssetRequest> {
+    return useMutation({
+      mutationFn: async (request: CreateAssetRequest) => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.createAsset(request);
+      },
+      onSuccess: (...args) => {
+        this.getClient().invalidateQueries({ queryKey: ['assets'] });
+        options?.onSuccess?.(...args);
+      },
+      ...options,
+    });
+  }
+
+  public createAssetMutation(
+    options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
+  ): UseMutationResult<Asset, Error, CreateAssetRequest> {
+    return this.useCreateAssetMutation(options);
+  }
+}
+
 export default class TanstackQueryClientService {
   public static current: TanstackQueryClientService = new TanstackQueryClientService();
 
@@ -95,4 +123,5 @@ export default class TanstackQueryClientService {
   });
 
   public readonly authentication: AuthenticationQueryService = new AuthenticationQueryService();
+  public readonly assets: AssetQueryService = new AssetQueryService(() => this.client);
 }

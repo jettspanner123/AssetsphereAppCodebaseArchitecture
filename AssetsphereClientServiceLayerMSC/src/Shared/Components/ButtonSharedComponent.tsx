@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
+import { Loader2 } from 'lucide-react';
 
 export interface ButtonSharedComponentProps {
   children: React.ReactNode;
@@ -9,6 +10,8 @@ export interface ButtonSharedComponentProps {
   icon?: React.ReactNode;
   fullWidth?: boolean;
   disabled?: boolean;
+  isLoading?: boolean;
+  loadingText?: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
 }
@@ -21,6 +24,8 @@ export default function ButtonSharedComponent({
   icon,
   fullWidth = false,
   disabled = false,
+  isLoading = false,
+  loadingText,
   type = 'button',
   className = '',
 }: ButtonSharedComponentProps): React.JSX.Element {
@@ -51,20 +56,25 @@ export default function ButtonSharedComponent({
   }
 
   const widthStyle = fullWidth ? 'w-full' : '';
-  const disabledStyle = disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : '';
+  const isButtonDisabled = disabled || isLoading;
+  const disabledStyle = isButtonDisabled ? 'opacity-70 cursor-not-allowed pointer-events-none' : '';
 
   return (
     <motion.button
       type={type}
       onClick={onClick}
-      disabled={disabled}
-      whileHover={disabled ? {} : { scale: 1.01 }}
-      whileTap={disabled ? {} : { scale: 0.98 }}
+      disabled={isButtonDisabled}
+      whileHover={isButtonDisabled ? {} : { scale: 1.01 }}
+      whileTap={isButtonDisabled ? {} : { scale: 0.98 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
       className={`${baseStyles} ${sizeStyles} ${variantStyles} ${widthStyle} ${disabledStyle} ${className}`}
     >
-      {icon && <span className="flex items-center shrink-0">{icon}</span>}
-      <span>{children}</span>
+      {isLoading ? (
+        <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 text-current" />
+      ) : (
+        icon && <span className="flex items-center shrink-0">{icon}</span>
+      )}
+      <span>{isLoading && loadingText ? loadingText : children}</span>
     </motion.button>
   );
 }

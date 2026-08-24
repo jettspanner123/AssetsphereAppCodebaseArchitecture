@@ -46,6 +46,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpPost(ApplicationRouteFactory.AssetInventoryRoutes.Create)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<AssetResponseDTO>>> Create([FromBody] AssetCreateDTO request)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";
@@ -54,6 +55,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpPut(ApplicationRouteFactory.AssetInventoryRoutes.Update)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<AssetResponseDTO>>> Update([FromRoute] Guid id, [FromBody] AssetUpdateDTO request)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";
@@ -62,6 +64,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpDelete(ApplicationRouteFactory.AssetInventoryRoutes.Delete)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<bool>>> Delete([FromRoute] Guid id)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";
@@ -70,6 +73,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpPatch(ApplicationRouteFactory.AssetInventoryRoutes.UpdateLifecycle)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<AssetResponseDTO>>> UpdateLifecycle([FromRoute] Guid id, [FromBody] AssetLifecycleUpdateDTO request)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";
@@ -78,6 +82,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpPatch(ApplicationRouteFactory.AssetInventoryRoutes.AssignEmployee)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<AssetResponseDTO>>> AssignEmployee([FromRoute] Guid id, [FromBody] AssetAssignDTO request)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";
@@ -86,6 +91,7 @@ public sealed class AssetInventoryController : ControllerBase
     }
 
     [HttpPost(ApplicationRouteFactory.AssetInventoryRoutes.BulkAction)]
+    [Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
     public async Task<ActionResult<ApiResponseClass<int>>> BulkAction([FromBody] AssetBulkActionDTO request)
     {
         string username = User.FindFirstValue(ClaimTypes.Name) ?? "authenticated_user";

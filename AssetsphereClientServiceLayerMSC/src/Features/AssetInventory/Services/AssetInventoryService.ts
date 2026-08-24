@@ -136,6 +136,24 @@ export default class AssetInventoryService {
     return this.mapDtoToAsset(createdDto);
   }
 
+  public async updateAsset(id: string, request: Partial<CreateAssetRequest>): Promise<Asset> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.assetInventory.update(id), {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(request),
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+      const errorMsg = json.message || json.title || `Asset update failed with HTTP ${response.status}`;
+      throw new Error(errorMsg);
+    }
+
+    const updatedDto: BackendAssetDTO = json.data;
+    return this.mapDtoToAsset(updatedDto);
+  }
+
   public async deleteAsset(id: string): Promise<boolean> {
     const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
     const response = await fetch(config.endpoints.assetInventory.delete(id), {

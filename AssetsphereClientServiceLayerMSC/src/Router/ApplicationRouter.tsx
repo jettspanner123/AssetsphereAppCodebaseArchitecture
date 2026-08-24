@@ -94,6 +94,7 @@ export interface DashboardContextType {
   onImportAssets: (importedAssets: Asset[]) => void;
   onSaveAsset: (asset: Partial<Asset>) => void;
   onDeleteAsset: (asset: Asset) => void;
+  onOpenEditAsset?: (asset: Asset) => void;
   onSaveEmployee?: (employee: any) => void;
 }
 
@@ -319,6 +320,18 @@ export function DashboardShell(): React.JSX.Element {
       search: (prev: any) => ({
         ...prev,
         newAsset: true,
+        editAssetId: undefined,
+      }),
+    });
+  };
+
+  const handleOpenEditAsset = (asset: Asset) => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        newAsset: true,
+        editAssetId: asset.id,
       }),
     });
   };
@@ -329,6 +342,7 @@ export function DashboardShell(): React.JSX.Element {
       search: (prev: any) => ({
         ...prev,
         newAsset: undefined,
+        editAssetId: undefined,
       }),
     });
   };
@@ -388,6 +402,20 @@ export function DashboardShell(): React.JSX.Element {
     onError: (error: any) => {
       toast.error('Registration Failed', {
         description: error.message || 'Unable to register device. Please check your permissions.',
+      });
+    },
+  });
+
+  const updateAssetMutation = TanstackQueryClientService.current.assets.useUpdateAssetMutation({
+    onSuccess: (updatedAsset) => {
+      toast.success('Asset Updated Successfully', {
+        description: `Asset ${updatedAsset.assetNumber} (${updatedAsset.deviceName}) details have been saved.`,
+      });
+      handleCloseAddAsset();
+    },
+    onError: (error: any) => {
+      toast.error('Update Failed', {
+        description: error.message || 'Unable to update asset details.',
       });
     },
   });
@@ -508,7 +536,7 @@ export function DashboardShell(): React.JSX.Element {
     const aggregatedStorage = assetData.hardwareSpecs?.storage ||
       drives.map((d) => `${d.capacity} ${d.type}`).join(' + ');
 
-    createAssetMutation.mutate({
+    const payload = {
       serialNumber: assetData.serialNumber || `SN-${Date.now()}`,
       category: assetData.category || 'Computing',
       subtype: assetData.subtype || 'Laptop',
@@ -530,7 +558,16 @@ export function DashboardShell(): React.JSX.Element {
         storageDrives: drives,
         screenSize: assetData.hardwareSpecs?.screenSize || '16.0"',
       },
-    });
+    };
+
+    if (search.editAssetId) {
+      updateAssetMutation.mutate({
+        id: search.editAssetId,
+        data: payload,
+      });
+    } else {
+      createAssetMutation.mutate(payload);
+    }
   };
 
   const handleImportAssets = (_importedAssets: Asset[]) => {
@@ -547,6 +584,10 @@ export function DashboardShell(): React.JSX.Element {
   // Selected entities for modals derived from search params
   const selectedAssetForDetail = search.selectedAssetId
     ? assets.find((a) => a.id === search.selectedAssetId || a.assetNumber === search.selectedAssetId) || null
+    : null;
+
+  const editingAsset = search.editAssetId
+    ? assets.find((a) => a.id === search.editAssetId || a.assetNumber === search.editAssetId) || null
     : null;
 
   const selectedAssetForQR = search.qrAssetId
@@ -583,6 +624,7 @@ export function DashboardShell(): React.JSX.Element {
         onImportAssets: handleImportAssets,
         onSaveAsset: handleSaveAsset,
         onDeleteAsset: handleDeleteAsset,
+        onOpenEditAsset: handleOpenEditAsset,
         onSaveEmployee: handleSaveEmployee,
       }}
     >
@@ -614,8 +656,7 @@ export function DashboardShell(): React.JSX.Element {
           onClose={handleCloseAssetDetail}
           onOpenQRBadgeModal={(ast) => handleOpenQRBadge(ast)}
           onEditAsset={(ast) => {
-            handleCloseAssetDetail();
-            handleOpenAddAsset();
+            handleOpenEditAsset(ast);
           }}
         />
 
@@ -634,13 +675,14 @@ export function DashboardShell(): React.JSX.Element {
           }}
         />
 
-        {/* Global Asset Form Modal */}
+        {/* Global Asset Form Modal (Layered on top with z-60) */}
         <AssetFormModalController
           isOpen={isAssetFormOpen}
-          isLoading={createAssetMutation.isPending}
+          isLoading={createAssetMutation.isPending || updateAssetMutation.isPending}
           onClose={handleCloseAddAsset}
           onSave={handleSaveAsset}
-          initialAsset={null}
+          initialAsset={editingAsset}
+          zIndex={60}
         />
 
         {/* Global Employee Form Modal */}

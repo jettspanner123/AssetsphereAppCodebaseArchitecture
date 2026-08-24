@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { User, Mail, Building, Briefcase, MapPin, Phone, UserCheck, Plus, Sparkles } from 'lucide-react';
 import ModalSharedComponent from '../../../Shared/Components/ModalSharedComponent';
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';
@@ -89,22 +89,29 @@ export default function EmployeeFormModalController({
   );
   const [contactPhone, setContactPhone] = useState(initialEmployee?.phone || '');
   const [managerName, setManagerName] = useState(initialEmployee?.managerName || '');
-
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
+  const lastEmployeeRef = useRef<Employee | null>(initialEmployee || null);
+  if (initialEmployee) {
+    lastEmployeeRef.current = initialEmployee;
+  }
+  const displayEmployee = initialEmployee || lastEmployeeRef.current;
+  const prevIsOpenRef = useRef(isOpen);
 
   useEffect(() => {
     if (isOpen) {
-      setExitDirection('down');
-      if (initialEmployee) {
-        setFullName(initialEmployee.name || '');
-        setEmail(initialEmployee.email || '');
-        setEmployeeCode(initialEmployee.employeeCode || '');
-        setDepartment(initialEmployee.department || 'Engineering');
-        setDesignation(initialEmployee.designation || 'Software Engineer');
-        setLocation(initialEmployee.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'));
-        setEmploymentType(initialEmployee.employmentType || 'Full-time');
-        setContactPhone(initialEmployee.phone || '');
-        setManagerName(initialEmployee.managerName || '');
+      if (!prevIsOpenRef.current) {
+        setExitDirection('down');
+      }
+      if (displayEmployee) {
+        setFullName(displayEmployee.name || '');
+        setEmail(displayEmployee.email || '');
+        setEmployeeCode(displayEmployee.employeeCode || '');
+        setDepartment(displayEmployee.department || 'Engineering');
+        setDesignation(displayEmployee.designation || 'Software Engineer');
+        setLocation(displayEmployee.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'));
+        setEmploymentType(displayEmployee.employmentType || 'Full-time');
+        setContactPhone(displayEmployee.phone || '');
+        setManagerName(displayEmployee.managerName || '');
       } else {
         setFullName('');
         setEmail('');
@@ -117,7 +124,8 @@ export default function EmployeeFormModalController({
         setManagerName('');
       }
     }
-  }, [isOpen, initialEmployee, workLocations]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, displayEmployee, workLocations]);
 
   const handleCancel = () => {
     setExitDirection('up');

@@ -158,6 +158,37 @@ export class AssetQueryService {
     return this.useCreateAssetMutation(options);
   }
 
+  public useUpdateAssetMutation(
+    options?: UseMutationOptions<Asset, Error, { id: string; data: Partial<CreateAssetRequest> }>
+  ): UseMutationResult<Asset, Error, { id: string; data: Partial<CreateAssetRequest> }> {
+    return useMutation({
+      ...options,
+      mutationFn: async ({ id, data }) => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.updateAsset(id, data);
+      },
+      onSuccess: async (...args) => {
+        const [updatedAsset] = args;
+        this.getClient().setQueryData<Asset[]>(
+          TanstackQueryKeysCON.ASSETS,
+          (oldAssets) => {
+            if (!oldAssets) return [updatedAsset];
+            return oldAssets.map((a) => (a.id === updatedAsset.id ? updatedAsset : a));
+          }
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        (options?.onSuccess as any)?.(...args);
+      },
+    });
+  }
+
+  public updateAssetMutation(
+    options?: UseMutationOptions<Asset, Error, { id: string; data: Partial<CreateAssetRequest> }>
+  ): UseMutationResult<Asset, Error, { id: string; data: Partial<CreateAssetRequest> }> {
+    return this.useUpdateAssetMutation(options);
+  }
+
   public useDeleteAssetMutation(
     options?: UseMutationOptions<boolean, Error, string>
   ): UseMutationResult<boolean, Error, string> {

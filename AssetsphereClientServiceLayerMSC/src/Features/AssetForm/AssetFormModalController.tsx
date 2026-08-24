@@ -91,6 +91,7 @@ export interface AssetFormModalControllerProps {
   isOpen: boolean;
   initialAsset?: Asset | null;
   isLoading?: boolean;
+  zIndex?: number;
   onSave: (assetData: Partial<Asset>) => void;
   onClose: () => void;
 }
@@ -99,6 +100,7 @@ export default function AssetFormModalController({
   isOpen,
   initialAsset,
   isLoading = false,
+  zIndex = 60,
   onSave,
   onClose,
 }: AssetFormModalControllerProps): React.JSX.Element {
@@ -158,15 +160,67 @@ export default function AssetFormModalController({
 
   const [notes, setNotes] = useState(initialAsset?.aiNotes || '');
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
+  const lastAssetRef = React.useRef<Asset | null>(initialAsset || null);
+  if (initialAsset) {
+    lastAssetRef.current = initialAsset;
+  }
+  const displayAsset = initialAsset || lastAssetRef.current;
+  const prevIsOpenRef = React.useRef(isOpen);
 
   React.useEffect(() => {
     if (isOpen) {
-      setExitDirection('down');
-      if (!initialAsset && workLocations.length > 0 && !assignedLocation) {
-        setAssignedLocation(workLocations[0]);
+      if (!prevIsOpenRef.current) {
+        setExitDirection('down');
+      }
+      if (displayAsset) {
+        setDeviceName(displayAsset.deviceName || '');
+        setCategory(displayAsset.category || 'Computing');
+        setSerialNumber(displayAsset.serialNumber || '');
+        setManufacturer(displayAsset.manufacturer || '');
+        setPurchaseCost(displayAsset.procurement?.purchaseCost || 1499);
+        setCurrency((displayAsset.procurement?.currency as 'USD' | 'INR') || 'USD');
+        setProcessor(displayAsset.hardwareSpecs?.cpu || displayAsset.hardwareSpecs?.processor || 'Apple M3 Pro');
+        setRamGbs(displayAsset.hardwareSpecs?.ramGbs || 32);
+        if (displayAsset.hardwareSpecs?.storageDrives && displayAsset.hardwareSpecs.storageDrives.length > 0) {
+          setStorageDrives(
+            displayAsset.hardwareSpecs.storageDrives.map((d, index) => {
+              const isTb = d.capacity.toUpperCase().includes('TB');
+              const num = parseFloat(d.capacity.replace(/[^0-9.]/g, '')) || (isTb ? 1 : 512);
+              return {
+                id: d.id || `drive-${index + 1}`,
+                sizeNumber: num,
+                unit: isTb ? 'TB' : 'GB',
+                type: d.type || 'NVMe SSD',
+              };
+            })
+          );
+        } else {
+          setStorageDrives([{ id: 'drive-1', sizeNumber: 512, unit: 'GB', type: 'NVMe SSD' }]);
+        }
+        setScreenSize(displayAsset.hardwareSpecs?.screenSize || '16.0"');
+        setAssignedEmployeeId(displayAsset.assignedToEmployeeId || 'UNASSIGNED');
+        setAssignedDepartment(displayAsset.department || 'Engineering');
+        setAssignedLocation(displayAsset.currentLocation || workLocations[0] || 'Pune, Maharastra');
+        setNotes(displayAsset.aiNotes || '');
+      } else {
+        setDeviceName('');
+        setCategory('Computing');
+        setSerialNumber('');
+        setManufacturer('');
+        setPurchaseCost(1499);
+        setCurrency('USD');
+        setProcessor('Apple M3 Pro');
+        setRamGbs(32);
+        setStorageDrives([{ id: 'drive-1', sizeNumber: 512, unit: 'GB', type: 'NVMe SSD' }]);
+        setScreenSize('16.0"');
+        setAssignedEmployeeId('UNASSIGNED');
+        setAssignedDepartment('Engineering');
+        setAssignedLocation(workLocations[0] || 'Pune, Maharastra');
+        setNotes('');
       }
     }
-  }, [isOpen, initialAsset, workLocations]);
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen, displayAsset, workLocations]);
 
   // Employee Select Options for Searchable Dropdown
   const employeeSelectOptions: SelectOption[] = React.useMemo(() => {
@@ -365,8 +419,13 @@ export default function AssetFormModalController({
     <ModalSharedComponent
       isOpen={isOpen}
       onClose={onClose}
-      title={initialAsset ? 'Edit Enterprise IT Asset' : 'Register New Enterprise IT Asset'}
-      subtitle={`Auto-Generated Asset Identifier: ${assetNumber}`}
+      zIndex={zIndex}
+      title={initialAsset ? `Edit ${initialAsset.deviceName}` : 'Register New Enterprise IT Asset'}
+      subtitle={
+        initialAsset
+          ? `Asset Tag: ${initialAsset.assetNumber} • S/N: ${initialAsset.serialNumber}`
+          : `Auto-Generated Asset Identifier: ${assetNumber}`
+      }
       maxWidth="3xl"
       scrollMode="backdrop"
       animationType="slide-up"
@@ -723,7 +782,7 @@ export default function AssetFormModalController({
             className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
             icon={<Plus className="w-3.5 h-3.5 !text-white" />}
           >
-            <span className="!text-white font-medium">{initialAsset ? 'Save Asset Specs' : 'Register Device'}</span>
+            <span className="!text-white font-medium">{initialAsset ? 'Update Asset' : 'Register Device'}</span>
           </ButtonSharedComponent>
         </div>
       </form>

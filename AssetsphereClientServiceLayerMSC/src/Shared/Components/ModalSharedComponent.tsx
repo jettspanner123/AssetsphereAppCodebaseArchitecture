@@ -14,6 +14,7 @@ export interface ModalSharedComponentProps {
   scrollMode?: 'backdrop' | 'body';
   animationType?: 'scale' | 'slide-up';
   exitDirection?: 'down' | 'up';
+  zIndex?: number;
 }
 
 export default function ModalSharedComponent({
@@ -28,30 +29,33 @@ export default function ModalSharedComponent({
   scrollMode = 'backdrop',
   animationType = 'slide-up',
   exitDirection: exitDirectionProp = 'down',
+  zIndex = 50,
 }: ModalSharedComponentProps): React.JSX.Element {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [internalExitDirection, setInternalExitDirection] = useState<'down' | 'up'>('down');
+  const [internalExitDirection, setInternalExitDirection] = useState<'down' | 'up'>(exitDirectionProp);
+  const prevOpenRef = useRef(isOpen);
 
-  // Sync internal exit direction from parent prop (used by Cancel/Submit to force a direction)
+  // Sync internal exit direction whenever exitDirectionProp changes
   useEffect(() => {
     setInternalExitDirection(exitDirectionProp);
   }, [exitDirectionProp]);
 
-  // Reset exit direction to 'down' when modal opens
+  // Reset exit direction to 'down' ONLY when transitioning from closed to open
   useEffect(() => {
-    if (isOpen) {
-      setInternalExitDirection('down');
+    if (isOpen && !prevOpenRef.current) {
+      setInternalExitDirection(exitDirectionProp || 'down');
     }
-  }, [isOpen]);
+    prevOpenRef.current = isOpen;
+  }, [isOpen, exitDirectionProp]);
 
   /**
    * Determines exit direction based on the backdrop scroll position.
-   * If scrollMode is 'backdrop' and the container has been scrolled (scrollTop > 0),
+   * If scrollMode is 'backdrop' and the container has been scrolled (scrollTop > 40),
    * the modal exits upward. Otherwise it exits downward.
    */
   const getScrollAwareDirection = (): 'down' | 'up' => {
     if (scrollMode === 'backdrop' && scrollContainerRef.current) {
-      return scrollContainerRef.current.scrollTop > 0 ? 'up' : 'down';
+      return scrollContainerRef.current.scrollTop > 40 ? 'up' : 'down';
     }
     return 'down';
   };
@@ -59,7 +63,6 @@ export default function ModalSharedComponent({
   const handleBackdropClick = () => {
     const direction = getScrollAwareDirection();
     setInternalExitDirection(direction);
-    // Use setTimeout(0) so the state update is committed before AnimatePresence reads exit variant
     setTimeout(() => {
       onClose();
     }, 0);
@@ -75,7 +78,9 @@ export default function ModalSharedComponent({
 
   const handleHeaderClose = () => {
     setInternalExitDirection('down');
-    onClose();
+    setTimeout(() => {
+      onClose();
+    }, 0);
   };
 
   useEffect(() => {
@@ -103,6 +108,8 @@ export default function ModalSharedComponent({
   if (maxWidth === '5xl') widthClass = 'max-w-5xl';
 
   const isSlideUp = animationType === 'slide-up';
+  const activeExitDirection: 'down' | 'up' =
+    exitDirectionProp === 'up' || internalExitDirection === 'up' ? 'up' : 'down';
 
   const modalVariants = {
     initial: {
@@ -114,43 +121,50 @@ export default function ModalSharedComponent({
       y: 0,
       opacity: 1,
       scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.16, 1, 0.3, 1] as const,
+      },
     },
-    exit: {
-      y: isSlideUp ? (internalExitDirection === 'up' ? '-100vh' : '100vh') : 8,
-      opacity: isSlideUp ? 1 : 0,
-      scale: isSlideUp ? 1 : 0.96,
+    exit: (customDir?: 'down' | 'up') => {
+      const dir = customDir || activeExitDirection;
+      return {
+        y: isSlideUp ? (dir === 'up' ? '-100vh' : '100vh') : 8,
+        opacity: isSlideUp ? 1 : 0,
+        scale: isSlideUp ? 1 : 0.96,
+        transition: {
+          duration: 0.6,
+          ease: [0.4, 0, 0.2, 1] as const,
+        },
+      };
     },
   };
 
   return (
-    <AnimatePresence>
+    <AnimatePresence custom={activeExitDirection}>
       {isOpen && (
         <div
           ref={scrollContainerRef}
-          className="fixed inset-0 z-50 flex items-start justify-center p-4 sm:p-6 overflow-y-auto"
+          style={{ zIndex }}
+          className="fixed inset-0 flex items-start justify-center p-4 sm:p-6 overflow-y-auto"
         >
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
             onClick={handleBackdropClick}
             className="fixed inset-0 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm"
           />
 
           {/* Dialog content */}
           <motion.div
+            custom={activeExitDirection}
             variants={modalVariants}
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{
-              type: 'spring',
-              damping: 30,
-              stiffness: 300,
-              mass: 0.8,
-            }}
             className={`relative w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-xl shadow-2xl z-10 my-auto sm:my-8 flex flex-col shrink-0`}
           >
             {/* Header */}

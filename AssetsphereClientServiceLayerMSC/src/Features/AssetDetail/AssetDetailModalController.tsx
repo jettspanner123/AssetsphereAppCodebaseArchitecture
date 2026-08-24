@@ -149,7 +149,7 @@ export default function AssetDetailModalController({
               onClick={() => onEditAsset(displayAsset)}
               icon={<Edit className="w-3.5 h-3.5" />}
             >
-              Edit Specs
+              Edit Asset
             </ButtonSharedComponent>
           </div>
         </div>

@@ -9,6 +9,7 @@ export const DashboardSearchSchema = z.object({
   selectedEmployeeId: z.string().optional(),
   employeeTab: z.enum(['overview', 'assigned_assets', 'activity']).optional(),
   editEmployeeId: z.string().optional(),
+  editAssetId: z.string().optional(),
   newAsset: z.boolean().optional(),
   newEmployee: z.boolean().optional(),
   scanner: z.boolean().optional(),

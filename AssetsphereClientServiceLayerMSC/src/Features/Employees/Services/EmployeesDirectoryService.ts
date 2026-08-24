@@ -123,6 +123,24 @@ export default class EmployeesDirectoryService {
     return this.mapDtoToEmployee(createdDto);
   }
 
+  public async updateEmployee(id: string, request: Partial<CreateEmployeeRequest>): Promise<Employee> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.employees.update(id), {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(request),
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+      const errorMsg = json.message || json.title || `Employee update failed with HTTP ${response.status}`;
+      throw new Error(errorMsg);
+    }
+
+    const updatedDto: BackendEmployeeDTO = json.data;
+    return this.mapDtoToEmployee(updatedDto);
+  }
+
   public async deleteEmployee(id: string): Promise<boolean> {
     const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
     const response = await fetch(config.endpoints.employees.delete(id), {

@@ -8,7 +8,6 @@ import {
   QrCode,
   Grid,
   List,
-  Columns,
   ShieldCheck,
   ShieldAlert,
   MoreVertical,
@@ -47,7 +46,7 @@ export const AssetInventoryView: React.FC<AssetInventoryViewProps> = ({
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
   const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [viewMode, setViewMode] = useState<'table' | 'grid' | 'kanban'>('table');
+  const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
 
   const categoriesList: (AssetCategory | 'ALL')[] = [
     'ALL',
@@ -182,13 +181,6 @@ export const AssetInventoryView: React.FC<AssetInventoryViewProps> = ({
                 title="Grid Card View"
               >
                 <Grid className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('kanban')}
-                className={`p-1.5 rounded ${viewMode === 'kanban' ? 'bg-slate-800 text-white' : 'text-slate-500 hover:text-slate-300'}`}
-                title="Kanban Board View"
-              >
-                <Columns className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -394,44 +386,6 @@ export const AssetInventoryView: React.FC<AssetInventoryViewProps> = ({
                       style={{ width: `${ast.health?.overallScore}%` }}
                     />
                   </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* VIEW 3: Kanban Board View */}
-      {viewMode === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 overflow-x-auto">
-          {['Inventory', 'Assigned', 'Repair', 'Retired'].map((stage) => {
-            const stageAssets = filteredAssets.filter((a) =>
-              stage === 'Assigned' ? a.lifecycleStatus === 'In Use' || a.lifecycleStatus === 'Assigned' : a.lifecycleStatus === stage
-            );
-            return (
-              <div key={stage} className="bg-[#161618] border border-slate-800 rounded-xl p-4 space-y-4 min-h-[500px]">
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <h3 className="font-semibold text-xs text-white uppercase tracking-wider">{stage}</h3>
-                  <span className="bg-slate-900 text-slate-400 font-mono text-[10px] px-2 py-0.5 rounded font-bold border border-slate-800">
-                    {stageAssets.length}
-                  </span>
-                </div>
-                <div className="space-y-3">
-                  {stageAssets.map((ast) => (
-                    <div
-                      key={ast.id}
-                      onClick={() => onSelectAsset(ast)}
-                      className="p-3.5 bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 cursor-pointer space-y-2 text-xs"
-                    >
-                      <div className="font-medium text-white">{ast.deviceName}</div>
-                      <div className="font-mono text-[10px] text-indigo-400">{ast.assetNumber}</div>
-                      <div className="text-[11px] text-slate-500">{ast.assignedToEmployeeName || 'Warehouse Storage'}</div>
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-800 font-mono text-[10px] text-slate-400">
-                        <span>${ast.currentValue}</span>
-                        <span className="text-emerald-400 font-bold">{ast.health?.overallScore}%</span>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             );

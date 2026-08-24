@@ -93,14 +93,14 @@ export default class UserPreferencesUtility {
   }
 
   // Asset Inventory View Mode - Default: grid
-  public getInventoryViewMode(defaultMode: 'table' | 'grid' | 'kanban' = 'grid'): 'table' | 'grid' | 'kanban' {
+  public getInventoryViewMode(defaultMode: 'table' | 'grid' = 'grid'): 'table' | 'grid' {
     if (typeof window === 'undefined') return defaultMode;
     const saved = localStorage.getItem(this.inventoryViewModeKey);
-    if (saved === 'table' || saved === 'grid' || saved === 'kanban') return saved;
+    if (saved === 'table' || saved === 'grid') return saved;
     return defaultMode;
   }
 
-  public setInventoryViewMode(mode: 'table' | 'grid' | 'kanban'): void {
+  public setInventoryViewMode(mode: 'table' | 'grid'): void {
     if (typeof window !== 'undefined') {
       localStorage.setItem(this.inventoryViewModeKey, mode);
     }

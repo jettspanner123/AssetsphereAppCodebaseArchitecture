@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Asset } from '../../Types/AssetType';
 import { fetchAssetDiagnostics, AIDiagnosticsResult } from '@/src/Services/aiService';
 import MockDataSeederService from '@/src/Services/MockDataSeederService';
@@ -41,7 +41,11 @@ export default function AssetDetailModalController({
   onOpenQRBadgeModal,
   onEditAsset,
 }: AssetDetailModalControllerProps): React.JSX.Element {
-  if (!asset) return <React.Fragment />;
+  const lastAssetRef = useRef<Asset | null>(asset);
+  if (asset) {
+    lastAssetRef.current = asset;
+  }
+  const displayAsset = asset || lastAssetRef.current;
 
   type AssetDetailTab = 'specs' | 'procurement' | 'warranty' | 'security' | 'timeline' | 'ai_diagnostics';
 
@@ -50,20 +54,22 @@ export default function AssetDetailModalController({
   const [aiDiagnostics, setAiDiagnostics] = useState<AIDiagnosticsResult | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
+  if (!displayAsset) return <React.Fragment />;
+
   const handleRunAiDiagnostics = async () => {
     setLoadingAi(true);
-    const result = await fetchAssetDiagnostics(asset);
+    const result = await fetchAssetDiagnostics(displayAsset);
     setAiDiagnostics(result);
     setLoadingAi(false);
   };
 
-  const hasCustodyHistory = asset.chainOfCustody && asset.chainOfCustody.length > 0;
-  const hasHardwareSpecs = Boolean(asset.hardwareSpecs?.cpu || asset.hardwareSpecs?.ramGbs || asset.hardwareSpecs?.storageGbs);
+  const hasCustodyHistory = displayAsset.chainOfCustody && displayAsset.chainOfCustody.length > 0;
+  const hasHardwareSpecs = Boolean(displayAsset.hardwareSpecs?.cpu || displayAsset.hardwareSpecs?.ramGbs || displayAsset.hardwareSpecs?.storageGbs);
 
   // Look up full employee record from MockDataSeederService
   const employees = MockDataSeederService.current.getEmployees();
   const assignedEmployee = employees.find(
-    (e) => e.id === asset.assignedToEmployeeId || e.name === asset.assignedToEmployeeName
+    (e) => e.id === displayAsset.assignedToEmployeeId || e.name === displayAsset.assignedToEmployeeName
   );
 
   // Construct alternating roadmap milestones starting from Intake -> Provisioning -> Custody Events
@@ -71,20 +77,20 @@ export default function AssetDetailModalController({
     {
       id: 'EVT-INTAKE',
       title: 'Vendor Procurement & Intake',
-      timestamp: asset.procurement?.purchaseDate || 'Initial Intake',
-      description: `Received from ${asset.procurement?.vendorName || 'Enterprise Vendor'} into HQ Storage. Barcode #${asset.barcodeValue} assigned.`,
+      timestamp: displayAsset.procurement?.purchaseDate || 'Initial Intake',
+      description: `Received from ${displayAsset.procurement?.vendorName || 'Enterprise Vendor'} into HQ Storage. Barcode #${displayAsset.barcodeValue} assigned.`,
       icon: <Warehouse className="w-4 h-4 text-slate-600 dark:text-zinc-300" />,
       signature: 'Inspected by HQ Warehouse QA',
     },
     {
       id: 'EVT-[#0C2086]',
       title: 'IT Staging & Security Baseline',
-      timestamp: asset.procurement?.purchaseDate ? `${asset.procurement.purchaseDate}` : 'Provisioned',
+      timestamp: displayAsset.procurement?.purchaseDate ? `${displayAsset.procurement.purchaseDate}` : 'Provisioned',
       description: `Device provisioned with enterprise security baseline, BitLocker encryption, and CrowdStrike agent.`,
       icon: <PackageCheck className="w-4 h-4 text-slate-600 dark:text-zinc-300" />,
       signature: 'Approved by IT Operations',
     },
-    ...(asset.chainOfCustody?.map((record) => ({
+    ...(displayAsset.chainOfCustody?.map((record) => ({
       id: record.id,
       title: `${record.fromEntity} → ${record.toEntity}`,
       timestamp: record.timestamp,
@@ -107,8 +113,8 @@ export default function AssetDetailModalController({
     <ModalSharedComponent
       isOpen={Boolean(asset)}
       onClose={onClose}
-      title={`${asset.deviceName} (${asset.assetNumber})`}
-      subtitle={`${asset.manufacturer} ${asset.model} • S/N: ${asset.serialNumber}`}
+      title={`${displayAsset.deviceName} (${displayAsset.assetNumber})`}
+      subtitle={`${displayAsset.manufacturer} ${displayAsset.model} • S/N: ${displayAsset.serialNumber}`}
       maxWidth="5xl"
       minHeight="min-h-[540px]"
     >
@@ -117,14 +123,14 @@ export default function AssetDetailModalController({
         <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <BadgeSharedComponent
-              variant={asset.security?.isCompliant ? 'success' : 'danger'}
+              variant={displayAsset.security?.isCompliant ? 'success' : 'danger'}
               size="md"
               showDot
             >
-              {asset.lifecycleStatus}
+              {displayAsset.lifecycleStatus}
             </BadgeSharedComponent>
             <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">
-              Valuation: ${asset.currentValue?.toLocaleString()}
+              Valuation: ${displayAsset.currentValue?.toLocaleString()}
             </span>
           </div>
 
@@ -132,7 +138,7 @@ export default function AssetDetailModalController({
             <ButtonSharedComponent
               variant="ghost"
               size="sm"
-              onClick={() => onOpenQRBadgeModal(asset)}
+              onClick={() => onOpenQRBadgeModal(displayAsset)}
               icon={<QrCode className="w-3.5 h-3.5" />}
             >
               Print Badge
@@ -140,7 +146,7 @@ export default function AssetDetailModalController({
             <ButtonSharedComponent
               variant="outline"
               size="sm"
-              onClick={() => onEditAsset(asset)}
+              onClick={() => onEditAsset(displayAsset)}
               icon={<Edit className="w-3.5 h-3.5" />}
             >
               Edit Specs
@@ -176,19 +182,19 @@ export default function AssetDetailModalController({
                 <div className="space-y-2 text-slate-600 dark:text-zinc-300">
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Processor (CPU):</span>
-                    <span className="font-mono">{asset.hardwareSpecs?.cpu || 'N/A'}</span>
+                    <span className="font-mono">{displayAsset.hardwareSpecs?.cpu || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">RAM Memory:</span>
-                    <span className="font-mono">{asset.hardwareSpecs?.ramGbs ? `${asset.hardwareSpecs.ramGbs} GB` : 'N/A'}</span>
+                    <span className="font-mono">{displayAsset.hardwareSpecs?.ramGbs ? `${displayAsset.hardwareSpecs.ramGbs} GB` : 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Disk Storage:</span>
-                    <span className="font-mono">{asset.hardwareSpecs?.storageGbs ? `${asset.hardwareSpecs.storageGbs} GB ${asset.hardwareSpecs.storageType || ''}` : 'N/A'}</span>
+                    <span className="font-mono">{displayAsset.hardwareSpecs?.storageGbs ? `${displayAsset.hardwareSpecs.storageGbs} GB ${displayAsset.hardwareSpecs.storageType || ''}` : 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">MAC Address:</span>
-                    <span className="font-mono">{asset.hardwareSpecs?.ethernetMac || asset.hardwareSpecs?.wifiMac || 'N/A'}</span>
+                    <span className="font-mono">{displayAsset.hardwareSpecs?.ethernetMac || displayAsset.hardwareSpecs?.wifiMac || 'N/A'}</span>
                   </div>
                 </div>
               </CardSharedComponent>
@@ -200,19 +206,19 @@ export default function AssetDetailModalController({
                 <div className="space-y-2 text-slate-600 dark:text-zinc-300">
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Assigned User:</span>
-                    <span className="font-medium">{asset.assignedToEmployeeName || 'Unassigned'}</span>
+                    <span className="font-medium">{displayAsset.assignedToEmployeeName || 'Unassigned'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Department:</span>
-                    <span>{asset.department || 'N/A'}</span>
+                    <span>{displayAsset.department || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Primary Office:</span>
-                    <span>{asset.currentLocation || 'N/A'}</span>
+                    <span>{displayAsset.currentLocation || 'N/A'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400 font-medium">Cost Center:</span>
-                    <span className="font-mono">{asset.costCenter || 'N/A'}</span>
+                    <span className="font-mono">{displayAsset.costCenter || 'N/A'}</span>
                   </div>
                 </div>
               </CardSharedComponent>
@@ -223,7 +229,7 @@ export default function AssetDetailModalController({
               title="Hardware Specifications Pending"
               description="Technical hardware specs such as CPU cores, RAM capacity, and storage types have not been indexed for this device tag."
               actionButton={
-                <ButtonSharedComponent variant="outline" size="sm" onClick={() => onEditAsset(asset)}>
+                <ButtonSharedComponent variant="outline" size="sm" onClick={() => onEditAsset(displayAsset)}>
                   Populate Specs
                 </ButtonSharedComponent>
               }
@@ -232,7 +238,7 @@ export default function AssetDetailModalController({
         )}
 
         {activeTab === 'procurement' && (
-          asset.procurement ? (
+          displayAsset.procurement ? (
             <CardSharedComponent className="space-y-3 text-xs">
               <h4 className="font-semibold text-slate-900 dark:text-white font-serif-headline flex items-center gap-2">
                 <DollarSign className="w-4 h-4 text-emerald-500" /> Financial Details
@@ -240,19 +246,19 @@ export default function AssetDetailModalController({
               <div className="grid grid-cols-2 gap-4 text-slate-600 dark:text-zinc-300">
                 <div>
                   <span className="text-slate-400 font-medium">Purchase Order:</span>
-                  <p className="font-mono font-medium">{asset.procurement?.purchaseOrderNo || 'N/A'}</p>
+                  <p className="font-mono font-medium">{displayAsset.procurement?.purchaseOrderNo || 'N/A'}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Original Cost:</span>
-                  <p className="font-mono font-medium">${asset.procurement?.purchaseCost?.toLocaleString() || 0}</p>
+                  <p className="font-mono font-medium">${displayAsset.procurement?.purchaseCost?.toLocaleString() || 0}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Vendor:</span>
-                  <p className="font-medium">{asset.procurement?.vendorName || 'N/A'}</p>
+                  <p className="font-medium">{displayAsset.procurement?.vendorName || 'N/A'}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Purchase Date:</span>
-                  <p className="font-mono">{asset.procurement?.purchaseDate || 'N/A'}</p>
+                  <p className="font-mono">{displayAsset.procurement?.purchaseDate || 'N/A'}</p>
                 </div>
               </div>
             </CardSharedComponent>
@@ -266,7 +272,7 @@ export default function AssetDetailModalController({
         )}
 
         {activeTab === 'warranty' && (
-          asset.warranty || asset.health ? (
+          displayAsset.warranty || displayAsset.health ? (
             <CardSharedComponent className="space-y-3 text-xs">
               <h4 className="font-semibold text-slate-900 dark:text-white font-serif-headline flex items-center gap-2">
                 <Activity className="w-4 h-4 text-amber-500" /> Health Telemetry & Warranty
@@ -274,19 +280,19 @@ export default function AssetDetailModalController({
               <div className="grid grid-cols-2 gap-4 text-slate-600 dark:text-zinc-300">
                 <div>
                   <span className="text-slate-400 font-medium">Health Score:</span>
-                  <p className="font-mono font-bold text-emerald-500 text-sm">{asset.health?.overallScore || 0}%</p>
+                  <p className="font-mono font-bold text-emerald-500 text-sm">{displayAsset.health?.overallScore || 0}%</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Battery Health:</span>
-                  <p className="font-mono font-bold">{asset.health?.batteryHealthPct ? `${asset.health.batteryHealthPct}%` : 'N/A'}</p>
+                  <p className="font-mono font-bold">{displayAsset.health?.batteryHealthPct ? `${displayAsset.health.batteryHealthPct}%` : 'N/A'}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Warranty End:</span>
-                  <p className="font-mono">{asset.warranty?.warrantyEnd || 'N/A'}</p>
+                  <p className="font-mono">{displayAsset.warranty?.warrantyEnd || 'N/A'}</p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Repair History Count:</span>
-                  <p className="font-mono">{asset.health?.repairCount || 0} maintenance events</p>
+                  <p className="font-mono">{displayAsset.health?.repairCount || 0} maintenance events</p>
                 </div>
               </div>
             </CardSharedComponent>
@@ -300,7 +306,7 @@ export default function AssetDetailModalController({
         )}
 
         {activeTab === 'security' && (
-          asset.security ? (
+          displayAsset.security ? (
             <CardSharedComponent className="space-y-3 text-xs">
               <h4 className="font-semibold text-slate-900 dark:text-white font-serif-headline flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-sky-500" /> Endpoint Security Audit
@@ -308,19 +314,19 @@ export default function AssetDetailModalController({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span>Disk Encryption Status</span>
-                  <BadgeSharedComponent variant={asset.security?.encryptionStatus === 'Encrypted' ? 'success' : 'danger'} size="sm">
-                    {asset.security?.encryptionStatus || 'UNENCRYPTED'}
+                  <BadgeSharedComponent variant={displayAsset.security?.encryptionStatus === 'Encrypted' ? 'success' : 'danger'} size="sm">
+                    {displayAsset.security?.encryptionStatus || 'UNENCRYPTED'}
                   </BadgeSharedComponent>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Antivirus Status</span>
-                  <BadgeSharedComponent variant={asset.security?.antivirusStatus === 'Active' ? 'success' : 'danger'} size="sm">
-                    {asset.security?.antivirusStatus || 'MISSING'}
+                  <BadgeSharedComponent variant={displayAsset.security?.antivirusStatus === 'Active' ? 'success' : 'danger'} size="sm">
+                    {displayAsset.security?.antivirusStatus || 'MISSING'}
                   </BadgeSharedComponent>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>OS Patch Level</span>
-                  <span className="font-mono text-slate-500">{asset.security?.patchLevel || 'N/A'}</span>
+                  <span className="font-mono text-slate-500">{displayAsset.security?.patchLevel || 'N/A'}</span>
                 </div>
               </div>
             </CardSharedComponent>
@@ -343,13 +349,13 @@ export default function AssetDetailModalController({
                   {assignedEmployee?.avatarUrl ? (
                     <img
                       src={assignedEmployee.avatarUrl}
-                      alt={asset.assignedToEmployeeName || 'Custodian'}
+                      alt={displayAsset.assignedToEmployeeName || 'Custodian'}
                       className="w-11 h-11 rounded-full object-cover border border-slate-200 dark:border-zinc-700 shadow-2xs"
                     />
                   ) : (
                     <div className="w-11 h-11 rounded-full bg-[#0C2086]/10 text-[#0C2086] dark:bg-indigo-950/60 dark:text-indigo-400 border border-[#0C2086]/20 font-bold flex items-center justify-center text-sm font-mono shadow-2xs">
-                      {asset.assignedToEmployeeName
-                        ? asset.assignedToEmployeeName
+                      {displayAsset.assignedToEmployeeName
+                        ? displayAsset.assignedToEmployeeName
                             .split(' ')
                             .map((n) => n[0])
                             .join('')
@@ -360,7 +366,7 @@ export default function AssetDetailModalController({
                   <div>
                     <div className="flex items-center gap-2">
                       <h4 className="font-bold text-sm text-slate-900 dark:text-white font-serif-headline">
-                        {asset.assignedToEmployeeName || 'HQ Inventory Pool'}
+                        {displayAsset.assignedToEmployeeName || 'HQ Inventory Pool'}
                       </h4>
                       {assignedEmployee?.employeeCode && (
                         <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 font-semibold">
@@ -369,7 +375,7 @@ export default function AssetDetailModalController({
                       )}
                     </div>
                     <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                      {assignedEmployee?.designation || `${asset.department} Department Lead`}
+                      {assignedEmployee?.designation || `${displayAsset.department} Department Lead`}
                     </p>
                   </div>
                 </div>
@@ -388,10 +394,10 @@ export default function AssetDetailModalController({
                     <Building className="w-3 h-3 text-slate-400" /> Department & Unit
                   </span>
                   <p className="font-medium text-slate-800 dark:text-zinc-200">
-                    {assignedEmployee?.department || asset.department}
+                    {assignedEmployee?.department || displayAsset.department}
                   </p>
                   <p className="text-[10px] font-mono text-slate-400 dark:text-zinc-500">
-                    {assignedEmployee?.businessUnit || asset.businessUnit} • {assignedEmployee?.costCenter || asset.costCenter}
+                    {assignedEmployee?.businessUnit || displayAsset.businessUnit} • {assignedEmployee?.costCenter || displayAsset.costCenter}
                   </p>
                 </div>
 
@@ -400,7 +406,7 @@ export default function AssetDetailModalController({
                     <MapPin className="w-3 h-3 text-slate-400" /> Verified Location
                   </span>
                   <p className="font-medium text-slate-800 dark:text-zinc-200">
-                    {assignedEmployee?.officeLocation || asset.currentLocation}
+                    {assignedEmployee?.officeLocation || displayAsset.currentLocation}
                   </p>
                   <p className="text-[10px] font-mono text-slate-400 dark:text-zinc-500">
                     {assignedEmployee?.floor ? `${assignedEmployee.floor} (${assignedEmployee.desk})` : 'Primary Facility'}
@@ -415,7 +421,7 @@ export default function AssetDetailModalController({
                     {assignedEmployee?.email || 'custody@enterprise.com'}
                   </p>
                   <p className="text-[10px] font-mono text-slate-400 dark:text-zinc-500">
-                    Assigned: {asset.assignedDate || '2023-11-20'} • {asset.lastVerifiedDate ? `Last Audit: ${asset.lastVerifiedDate}` : 'Audit Active'}
+                    Assigned: {displayAsset.assignedDate || '2023-11-20'} • {displayAsset.lastVerifiedDate ? `Last Audit: ${displayAsset.lastVerifiedDate}` : 'Audit Active'}
                   </p>
                 </div>
               </div>

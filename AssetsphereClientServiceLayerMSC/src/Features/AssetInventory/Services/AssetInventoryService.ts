@@ -51,10 +51,14 @@ export interface CreateAssetRequest {
   modelName: string;
   manufacturer: string;
   status?: string;
+  assignedEmployeeId?: string;
+  assignedEmployeeName?: string;
+  assignedDepartment?: string;
   purchasePrice: number;
   currency?: string;
   location?: string;
   notes?: string;
+  warrantyInfoJson?: string;
   specs?: {
     processor?: string;
     ramGbs?: number;

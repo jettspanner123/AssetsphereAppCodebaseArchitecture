@@ -5,18 +5,19 @@ import { Asset } from '../Types/AssetType';
 export interface AssetInventoryScreenRouteProps {
   assets: Asset[];
   isLoading?: boolean;
+  onRefresh?: () => void;
   onSelectAsset: (asset: Asset) => void;
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
   onImportAssets?: (importedAssets: Asset[]) => void;
   onDeleteAsset?: (asset: Asset) => void;
-  overrideViewMode?: 'table' | 'grid' | 'kanban';
+  overrideViewMode?: 'table' | 'grid';
   overrideGridColumns?: 2 | 3;
   overrideSingleLine?: boolean;
   overrideComplianceFilter?: string;
   overrideSearchQuery?: string;
-  onViewModeChange?: (mode: 'table' | 'grid' | 'kanban') => void;
+  onViewModeChange?: (mode: 'table' | 'grid') => void;
   onGridColumnsChange?: (cols: 2 | 3) => void;
   onSingleLineChange?: (val: boolean) => void;
 }
@@ -24,6 +25,7 @@ export interface AssetInventoryScreenRouteProps {
 export default function AssetInventoryScreenRoute({
   assets,
   isLoading = false,
+  onRefresh,
   onSelectAsset,
   onOpenAddModal,
   onOpenQRBadgeModal,
@@ -43,6 +45,7 @@ export default function AssetInventoryScreenRoute({
     <AssetInventoryScreenController
       assets={assets}
       isLoading={isLoading}
+      onRefresh={onRefresh}
       onSelectAsset={onSelectAsset}
       onOpenAddModal={onOpenAddModal}
       onOpenQRBadgeModal={onOpenQRBadgeModal}

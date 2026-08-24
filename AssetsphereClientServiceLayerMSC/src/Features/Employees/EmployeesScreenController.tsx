@@ -17,6 +17,7 @@ import {
   MapPin,
   Phone,
   Briefcase,
+  ArrowRight,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
@@ -33,6 +34,7 @@ export interface EmployeesScreenControllerProps {
   assets: Asset[];
   isLoading?: boolean;
   onOpenAddModal?: () => void;
+  onSelectEmployee?: (employee: Employee) => void;
 }
 
 export default function EmployeesScreenController({
@@ -40,6 +42,7 @@ export default function EmployeesScreenController({
   assets,
   isLoading = false,
   onOpenAddModal,
+  onSelectEmployee,
 }: EmployeesScreenControllerProps): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
     UserPreferencesUtility.current.getEmployeesViewMode('grid')
@@ -321,7 +324,12 @@ export default function EmployeesScreenController({
             );
 
             return (
-              <CardSharedComponent key={emp.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
+              <CardSharedComponent
+                key={emp.id}
+                hoverable
+                onClick={() => onSelectEmployee?.(emp)}
+                className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
+              >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3 min-w-0">
@@ -418,6 +426,7 @@ export default function EmployeesScreenController({
                   <th className="py-3.5 px-4">Email</th>
                   <th className="py-3.5 px-4">Location</th>
                   <th className="py-3.5 px-4">Allocated Devices</th>
+                  <th className="py-3.5 px-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-zinc-800/60">
@@ -429,7 +438,8 @@ export default function EmployeesScreenController({
                   return (
                     <tr
                       key={emp.id}
-                      className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors"
+                      onClick={() => onSelectEmployee?.(emp)}
+                      className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors cursor-pointer"
                     >
                       <td className="py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-zinc-100">
                         {emp.employeeCode}
@@ -455,6 +465,19 @@ export default function EmployeesScreenController({
                         <span className="font-mono text-xs font-semibold text-slate-900 dark:text-white">
                           {empAssets.length} Assets
                         </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onSelectEmployee?.(emp);
+                          }}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors cursor-pointer"
+                        >
+                          <span>Inspect</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
                       </td>
                     </tr>
                   );

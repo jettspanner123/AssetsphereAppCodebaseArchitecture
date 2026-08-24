@@ -6,7 +6,7 @@ export default class ApplicationPermissionCON {
   public static readonly CAN_VIEW_CORE_CATEGORY: Set<UserRoleType> =
     ApplicationPermissionPreset.current.allRoles();
   public static readonly CAN_VIEW_ORGANIZATION_CATEGORY: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.managementRoles();
+    ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_VIEW_OPERATIONS_CATEGORY: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
   public static readonly CAN_VIEW_INTELLIGENCE_CATEGORY: Set<UserRoleType> =
@@ -26,10 +26,10 @@ export default class ApplicationPermissionCON {
   public static readonly CAN_VIEW_TAB_LICENSES: Set<UserRoleType> =
     ApplicationPermissionPreset.current.allRoles();
   public static readonly CAN_VIEW_TAB_CLOUD: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.allRoles();
+    ApplicationPermissionPreset.current.managementRoles();
 
   public static readonly CAN_VIEW_TAB_EMPLOYEES: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.managementRoles();
+    ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_VIEW_TAB_PROCUREMENT: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
   public static readonly CAN_VIEW_TAB_VENDORS: Set<UserRoleType> =
@@ -53,10 +53,10 @@ export default class ApplicationPermissionCON {
   public static readonly CAN_WRITE_CORE_LICENSES: Set<UserRoleType> =
     ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_WRITE_CORE_CLOUD: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.operatorRolePreset();
+    ApplicationPermissionPreset.current.managementRoles();
 
   public static readonly CAN_WRITE_ORGANIZATION: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.managementRoles();
+    ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_WRITE_OPERATIONS: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
   public static readonly CAN_WRITE_INTELLIGENCE: Set<UserRoleType> =

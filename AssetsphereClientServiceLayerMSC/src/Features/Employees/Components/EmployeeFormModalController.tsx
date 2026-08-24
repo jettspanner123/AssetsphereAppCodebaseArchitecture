@@ -4,7 +4,7 @@ import ModalSharedComponent from '../../../Shared/Components/ModalSharedComponen
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';
 import CustomSelectSharedComponent, { SelectOption } from '../../../Shared/Components/CustomSelectSharedComponent';
 import { Employee } from '../../../Types/EmployeeType';
-import { DEPARTMENT_INDEX_MAP } from '../Services/EmployeesDirectoryService';
+import EmployeesCON from '../Constants/EmployeesCON';
 
 export interface EmployeeFormModalControllerProps {
   isOpen: boolean;
@@ -95,20 +95,29 @@ export default function EmployeeFormModalController({
   useEffect(() => {
     if (isOpen) {
       setExitDirection('down');
-      if (!initialEmployee) {
+      if (initialEmployee) {
+        setFullName(initialEmployee.name || '');
+        setEmail(initialEmployee.email || '');
+        setEmployeeCode(initialEmployee.employeeCode || '');
+        setDepartment(initialEmployee.department || 'Engineering');
+        setDesignation(initialEmployee.designation || 'Software Engineer');
+        setLocation(initialEmployee.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'));
+        setEmploymentType(initialEmployee.employmentType || 'Full-time');
+        setContactPhone(initialEmployee.phone || '');
+        setManagerName(initialEmployee.managerName || '');
+      } else {
+        setFullName('');
+        setEmail('');
         setEmployeeCode(`EMP-${Math.floor(1000 + Math.random() * 9000)}`);
-        if (workLocations.length > 0 && !location) {
-          setLocation(workLocations[0]);
-        }
+        setDepartment('Engineering');
+        setDesignation('Software Engineer');
+        setLocation(workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra');
+        setEmploymentType('Full-time');
+        setContactPhone('');
+        setManagerName('');
       }
     }
   }, [isOpen, initialEmployee, workLocations]);
-
-  useEffect(() => {
-    if (!initialEmployee && (!location || location === 'HQ Bangalore') && workLocations.length > 0) {
-      setLocation(workLocations[0]);
-    }
-  }, [workLocations, initialEmployee]);
 
   const handleCancel = () => {
     setExitDirection('up');
@@ -126,7 +135,7 @@ export default function EmployeeFormModalController({
 
     setExitDirection('up');
 
-    const departmentIndex = DEPARTMENT_INDEX_MAP[department] ?? 0;
+    const departmentIndex = EmployeesCON.DEPARTMENT_INDEX_MAP[department] ?? 0;
 
     onSave({
       fullName: fullName.trim(),

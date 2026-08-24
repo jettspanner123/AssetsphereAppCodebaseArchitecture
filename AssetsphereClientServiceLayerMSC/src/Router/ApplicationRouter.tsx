@@ -52,6 +52,7 @@ import DevDashboardScreenRoute from '../Routes/DevDashboardScreenRoute';
 import NavigationController from '../Features/Navigation/NavigationController';
 import AssetDetailModalController from '../Features/AssetDetail/AssetDetailModalController';
 import AssetFormModalController from '../Features/AssetForm/AssetFormModalController';
+import EmployeeDetailModalController from '../Features/Employees/Components/EmployeeDetailModalController';
 import EmployeeFormModalController from '../Features/Employees/Components/EmployeeFormModalController';
 import QRBadgeModalController from '../Features/QRScanner/QRBadgeModalController';
 import QRScannerModalController from '../Features/QRScanner/QRScannerModalController';
@@ -405,6 +406,20 @@ export function DashboardShell(): React.JSX.Element {
     },
   });
 
+  const updateEmployeeMutation = TanstackQueryClientService.current.employees.useUpdateEmployeeMutation({
+    onSuccess: (updatedEmp) => {
+      toast.success('Employee Profile Updated', {
+        description: `${updatedEmp.name} (${updatedEmp.employeeCode}) was successfully updated.`,
+      });
+      handleCloseAddEmployee();
+    },
+    onError: (error: any) => {
+      toast.error('Update Failed', {
+        description: error.message || 'Unable to update employee record. Check permissions.',
+      });
+    },
+  });
+
   const deleteAssetMutation = TanstackQueryClientService.current.assets.useDeleteAssetMutation({
     onSuccess: () => {
       toast.success('Asset Deleted', {
@@ -424,6 +439,19 @@ export function DashboardShell(): React.JSX.Element {
       search: (prev: any) => ({
         ...prev,
         newEmployee: true,
+        editEmployeeId: undefined,
+      }),
+    });
+  };
+
+  const handleOpenEditEmployee = (employee: Employee) => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        selectedEmployeeId: undefined,
+        newEmployee: true,
+        editEmployeeId: employee.id,
       }),
     });
   };
@@ -434,12 +462,41 @@ export function DashboardShell(): React.JSX.Element {
       search: (prev: any) => ({
         ...prev,
         newEmployee: undefined,
+        editEmployeeId: undefined,
+      }),
+    });
+  };
+
+  const handleOpenEmployeeDetail = (employee: Employee) => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        selectedEmployeeId: employee.id,
+      }),
+    });
+  };
+
+  const handleCloseEmployeeDetail = () => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        selectedEmployeeId: undefined,
+        employeeTab: undefined,
       }),
     });
   };
 
   const handleSaveEmployee = (empData: any) => {
-    createEmployeeMutation.mutate(empData);
+    if (editingEmployee) {
+      updateEmployeeMutation.mutate({
+        id: editingEmployee.id,
+        request: empData,
+      });
+    } else {
+      createEmployeeMutation.mutate(empData);
+    }
   };
 
   const handleSaveAsset = (assetData: Partial<Asset>) => {
@@ -457,6 +514,10 @@ export function DashboardShell(): React.JSX.Element {
       subtype: assetData.subtype || 'Laptop',
       modelName: assetData.deviceName || 'Enterprise IT Device',
       manufacturer: assetData.manufacturer || 'Enterprise Vendor',
+      status: assetData.lifecycleStatus || (assetData.assignedToEmployeeId ? 'Assigned' : 'Inventory'),
+      assignedEmployeeId: assetData.assignedToEmployeeId,
+      assignedEmployeeName: assetData.assignedToEmployeeName,
+      assignedDepartment: assetData.department,
       purchasePrice: assetData.procurement?.purchaseCost || 1499,
       currency: assetData.procurement?.currency || 'USD',
       location: assetData.currentLocation || 'HQ Warehouse',
@@ -490,6 +551,14 @@ export function DashboardShell(): React.JSX.Element {
 
   const selectedAssetForQR = search.qrAssetId
     ? assets.find((a) => a.id === search.qrAssetId || a.assetNumber === search.qrAssetId) || null
+    : null;
+
+  const selectedEmployeeForDetail = search.selectedEmployeeId
+    ? employees.find((e) => e.id === search.selectedEmployeeId || e.employeeCode === search.selectedEmployeeId) || null
+    : null;
+
+  const editingEmployee = search.editEmployeeId
+    ? employees.find((e) => e.id === search.editEmployeeId || e.employeeCode === search.editEmployeeId) || null
     : null;
 
   const isAssetFormOpen = Boolean(search.newAsset);
@@ -550,6 +619,21 @@ export function DashboardShell(): React.JSX.Element {
           }}
         />
 
+        {/* Global Employee Detail Modal (Synchronized with URL search params) */}
+        <EmployeeDetailModalController
+          employee={selectedEmployeeForDetail}
+          assets={assets}
+          isOpen={Boolean(selectedEmployeeForDetail)}
+          onClose={handleCloseEmployeeDetail}
+          onEditEmployee={(emp) => {
+            handleOpenEditEmployee(emp);
+          }}
+          onInspectAsset={(ast) => {
+            handleCloseEmployeeDetail();
+            handleOpenAssetDetail(ast);
+          }}
+        />
+
         {/* Global Asset Form Modal */}
         <AssetFormModalController
           isOpen={isAssetFormOpen}
@@ -562,10 +646,10 @@ export function DashboardShell(): React.JSX.Element {
         {/* Global Employee Form Modal */}
         <EmployeeFormModalController
           isOpen={isEmployeeFormOpen}
-          isLoading={createEmployeeMutation.isPending}
+          isLoading={createEmployeeMutation.isPending || updateEmployeeMutation.isPending}
           onClose={handleCloseAddEmployee}
           onSave={handleSaveEmployee}
-          initialEmployee={null}
+          initialEmployee={editingEmployee}
         />
 
         {/* Global QR Badge Modal */}
@@ -834,12 +918,13 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets } = useDashboard();
+    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets, refetchAssets } = useDashboard();
 
     return (
       <AssetInventoryScreenRoute
         assets={assets}
         isLoading={isLoadingAssets}
+        onRefresh={refetchAssets}
         onImportAssets={onImportAssets}
         onDeleteAsset={onDeleteAsset}
         onSelectAsset={(asset) =>
@@ -870,7 +955,7 @@ const assetInventoryRoute = createRoute({
           })
         }
         onExportCSV={() => ExportUtility.current.exportAssetsToCSV(assets)}
-        overrideViewMode={search.view as 'table' | 'grid' | 'kanban' | undefined}
+        overrideViewMode={search.view as 'table' | 'grid' | undefined}
         overrideGridColumns={search.cols}
         overrideSingleLine={search.singleLine}
         overrideComplianceFilter={search.status}
@@ -916,6 +1001,16 @@ const employeesRoute = createRoute({
             search: (prev: any) => ({
               ...prev,
               newEmployee: true,
+              editEmployeeId: undefined,
+            }),
+          })
+        }
+        onSelectEmployee={(emp) =>
+          navigate({
+            to: '.',
+            search: (prev: any) => ({
+              ...prev,
+              selectedEmployeeId: emp.id,
             }),
           })
         }

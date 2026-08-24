@@ -10,16 +10,45 @@ import {
   KeyRound,
   Maximize2,
   WrapText,
+  ShieldCheck,
+  Layers,
+  Sparkles,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
+import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
+import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
+import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryActionButtonSharedComponent';
+import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
+import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
+import { toast } from 'sonner';
 
 export interface SoftwareLicensesScreenControllerProps {
   licenses: SoftwareLicense[];
+  isLoading?: boolean;
+  onOpenAddModal?: () => void;
 }
+
+const COMPLIANCE_FILTER_OPTIONS: SelectOption[] = [
+  { value: 'ALL', label: 'All Statuses' },
+  { value: 'Compliant', label: 'Compliant' },
+  { value: 'Over Allocated', label: 'Over Allocated' },
+  { value: 'Under Utilized', label: 'Under Utilized' },
+  { value: 'Expiring Soon', label: 'Expiring Soon' },
+];
+
+const LICENSE_TYPE_FILTER_OPTIONS: SelectOption[] = [
+  { value: 'ALL', label: 'All License Types' },
+  { value: 'Enterprise Subscription', label: 'Enterprise Subscription' },
+  { value: 'Named User', label: 'Named User' },
+  { value: 'Floating', label: 'Floating' },
+  { value: 'Per Core', label: 'Per Core' },
+];
 
 export default function SoftwareLicensesScreenController({
   licenses,
+  isLoading = false,
+  onOpenAddModal,
 }: SoftwareLicensesScreenControllerProps): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
     UserPreferencesUtility.current.getSoftwareViewMode('grid')
@@ -31,6 +60,8 @@ export default function SoftwareLicensesScreenController({
     UserPreferencesUtility.current.getSoftwareSingleLine(true)
   );
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [complianceFilter, setComplianceFilter] = useState<string>('ALL');
+  const [licenseTypeFilter, setLicenseTypeFilter] = useState<string>('ALL');
 
   const setViewMode = (mode: 'grid' | 'list') => {
     setViewModeState(mode);
@@ -48,6 +79,8 @@ export default function SoftwareLicensesScreenController({
   };
 
   const filteredLicenses = licenses.filter((lic) => {
+    if (complianceFilter !== 'ALL' && lic.complianceStatus !== complianceFilter) return false;
+    if (licenseTypeFilter !== 'ALL' && lic.licenseType !== licenseTypeFilter) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -59,15 +92,15 @@ export default function SoftwareLicensesScreenController({
   });
 
   const totalSpend = filteredLicenses.reduce(
-    (acc, l) => acc + l.costPerSeat * l.totalSeats,
+    (acc, l) => acc + (l.costPerSeat || 0) * (l.totalSeats || 0),
     0
   );
   const totalAllocatedSeats = filteredLicenses.reduce(
-    (acc, l) => acc + l.allocatedSeats,
+    (acc, l) => acc + (l.allocatedSeats || 0),
     0
   );
   const totalCapacitySeats = filteredLicenses.reduce(
-    (acc, l) => acc + l.totalSeats,
+    (acc, l) => acc + (l.totalSeats || 0),
     0
   );
 
@@ -85,13 +118,13 @@ export default function SoftwareLicensesScreenController({
         </div>
 
         {/* Executive Typographic Metric Counters */}
-        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
+        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               ${totalSpend.toLocaleString()}
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              Annual SaaS Spend
+              Annual Spend
             </span>
           </div>
 
@@ -108,10 +141,10 @@ export default function SoftwareLicensesScreenController({
         </div>
       </div>
 
-      {/* Control Toolbar (Search, Grid Density, Single Line & View Mode Controls) */}
-      <CardSharedComponent className="p-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          {/* Search Input */}
+      {/* Control Toolbar Card (Search, Filters, Divider, Switchers & Add Action) */}
+      <CardSharedComponent className="p-3 space-y-3">
+        {/* Row 1: Search + Add Subscription */}
+        <div className="flex items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
             <input
@@ -123,8 +156,51 @@ export default function SoftwareLicensesScreenController({
             />
           </div>
 
-          {/* Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+          <PermissionGuardSharedComponent
+            permission={ApplicationPermissionCON.CAN_WRITE_CORE_LICENSES}
+          >
+            <PrimaryActionButtonSharedComponent
+              label="Add Subscription"
+              onClick={
+                onOpenAddModal ||
+                (() =>
+                  toast.info('Add Subscription', {
+                    description: 'License registration wizard is coming soon.',
+                  }))
+              }
+            />
+          </PermissionGuardSharedComponent>
+        </div>
+
+        {/* Row 2: Relevant Filters + View Options (with divider) */}
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+          {/* Left: Status & License Type Dropdown Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 dark:text-zinc-400 font-medium">Status:</span>
+              <CustomSelectSharedComponent
+                value={complianceFilter}
+                options={COMPLIANCE_FILTER_OPTIONS}
+                onChange={(val) => setComplianceFilter(val)}
+                size="sm"
+                className="w-36 sm:w-40"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-slate-500 dark:text-zinc-400 font-medium">Type:</span>
+              <CustomSelectSharedComponent
+                value={licenseTypeFilter}
+                options={LICENSE_TYPE_FILTER_OPTIONS}
+                onChange={(val) => setLicenseTypeFilter(val)}
+                size="sm"
+                className="w-44 sm:w-48"
+              />
+            </div>
+          </div>
+
+          {/* Right: Uniform Height Control Switchers */}
+          <div className="flex flex-wrap items-center justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -189,7 +265,7 @@ export default function SoftwareLicensesScreenController({
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 h-7 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   viewMode === 'grid'
-                    ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
+                    ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -200,7 +276,7 @@ export default function SoftwareLicensesScreenController({
                 onClick={() => setViewMode('list')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 h-7 rounded-md text-xs font-medium transition-all cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs'
+                    ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
                     : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
@@ -214,14 +290,15 @@ export default function SoftwareLicensesScreenController({
 
       {/* Fallback Empty State */}
       {filteredLicenses.length === 0 && (
-        <CardSharedComponent className="p-12 text-center space-y-2">
-          <p className="text-base font-semibold text-slate-900 dark:text-white font-serif-headline">
-            No Software Subscriptions Found
-          </p>
-          <p className="text-xs text-slate-500 dark:text-zinc-400">
-            No items matched "{searchQuery}". Try clearing your search query.
-          </p>
-        </CardSharedComponent>
+        <EmptyStateSharedComponent
+          icon={<KeyRound className="w-6 h-6 text-slate-400 dark:text-zinc-500" />}
+          title={searchQuery || complianceFilter !== 'ALL' || licenseTypeFilter !== 'ALL' ? 'No Subscriptions Match Filters' : 'No Software Licenses Registered'}
+          description={
+            searchQuery || complianceFilter !== 'ALL' || licenseTypeFilter !== 'ALL'
+              ? `No enterprise software licenses or SaaS subscriptions match your search "${searchQuery}" or filter settings.`
+              : 'There are no active software licenses or SaaS subscriptions registered in the directory.'
+          }
+        />
       )}
 
       {/* Grid View Mode with Dynamic Column Density (2 vs 3 per row) */}

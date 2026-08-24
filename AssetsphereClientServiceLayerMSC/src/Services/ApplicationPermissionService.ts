@@ -119,6 +119,20 @@ export default class ApplicationPermissionService {
   }
 
   /**
+   * Checks if user can perform write/edit/delete operations in Organization modules.
+   */
+  public canWriteOrganization(): boolean {
+    return this.hasPermission(ApplicationPermissionCON.CAN_WRITE_ORGANIZATION);
+  }
+
+  /**
+   * Checks if user can perform write/edit/delete operations in Cloud modules.
+   */
+  public canWriteCloud(): boolean {
+    return this.hasPermission(ApplicationPermissionCON.CAN_WRITE_CORE_CLOUD);
+  }
+
+  /**
    * Checks if user can access System Settings.
    */
   public canAccessSettings(): boolean {

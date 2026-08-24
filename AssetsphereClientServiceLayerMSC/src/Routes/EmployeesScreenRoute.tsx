@@ -8,6 +8,7 @@ export interface EmployeesScreenRouteProps {
   assets: Asset[];
   isLoading?: boolean;
   onOpenAddModal?: () => void;
+  onSelectEmployee?: (employee: Employee) => void;
 }
 
 export default function EmployeesScreenRoute({
@@ -15,6 +16,7 @@ export default function EmployeesScreenRoute({
   assets,
   isLoading = false,
   onOpenAddModal,
+  onSelectEmployee,
 }: EmployeesScreenRouteProps): React.JSX.Element {
   return (
     <EmployeesScreenController
@@ -22,6 +24,7 @@ export default function EmployeesScreenRoute({
       assets={assets}
       isLoading={isLoading}
       onOpenAddModal={onOpenAddModal}
+      onSelectEmployee={onSelectEmployee}
     />
   );
 }

@@ -146,6 +146,7 @@ export class AssetQueryService {
           }
         );
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },
     });
@@ -176,6 +177,7 @@ export class AssetQueryService {
           }
         );
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },
     });
@@ -254,6 +256,41 @@ export class EmployeeQueryService {
     options?: UseMutationOptions<Employee, Error, CreateEmployeeRequest>
   ): UseMutationResult<Employee, Error, CreateEmployeeRequest> {
     return this.useCreateEmployeeMutation(options);
+  }
+
+  public useUpdateEmployeeMutation(
+    options?: UseMutationOptions<Employee, Error, { id: string; request: Partial<CreateEmployeeRequest> }>
+  ): UseMutationResult<Employee, Error, { id: string; request: Partial<CreateEmployeeRequest> }> {
+    return useMutation({
+      ...options,
+      mutationFn: async ({ id, request }: { id: string; request: Partial<CreateEmployeeRequest> }) => {
+        const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
+        return await EmployeesDirectoryService.current.updateEmployee(id, request);
+      },
+      onSuccess: async (...args) => {
+        const [updatedEmp] = args;
+        this.getClient().setQueryData<Employee[]>(
+          TanstackQueryKeysCON.EMPLOYEES,
+          (oldEmployees) => {
+            if (!oldEmployees) return [updatedEmp];
+            return oldEmployees.map((e) => (e.id === updatedEmp.id ? updatedEmp : e));
+          }
+        );
+        this.getClient().setQueryData<Employee>(
+          TanstackQueryKeysCON.EMPLOYEE_DETAIL(updatedEmp.id),
+          updatedEmp
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEE_DETAIL(updatedEmp.id) });
+        (options?.onSuccess as any)?.(...args);
+      },
+    });
+  }
+
+  public updateEmployeeMutation(
+    options?: UseMutationOptions<Employee, Error, { id: string; request: Partial<CreateEmployeeRequest> }>
+  ): UseMutationResult<Employee, Error, { id: string; request: Partial<CreateEmployeeRequest> }> {
+    return this.useUpdateEmployeeMutation(options);
   }
 
   public useDeleteEmployeeMutation(

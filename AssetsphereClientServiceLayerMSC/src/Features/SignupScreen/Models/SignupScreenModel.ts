@@ -15,6 +15,8 @@ export interface SignupFormErrors {
   general?: string;
 }
 
+import { UserProfileType } from '@/src/Types';
+
 export interface SignupAuthState {
   isAuthenticated: boolean;
   userEmail: string | null;
@@ -22,6 +24,7 @@ export interface SignupAuthState {
   userRole: string | null;
   accessToken?: string | null;
   refreshToken?: string | null;
+  user?: UserProfileType | null;
 }
 
 export interface BackendUserProfileDTO {

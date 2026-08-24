@@ -17,6 +17,9 @@ import {
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
 import ENValidator from '../../../../Utilities/ENValidator';
+import useAuthenticationStateStore from '../../../../Store/AuthenticationStateStore';
+import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
+import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 
 export interface ProfileDropdownStaticComponentProps {
   isOpen: boolean;
@@ -50,6 +53,34 @@ export default function ProfileDropdownStaticComponent({
   const isDark = currentTheme === ApplicationThemeCON.DARK;
   const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+  // Dynamic user data from Zustand store
+  const user = useAuthenticationStateStore((state) => state.user);
+
+  const displayName =
+    user?.fullName ||
+    `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
+    'Enterprise User';
+  const displayEmail = user?.email || 'user@assetsphere.internal';
+  const displayRole = user?.department
+    ? `${user.role || 'USER'} • ${user.department}`
+    : user?.role || 'Enterprise User';
+
+  const getInitials = (name: string, email: string): string => {
+    if (name && name.trim() && name !== 'Enterprise User') {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2 && parts[0] && parts[1]) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (email && email.trim()) {
+      return email.slice(0, 2).toUpperCase();
+    }
+    return 'EU';
+  };
+
+  const initials = getInitials(displayName, displayEmail);
 
   // Check if ASSETSPHERE_ENV_MODE in env is set to "development" using ENValidator
   let isDevelopmentMode = false;
@@ -107,19 +138,27 @@ export default function ProfileDropdownStaticComponent({
           >
             {/* 1. Header: User Identity */}
             <div className="flex items-center gap-3 pb-3.5 border-b border-slate-100 dark:border-zinc-800/80">
-              <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-sm shadow-xs shrink-0">
-                AV
-              </div>
+              {user?.avatarUrl ? (
+                <img
+                  src={user.avatarUrl}
+                  alt={displayName}
+                  className="w-10 h-10 rounded-full object-cover shadow-xs shrink-0 border border-slate-200 dark:border-zinc-700"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-serif-headline text-sm shadow-xs shrink-0">
+                  {initials}
+                </div>
+              )}
               <div className="min-w-0 flex-1">
                 <h3 className="font-bold text-slate-900 dark:text-white font-serif-headline text-sm truncate leading-tight">
-                  Alexander Vance
+                  {displayName}
                 </h3>
                 <p className="text-[11px] text-slate-400 dark:text-zinc-500 truncate mt-0.5 font-mono">
-                  Director of IT
+                  {displayRole}
                 </p>
                 <div className="flex items-center gap-1 text-[11px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 truncate">
                   <Mail className="w-3 h-3 shrink-0 text-slate-400" />
-                  <span className="truncate">a.vance@assetsphere.io</span>
+                  <span className="truncate">{displayEmail}</span>
                 </div>
               </div>
             </div>
@@ -210,8 +249,8 @@ export default function ProfileDropdownStaticComponent({
                 </div>
               </div>
 
-            {/* 3. Development Tools Section (Only shown if ASSETSPHERE_ENV_MODE is "development") */}
-            {isDevelopmentMode && (
+            {/* 3. Development Tools Section (Only shown if ASSETSPHERE_ENV_MODE is "development" and user is DEVELOPER) */}
+            {isDevelopmentMode && ApplicationPermissionService.current.canAccessDevDashboard() && (
               <div className="space-y-2 pt-1">
                 <span className="text-[10px] uppercase font-mono font-semibold tracking-wider text-slate-400 dark:text-zinc-500 block px-1">
                   Development Tools
@@ -300,7 +339,7 @@ export default function ProfileDropdownStaticComponent({
                 <span>Scan Asset Barcode</span>
               </button>
 
-              {onNavigateSettings && (
+              {onNavigateSettings && ApplicationPermissionService.current.canAccessSettings() && (
                 <button
                   onClick={() => {
                     onClose();

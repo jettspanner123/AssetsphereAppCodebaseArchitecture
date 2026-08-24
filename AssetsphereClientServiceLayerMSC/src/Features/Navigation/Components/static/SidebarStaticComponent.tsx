@@ -4,6 +4,8 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../Types/NavigationType';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
+import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
+import useAuthenticationStateStore from '@/src/Store/AuthenticationStateStore';
 
 export interface SidebarStaticComponentProps {
   activeTab: TabType;
@@ -21,6 +23,9 @@ export default function SidebarStaticComponent({
   onToggleCollapse: externalOnToggleCollapse,
 }: SidebarStaticComponentProps): React.JSX.Element {
   const [internalIsCollapsed, setInternalIsCollapsed] = useState(false);
+
+  // Subscribe to user role to re-render when auth changes
+  const userRole = useAuthenticationStateStore((state) => state.user?.role);
 
   const isCollapsed =
     externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
@@ -63,7 +68,9 @@ export default function SidebarStaticComponent({
       {/* Nav Items List */}
       <div className="space-y-5 flex-1">
         {categories.map((category) => {
-          const items = NavigationCON.NAV_ITEMS.filter((i) => i.category === category);
+          const items = NavigationCON.NAV_ITEMS.filter(
+            (i) => i.category === category && ApplicationPermissionService.current.canAccessTab(i.id)
+          );
           if (items.length === 0) return null;
 
           return (

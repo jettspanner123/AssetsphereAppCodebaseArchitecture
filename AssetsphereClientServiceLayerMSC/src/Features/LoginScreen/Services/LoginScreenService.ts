@@ -9,6 +9,8 @@ import {
 import LoginScreenCON from '../Constants/LoginScreenCON';
 import ApplicationNetworkAPIConfiguration from '../../../Configurations/ApplicationNetworkAPIConfiguration';
 import ApplicationLocalStorageService from '@/src/Services/ApplicationLocalStorageService';
+import useAuthenticationStateStore from '@/src/Store/AuthenticationStateStore';
+import { UserProfileType } from '@/src/Types';
 
 export default class LoginScreenService {
   public static current: LoginScreenService = new LoginScreenService();
@@ -85,13 +87,36 @@ export default class LoginScreenService {
     });
 
     const userProfile = authData.user;
+    const typedUser: UserProfileType = {
+      id: userProfile.id,
+      email: userProfile.email,
+      firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
+      fullName: userProfile.fullName || `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Enterprise User',
+      role: String(userProfile.role || 'USER'),
+      department: userProfile.department ? String(userProfile.department) : null,
+      avatarUrl: userProfile.avatarUrl || null,
+      lastLoginAt: userProfile.lastLoginAt || null,
+    };
+
+    // Save to Zustand State Store
+    useAuthenticationStateStore.getState().setAuth(
+      {
+        accessToken: authData.accessToken,
+        refreshToken: authData.refreshToken,
+        expiresAt: authData.expiresAt,
+      },
+      typedUser
+    );
+
     const authState: LoginAuthState = {
       isAuthenticated: true,
-      userEmail: userProfile.email,
-      userName: userProfile.fullName || `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Enterprise User',
-      userRole: String(userProfile.role || 'Enterprise User'),
+      userEmail: typedUser.email,
+      userName: typedUser.fullName,
+      userRole: typedUser.role,
       accessToken: authData.accessToken,
       refreshToken: authData.refreshToken,
+      user: typedUser,
     };
 
     // Save session via dedicated LocalStorage Service
@@ -120,5 +145,6 @@ export default class LoginScreenService {
 
   public clearSession(): void {
     ApplicationLocalStorageService.current.clearAllAuthData();
+    useAuthenticationStateStore.getState().clearAuth();
   }
 }

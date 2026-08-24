@@ -10,6 +10,8 @@ export interface LoginFormErrors {
   general?: string;
 }
 
+import { UserProfileType } from '@/src/Types';
+
 export interface LoginAuthState {
   isAuthenticated: boolean;
   userEmail: string | null;
@@ -17,6 +19,7 @@ export interface LoginAuthState {
   userRole: string | null;
   accessToken?: string | null;
   refreshToken?: string | null;
+  user?: UserProfileType | null;
 }
 
 export interface BackendUserProfileDTO {

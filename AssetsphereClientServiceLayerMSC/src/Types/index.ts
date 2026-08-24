@@ -9,3 +9,4 @@ export * from './ComplianceType';
 export * from './AIAssistantType';
 export * from './CloudResourceType';
 export * from './NavigationType';
+export * from './AuthType';

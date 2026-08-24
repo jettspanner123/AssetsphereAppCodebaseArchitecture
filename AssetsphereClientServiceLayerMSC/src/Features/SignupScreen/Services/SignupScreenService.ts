@@ -9,6 +9,8 @@ import {
 import SignupScreenCON from '../Constants/SignupScreenCON';
 import ApplicationNetworkAPIConfiguration from '../../../Configurations/ApplicationNetworkAPIConfiguration';
 import ApplicationLocalStorageService from '@/src/Services/ApplicationLocalStorageService';
+import useAuthenticationStateStore from '@/src/Store/AuthenticationStateStore';
+import { UserProfileType } from '@/src/Types';
 
 export default class SignupScreenService {
   public static current: SignupScreenService = new SignupScreenService();
@@ -110,13 +112,36 @@ export default class SignupScreenService {
     });
 
     const userProfile = authData.user;
+    const typedUser: UserProfileType = {
+      id: userProfile.id,
+      email: userProfile.email,
+      firstName: userProfile.firstName,
+      lastName: userProfile.lastName,
+      fullName: userProfile.fullName || `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Enterprise User',
+      role: String(userProfile.role || 'USER'),
+      department: userProfile.department ? String(userProfile.department) : null,
+      avatarUrl: userProfile.avatarUrl || null,
+      lastLoginAt: userProfile.lastLoginAt || null,
+    };
+
+    // Save to Zustand State Store
+    useAuthenticationStateStore.getState().setAuth(
+      {
+        accessToken: authData.accessToken,
+        refreshToken: authData.refreshToken,
+        expiresAt: authData.expiresAt,
+      },
+      typedUser
+    );
+
     const authState: SignupAuthState = {
       isAuthenticated: true,
-      userEmail: userProfile.email,
-      userName: userProfile.fullName || `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Enterprise User',
-      userRole: String(userProfile.role || 'USER'),
+      userEmail: typedUser.email,
+      userName: typedUser.fullName,
+      userRole: typedUser.role,
       accessToken: authData.accessToken,
       refreshToken: authData.refreshToken,
+      user: typedUser,
     };
 
     // Persist authenticated session

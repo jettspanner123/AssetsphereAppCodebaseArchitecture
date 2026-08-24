@@ -16,7 +16,8 @@ public static class DatabaseSeederUtility
         string adminEmail = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_EMAIL", "admin@assetsphere.internal");
         string adminPassword = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_PASSWORD", "AssetsphereAdmin2026!");
 
-        if (!await context.Users.AnyAsync(u => u.Email == adminEmail))
+        var existingAdmin = await context.Users.FirstOrDefaultAsync(u => u.Email == adminEmail);
+        if (existingAdmin == null)
         {
             UserEntityClass adminUser = new UserEntityClass
             {
@@ -34,6 +35,12 @@ public static class DatabaseSeederUtility
             };
 
             await context.Users.AddAsync(adminUser);
+        }
+        else
+        {
+            existingAdmin.PasswordHash = PasswordHashHelper.Current.HashPassword(adminPassword);
+            existingAdmin.Role = UserRoleType.ADMIN;
+            existingAdmin.IsActive = true;
         }
 
         string userEmail = "user@assetsphere.internal";
@@ -57,6 +64,52 @@ public static class DatabaseSeederUtility
             };
 
             await context.Users.AddAsync(standardUser);
+        }
+
+        string operatorEmail = "operator@assetsphere.internal";
+        string operatorPassword = "AssetsphereOperator2026!";
+
+        if (!await context.Users.AnyAsync(u => u.Email == operatorEmail))
+        {
+            UserEntityClass operatorUser = new UserEntityClass
+            {
+                Id = Guid.NewGuid(),
+                Email = operatorEmail,
+                PasswordHash = PasswordHashHelper.Current.HashPassword(operatorPassword),
+                FirstName = "Morgan",
+                LastName = "Reed",
+                Role = UserRoleType.OPERATOR,
+                Department = DepartmentType.ITInfrastructure,
+                AvatarUrl = "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "seeder"
+            };
+
+            await context.Users.AddAsync(operatorUser);
+        }
+
+        string developerEmail = "developer@assetsphere.internal";
+        string developerPassword = "AssetsphereDeveloper2026!";
+
+        if (!await context.Users.AnyAsync(u => u.Email == developerEmail))
+        {
+            UserEntityClass developerUser = new UserEntityClass
+            {
+                Id = Guid.NewGuid(),
+                Email = developerEmail,
+                PasswordHash = PasswordHashHelper.Current.HashPassword(developerPassword),
+                FirstName = "Devon",
+                LastName = "Vance",
+                Role = UserRoleType.DEVELOPER,
+                Department = DepartmentType.Engineering,
+                AvatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "seeder"
+            };
+
+            await context.Users.AddAsync(developerUser);
         }
 
         await context.SaveChangesAsync();

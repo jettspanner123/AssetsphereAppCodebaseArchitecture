@@ -56,8 +56,10 @@ import QRBadgeModalController from '../Features/QRScanner/QRBadgeModalController
 import QRScannerModalController from '../Features/QRScanner/QRScannerModalController';
 import ConfirmationModalSharedComponent from '../Shared/Components/ConfirmationModalSharedComponent';
 import { LogOut } from 'lucide-react';
+import { toast } from 'sonner';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
 import { LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
+import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
 
 // ==========================================
 // 1. Root Route Definition
@@ -224,6 +226,14 @@ export function DashboardShell(): React.JSX.Element {
   else if (pathname.includes('settings')) activeTab = 'settings';
 
   const handleSelectTab = (tab: TabType) => {
+    // Validate module permissions
+    if (tab !== 'dashboard' && !ApplicationPermissionService.current.canAccessTab(tab)) {
+      toast.error('Access Denied', {
+        description: 'You do not have permission to access this module. Redirecting to Dashboard.',
+      });
+      return;
+    }
+
     const routeMap: Record<TabType, string> = {
       dashboard: ApplicationRouteCON.DASHBOARD_OVERVIEW,
       inventory: ApplicationRouteCON.DASHBOARD_INVENTORY,
@@ -244,6 +254,16 @@ export function DashboardShell(): React.JSX.Element {
       search: (prev: any) => prev,
     });
   };
+
+  // Guard activeTab on route changes or direct URL deep-links
+  useEffect(() => {
+    if (activeTab !== 'dashboard' && !ApplicationPermissionService.current.canAccessTab(activeTab)) {
+      toast.error('Access Denied', {
+        description: 'You do not have permission to access this module. Redirecting to Dashboard.',
+      });
+      handleSelectTab('dashboard');
+    }
+  }, [activeTab]);
 
   // Search Param Handlers for URL State Sharing
   const handleSearchChange = (query: string) => {
@@ -923,6 +943,15 @@ const settingsRoute = createRoute({
 const devDashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: 'dev/dashboard',
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    if (!session) {
+      throw redirect({ to: ApplicationRouteCON.LOGIN });
+    }
+    if (!ApplicationPermissionService.current.canAccessDevDashboard()) {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+    }
+  },
   component: function DevDashboardComponent() {
     const navigate = useNavigate();
 

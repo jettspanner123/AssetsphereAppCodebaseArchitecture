@@ -35,6 +35,9 @@ import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import AssetImportModalController from './Components/AssetImportModalController';
 import { ImportExecutionSummary } from './Services/AssetImportProcessorService';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
+import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
+import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
+import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
 
 export interface AssetInventoryScreenControllerProps {
   assets: Asset[];
@@ -187,6 +190,8 @@ export default function AssetInventoryScreenController({
     setContextMenu((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const canWrite = ApplicationPermissionService.current.canWriteCore();
+
   const contextMenuItems: ContextMenuItem[] = contextMenu.asset
     ? [
         {
@@ -217,37 +222,45 @@ export default function AssetInventoryScreenController({
             }
           },
         },
-        {
-          id: 'edit',
-          label: 'Edit',
-          icon: <Edit3 className="w-3.5 h-3.5" />,
-          onClick: () => {
-            // UI placeholder action
-          },
-        },
-        {
-          id: 'delete',
-          label: 'Delete',
-          icon: <Trash2 className="w-3.5 h-3.5" />,
-          isDestructive: true,
-          divider: true,
-          onClick: () => {
-            if (contextMenu.asset) {
-              setAssetToDelete(contextMenu.asset);
-            }
-          },
-        },
+        ...(canWrite
+          ? [
+              {
+                id: 'edit',
+                label: 'Edit',
+                icon: <Edit3 className="w-3.5 h-3.5" />,
+                onClick: () => {
+                  // UI placeholder action
+                },
+              },
+              {
+                id: 'delete',
+                label: 'Delete',
+                icon: <Trash2 className="w-3.5 h-3.5" />,
+                isDestructive: true,
+                divider: true,
+                onClick: () => {
+                  if (contextMenu.asset) {
+                    setAssetToDelete(contextMenu.asset);
+                  }
+                },
+              },
+            ]
+          : []),
       ]
     : [
-        {
-          id: 'create',
-          label: 'Create / Register Asset',
-          icon: <Plus className="w-3.5 h-3.5" />,
-          shortcut: 'N',
-          onClick: () => {
-            onOpenAddModal();
-          },
-        },
+        ...(canWrite
+          ? [
+              {
+                id: 'create',
+                label: 'Create / Register Asset',
+                icon: <Plus className="w-3.5 h-3.5" />,
+                shortcut: 'N',
+                onClick: () => {
+                  onOpenAddModal();
+                },
+              },
+            ]
+          : []),
         {
           id: 'selection-mode',
           label: 'Selection Mode',
@@ -371,14 +384,16 @@ export default function AssetInventoryScreenController({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            <ButtonSharedComponent
-              variant="outline"
-              size="sm"
-              onClick={() => setIsImportModalOpen(true)}
-              icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
-            >
-              Import CSV
-            </ButtonSharedComponent>
+            <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
+              <ButtonSharedComponent
+                variant="outline"
+                size="sm"
+                onClick={() => setIsImportModalOpen(true)}
+                icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
+              >
+                Import CSV
+              </ButtonSharedComponent>
+            </PermissionGuardSharedComponent>
 
             <ButtonSharedComponent
               variant="outline"
@@ -389,15 +404,17 @@ export default function AssetInventoryScreenController({
               Export CSV
             </ButtonSharedComponent>
 
-            <ButtonSharedComponent
-              variant="primary"
-              size="sm"
-              onClick={onOpenAddModal}
-              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-              icon={<Plus className="w-3.5 h-3.5 !text-white" />}
-            >
-              <span className="!text-white font-medium">Register Device</span>
-            </ButtonSharedComponent>
+            <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
+              <ButtonSharedComponent
+                variant="primary"
+                size="sm"
+                onClick={onOpenAddModal}
+                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+                icon={<Plus className="w-3.5 h-3.5 !text-white" />}
+              >
+                <span className="!text-white font-medium">Register Device</span>
+              </ButtonSharedComponent>
+            </PermissionGuardSharedComponent>
           </div>
         </div>
 

@@ -6,6 +6,7 @@ import NotificationsDropdownStaticComponent from './NotificationsDropdownStaticC
 import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../Types/NavigationType';
 import weplmLogo from '../../../../assets/weplm.jpeg';
+import useAuthenticationStateStore from '../../../../Store/AuthenticationStateStore';
 
 export interface HeaderStaticComponentProps {
   globalSearch: string;
@@ -52,6 +53,29 @@ export default function HeaderStaticComponent({
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+
+  const user = useAuthenticationStateStore((state) => state.user);
+  const displayName =
+    user?.fullName ||
+    `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
+    'Enterprise User';
+  const displayEmail = user?.email || '';
+
+  const getInitials = (name: string, email: string): string => {
+    if (name && name.trim() && name !== 'Enterprise User') {
+      const parts = name.trim().split(/\s+/);
+      if (parts.length >= 2 && parts[0] && parts[1]) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0].slice(0, 2).toUpperCase();
+    }
+    if (email && email.trim()) {
+      return email.slice(0, 2).toUpperCase();
+    }
+    return 'EU';
+  };
+
+  const initials = getInitials(displayName, displayEmail);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -132,11 +156,19 @@ export default function HeaderStaticComponent({
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
             className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
-            title="User Profile & Settings"
+            title={`${displayName} - Profile & Settings`}
           >
-            <div className="w-6 h-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px] font-mono">
-              AV
-            </div>
+            {user?.avatarUrl ? (
+              <img
+                src={user.avatarUrl}
+                alt={displayName}
+                className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+              />
+            ) : (
+              <div className="w-6 h-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px] font-mono">
+                {initials}
+              </div>
+            )}
           </button>
 
           {/* Profile Dropdown Popover */}

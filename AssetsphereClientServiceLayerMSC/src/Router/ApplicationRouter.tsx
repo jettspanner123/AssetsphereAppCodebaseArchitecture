@@ -52,6 +52,7 @@ import DevDashboardScreenRoute from '../Routes/DevDashboardScreenRoute';
 import NavigationController from '../Features/Navigation/NavigationController';
 import AssetDetailModalController from '../Features/AssetDetail/AssetDetailModalController';
 import AssetFormModalController from '../Features/AssetForm/AssetFormModalController';
+import EmployeeFormModalController from '../Features/Employees/Components/EmployeeFormModalController';
 import QRBadgeModalController from '../Features/QRScanner/QRBadgeModalController';
 import QRScannerModalController from '../Features/QRScanner/QRScannerModalController';
 import ConfirmationModalSharedComponent from '../Shared/Components/ConfirmationModalSharedComponent';
@@ -81,6 +82,8 @@ export interface DashboardContextType {
   isLoadingAssets: boolean;
   refetchAssets: () => void;
   employees: Employee[];
+  isLoadingEmployees: boolean;
+  refetchEmployees: () => void;
   licenses: SoftwareLicense[];
   orders: PurchaseOrder[];
   tickets: ServiceTicket[];
@@ -90,6 +93,7 @@ export interface DashboardContextType {
   onImportAssets: (importedAssets: Asset[]) => void;
   onSaveAsset: (asset: Partial<Asset>) => void;
   onDeleteAsset: (asset: Asset) => void;
+  onSaveEmployee?: (employee: any) => void;
 }
 
 export const DashboardContext = React.createContext<DashboardContextType | null>(null);
@@ -102,6 +106,8 @@ export function useDashboard(): DashboardContextType {
       isLoadingAssets: false,
       refetchAssets: () => {},
       employees: [],
+      isLoadingEmployees: false,
+      refetchEmployees: () => {},
       licenses: [],
       orders: [],
       tickets: [],
@@ -122,6 +128,7 @@ export function useDashboard(): DashboardContextType {
       onImportAssets: () => {},
       onSaveAsset: () => {},
       onDeleteAsset: () => {},
+      onSaveEmployee: () => {},
     };
   }
   return ctx;
@@ -184,8 +191,15 @@ export function DashboardShell(): React.JSX.Element {
     refetch: refetchAssets,
   } = TanstackQueryClientService.current.assets.useAssetsQuery();
 
+  // Live Database Employees Query via TanStack Query
+  const {
+    data: dbEmployees = [],
+    isLoading: isLoadingEmployees,
+    refetch: refetchEmployees,
+  } = TanstackQueryClientService.current.employees.useEmployeesQuery();
+
   const assets = dbAssets;
-  const employees: Employee[] = [];
+  const employees = dbEmployees;
   const licenses: SoftwareLicense[] = [];
   const orders: PurchaseOrder[] = [];
   const tickets: ServiceTicket[] = [];
@@ -377,6 +391,20 @@ export function DashboardShell(): React.JSX.Element {
     },
   });
 
+  const createEmployeeMutation = TanstackQueryClientService.current.employees.useCreateEmployeeMutation({
+    onSuccess: (createdEmp) => {
+      toast.success('Employee Added Successfully', {
+        description: `${createdEmp.name} (${createdEmp.employeeCode}) was registered in the directory.`,
+      });
+      handleCloseAddEmployee();
+    },
+    onError: (error: any) => {
+      toast.error('Add Employee Failed', {
+        description: error.message || 'Unable to create employee record. Check permissions.',
+      });
+    },
+  });
+
   const deleteAssetMutation = TanstackQueryClientService.current.assets.useDeleteAssetMutation({
     onSuccess: () => {
       toast.success('Asset Deleted', {
@@ -389,6 +417,30 @@ export function DashboardShell(): React.JSX.Element {
       });
     },
   });
+
+  const handleOpenAddEmployee = () => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        newEmployee: true,
+      }),
+    });
+  };
+
+  const handleCloseAddEmployee = () => {
+    navigate({
+      to: '.',
+      search: (prev: any) => ({
+        ...prev,
+        newEmployee: undefined,
+      }),
+    });
+  };
+
+  const handleSaveEmployee = (empData: any) => {
+    createEmployeeMutation.mutate(empData);
+  };
 
   const handleSaveAsset = (assetData: Partial<Asset>) => {
     const ramNumber = assetData.hardwareSpecs?.ramGbs || 16;
@@ -441,6 +493,7 @@ export function DashboardShell(): React.JSX.Element {
     : null;
 
   const isAssetFormOpen = Boolean(search.newAsset);
+  const isEmployeeFormOpen = Boolean(search.newEmployee);
   const isQRScannerOpen = Boolean(search.scanner);
 
   return (
@@ -450,6 +503,8 @@ export function DashboardShell(): React.JSX.Element {
         isLoadingAssets,
         refetchAssets,
         employees,
+        isLoadingEmployees,
+        refetchEmployees,
         licenses,
         orders,
         tickets,
@@ -459,6 +514,7 @@ export function DashboardShell(): React.JSX.Element {
         onImportAssets: handleImportAssets,
         onSaveAsset: handleSaveAsset,
         onDeleteAsset: handleDeleteAsset,
+        onSaveEmployee: handleSaveEmployee,
       }}
     >
       <NavigationController
@@ -501,6 +557,15 @@ export function DashboardShell(): React.JSX.Element {
           onClose={handleCloseAddAsset}
           onSave={handleSaveAsset}
           initialAsset={null}
+        />
+
+        {/* Global Employee Form Modal */}
+        <EmployeeFormModalController
+          isOpen={isEmployeeFormOpen}
+          isLoading={createEmployeeMutation.isPending}
+          onClose={handleCloseAddEmployee}
+          onSave={handleSaveEmployee}
+          initialEmployee={null}
         />
 
         {/* Global QR Badge Modal */}
@@ -838,8 +903,24 @@ const employeesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'employees',
   component: function EmployeesComponent() {
-    const { employees, assets } = useDashboard();
-    return <EmployeesScreenRoute employees={employees} assets={assets} />;
+    const navigate = useNavigate();
+    const { employees, assets, isLoadingEmployees } = useDashboard();
+    return (
+      <EmployeesScreenRoute
+        employees={employees}
+        assets={assets}
+        isLoading={isLoadingEmployees}
+        onOpenAddModal={() =>
+          navigate({
+            to: '.',
+            search: (prev: any) => ({
+              ...prev,
+              newEmployee: true,
+            }),
+          })
+        }
+      />
+    );
   },
 });
 

@@ -13,6 +13,8 @@ import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models
 import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
 import { Asset } from '../Types/AssetType';
 import { CreateAssetRequest } from '../Features/AssetInventory/Services/AssetInventoryService';
+import { Employee } from '../Types/EmployeeType';
+import { CreateEmployeeRequest } from '../Features/Employees/Services/EmployeesDirectoryService';
 import TanstackQueryKeysCON from '../Constants/TanstackQueryKeysCON';
 
 export class AuthenticationQueryService {
@@ -128,15 +130,24 @@ export class AssetQueryService {
     options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
   ): UseMutationResult<Asset, Error, CreateAssetRequest> {
     return useMutation({
+      ...options,
       mutationFn: async (request: CreateAssetRequest) => {
         const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
         return await AssetInventoryService.current.createAsset(request);
       },
-      onSuccess: (...args) => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
-        options?.onSuccess?.(...args);
+      onSuccess: async (...args) => {
+        const [createdAsset] = args;
+        this.getClient().setQueryData<Asset[]>(
+          TanstackQueryKeysCON.ASSETS,
+          (oldAssets) => {
+            if (!oldAssets) return [createdAsset];
+            const exists = oldAssets.some((a) => a.id === createdAsset.id);
+            return exists ? oldAssets : [createdAsset, ...oldAssets];
+          }
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        (options?.onSuccess as any)?.(...args);
       },
-      ...options,
     });
   }
 
@@ -150,15 +161,23 @@ export class AssetQueryService {
     options?: UseMutationOptions<boolean, Error, string>
   ): UseMutationResult<boolean, Error, string> {
     return useMutation({
+      ...options,
       mutationFn: async (id: string) => {
         const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
         return await AssetInventoryService.current.deleteAsset(id);
       },
-      onSuccess: (...args) => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
-        options?.onSuccess?.(...args);
+      onSuccess: async (...args) => {
+        const [, id] = args;
+        this.getClient().setQueryData<Asset[]>(
+          TanstackQueryKeysCON.ASSETS,
+          (oldAssets) => {
+            if (!oldAssets) return [];
+            return oldAssets.filter((a) => a.id !== id);
+          }
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        (options?.onSuccess as any)?.(...args);
       },
-      ...options,
     });
   }
 
@@ -166,6 +185,129 @@ export class AssetQueryService {
     options?: UseMutationOptions<boolean, Error, string>
   ): UseMutationResult<boolean, Error, string> {
     return this.useDeleteAssetMutation(options);
+  }
+}
+
+export class EmployeeQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useEmployeesQuery(
+    options?: Omit<UseQueryOptions<Employee[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Employee[], Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.EMPLOYEES,
+      queryFn: async () => {
+        const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
+        return await EmployeesDirectoryService.current.getAllEmployees();
+      },
+      ...options,
+    });
+  }
+
+  public employeesQuery(
+    options?: Omit<UseQueryOptions<Employee[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Employee[], Error> {
+    return this.useEmployeesQuery(options);
+  }
+
+  public useEmployeeByIdQuery(
+    id: string,
+    options?: Omit<UseQueryOptions<Employee, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Employee, Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.EMPLOYEE_DETAIL(id),
+      queryFn: async () => {
+        const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
+        return await EmployeesDirectoryService.current.getEmployeeById(id);
+      },
+      enabled: Boolean(id),
+      ...options,
+    });
+  }
+
+  public useCreateEmployeeMutation(
+    options?: UseMutationOptions<Employee, Error, CreateEmployeeRequest>
+  ): UseMutationResult<Employee, Error, CreateEmployeeRequest> {
+    return useMutation({
+      ...options,
+      mutationFn: async (request: CreateEmployeeRequest) => {
+        const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
+        return await EmployeesDirectoryService.current.createEmployee(request);
+      },
+      onSuccess: async (...args) => {
+        const [createdEmp] = args;
+        this.getClient().setQueryData<Employee[]>(
+          TanstackQueryKeysCON.EMPLOYEES,
+          (oldEmployees) => {
+            if (!oldEmployees) return [createdEmp];
+            const exists = oldEmployees.some((e) => e.id === createdEmp.id);
+            return exists ? oldEmployees : [createdEmp, ...oldEmployees];
+          }
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        (options?.onSuccess as any)?.(...args);
+      },
+    });
+  }
+
+  public createEmployeeMutation(
+    options?: UseMutationOptions<Employee, Error, CreateEmployeeRequest>
+  ): UseMutationResult<Employee, Error, CreateEmployeeRequest> {
+    return this.useCreateEmployeeMutation(options);
+  }
+
+  public useDeleteEmployeeMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return useMutation({
+      ...options,
+      mutationFn: async (id: string) => {
+        const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
+        return await EmployeesDirectoryService.current.deleteEmployee(id);
+      },
+      onSuccess: async (...args) => {
+        const [, id] = args;
+        this.getClient().setQueryData<Employee[]>(
+          TanstackQueryKeysCON.EMPLOYEES,
+          (oldEmployees) => {
+            if (!oldEmployees) return [];
+            return oldEmployees.filter((e) => e.id !== id);
+          }
+        );
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        (options?.onSuccess as any)?.(...args);
+      },
+    });
+  }
+
+  public deleteEmployeeMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return this.useDeleteEmployeeMutation(options);
+  }
+}
+
+export class ConfigurationQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useWorkLocationsQuery(
+    options?: Omit<UseQueryOptions<string[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<string[], Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.WORK_LOCATIONS,
+      queryFn: async () => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.getWorkLocations();
+      },
+      staleTime: 1000 * 60 * 30, // 30 minutes
+      ...options,
+    });
+  }
+
+  public workLocationsQuery(
+    options?: Omit<UseQueryOptions<string[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<string[], Error> {
+    return this.useWorkLocationsQuery(options);
   }
 }
 
@@ -184,4 +326,6 @@ export default class TanstackQueryClientService {
 
   public readonly authentication: AuthenticationQueryService = new AuthenticationQueryService();
   public readonly assets: AssetQueryService = new AssetQueryService(() => this.client);
+  public readonly employees: EmployeeQueryService = new EmployeeQueryService(() => this.client);
+  public readonly configuration: ConfigurationQueryService = new ConfigurationQueryService(() => this.client);
 }

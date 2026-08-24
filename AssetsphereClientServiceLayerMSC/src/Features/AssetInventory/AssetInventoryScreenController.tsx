@@ -36,6 +36,7 @@ import AssetImportModalController from './Components/AssetImportModalController'
 import { ImportExecutionSummary } from './Services/AssetImportProcessorService';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
 import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
+import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryActionButtonSharedComponent';
 import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
 
@@ -407,15 +408,10 @@ export default function AssetInventoryScreenController({
             </ButtonSharedComponent>
 
             <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
-              <ButtonSharedComponent
-                variant="primary"
-                size="sm"
+              <PrimaryActionButtonSharedComponent
+                label="Register Device"
                 onClick={onOpenAddModal}
-                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-                icon={<Plus className="w-3.5 h-3.5 !text-white" />}
-              >
-                <span className="!text-white font-medium">Register Device</span>
-              </ButtonSharedComponent>
+              />
             </PermissionGuardSharedComponent>
           </div>
         </div>
@@ -603,17 +599,6 @@ export default function AssetInventoryScreenController({
             searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
               ? 'No assets matched your search query or active filter criteria. Try clearing search filters or changing parameters.'
               : 'Your enterprise hardware asset registry is currently empty. Register your first device or import assets via CSV.'
-          }
-          actionButton={
-            <ButtonSharedComponent
-              variant="primary"
-              size="sm"
-              onClick={onOpenAddModal}
-              icon={<Plus className="w-3.5 h-3.5" />}
-              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white"
-            >
-              Register First Device
-            </ButtonSharedComponent>
           }
         />
       )}

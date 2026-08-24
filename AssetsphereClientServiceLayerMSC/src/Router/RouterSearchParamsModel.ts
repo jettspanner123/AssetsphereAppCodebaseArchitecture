@@ -7,6 +7,7 @@ export const DashboardSearchSchema = z.object({
     .enum(['specs', 'procurement', 'warranty', 'security', 'timeline', 'ai_diagnostics'])
     .optional(),
   newAsset: z.boolean().optional(),
+  newEmployee: z.boolean().optional(),
   scanner: z.boolean().optional(),
   qrAssetId: z.string().optional(),
   status: z.string().optional(),

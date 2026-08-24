@@ -21,6 +21,7 @@ public sealed class ApplicationRouteFactory
     public VerificationCampaignRoutes VerificationCampaign { get; } = new();
     public AIAssistantRoutes AIAssistant { get; } = new();
     public DashboardRoutes Dashboard { get; } = new();
+    public ConfigurationConstantRoutes ConfigurationConstant { get; } = new();
 
     public sealed class AuthenticationRoutes
     {
@@ -145,5 +146,12 @@ public sealed class ApplicationRouteFactory
         public const string ControllerURL = "Api/V1/Dashboard";
         public const string Summary = "Summary";
         public const string Analytics = "Analytics";
+    }
+
+    public sealed class ConfigurationConstantRoutes
+    {
+        public const string ControllerURL = "Api/V1/ConfigurationConstant";
+        public const string GetAll = "";
+        public const string GetByKey = "{key}";
     }
 }

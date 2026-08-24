@@ -68,6 +68,7 @@ builder.Services.AddScoped<ComplianceService>();
 builder.Services.AddScoped<VerificationCampaignService>();
 builder.Services.AddScoped<AIAssistantService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.Configuration.Services.ConfigurationConstantService>();
 
 // 4. JWT Authentication Configuration
 byte[] secretBytes = Encoding.UTF8.GetBytes(jwtSecret);

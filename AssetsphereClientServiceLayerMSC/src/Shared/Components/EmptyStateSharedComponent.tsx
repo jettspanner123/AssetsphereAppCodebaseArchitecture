@@ -21,10 +21,10 @@ export default function EmptyStateSharedComponent({
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
-      className={`py-8 px-6 rounded-xl bg-slate-50/50 dark:bg-zinc-900/30 text-center flex flex-col items-center justify-center select-none ${className}`}
+      className={`py-12 px-6 rounded-xl bg-white dark:bg-[#0d0d10] border border-slate-300/90 dark:border-zinc-800 shadow-sm dark:shadow-2xs text-center flex flex-col items-center justify-center select-none ${className}`}
     >
       {/* Muted Large Icon Container */}
-      <div className="w-12 h-12 rounded-xl bg-white dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/60 shadow-2xs flex items-center justify-center mb-3 text-slate-400 dark:text-zinc-500 shrink-0">
+      <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-zinc-800/80 border border-slate-200/80 dark:border-zinc-700/60 shadow-2xs flex items-center justify-center mb-3 text-slate-400 dark:text-zinc-500 shrink-0">
         {icon}
       </div>
 

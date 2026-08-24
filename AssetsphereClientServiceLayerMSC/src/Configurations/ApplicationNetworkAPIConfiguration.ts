@@ -13,6 +13,20 @@ export interface NetworkAPIEndpoints {
     update: (id: string) => string;
     delete: (id: string) => string;
   };
+  employees: {
+    base: string;
+    getAll: string;
+    getById: (id: string) => string;
+    create: string;
+    update: (id: string) => string;
+    delete: (id: string) => string;
+    assignedAssets: (id: string) => string;
+  };
+  configurationConstant: {
+    base: string;
+    getAll: string;
+    getByKey: (key: string) => string;
+  };
 }
 
 export interface ApplicationNetworkAPIConfigurationDetails {
@@ -50,6 +64,20 @@ export default class ApplicationNetworkAPIConfiguration {
           create: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
           update: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
           delete: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
+        },
+        employees: {
+          base: `${this.defaultBaseUrl}/Api/V1/Employees`,
+          getAll: `${this.defaultBaseUrl}/Api/V1/Employees`,
+          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
+          create: `${this.defaultBaseUrl}/Api/V1/Employees`,
+          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
+          delete: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
+          assignedAssets: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}/Assets`,
+        },
+        configurationConstant: {
+          base: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
+          getAll: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
+          getByKey: (key: string) => `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/${key}`,
         },
       },
     };

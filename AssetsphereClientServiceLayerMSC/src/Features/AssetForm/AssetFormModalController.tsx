@@ -3,8 +3,9 @@ import { Asset, AssetCategory, AssetSubtype, LifecycleStatus, StorageDrive } fro
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import InputSharedComponent from '../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
-import { Plus, Cpu, HardDrive, MemoryStick, Monitor, Sparkles, Trash2, FileText } from 'lucide-react';
+import { Plus, Cpu, HardDrive, MemoryStick, Monitor, Sparkles, Trash2, FileText, UserCheck, MapPin, Building } from 'lucide-react';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
+import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 
 const CATEGORY_OPTIONS: SelectOption[] = [
   { value: 'Computing', label: 'Computing', sublabel: 'Laptops, Desktops & Workstations' },
@@ -33,6 +34,18 @@ const DRIVE_TYPE_OPTIONS: SelectOption[] = [
   { value: 'eMMC', label: 'eMMC Flash Storage' },
   { value: 'External SSD', label: 'External / Removable SSD' },
   { value: 'Other', label: 'Other Storage Array' },
+];
+
+const DEPARTMENT_SELECT_OPTIONS: SelectOption[] = [
+  { value: 'Engineering', label: 'Engineering' },
+  { value: 'Product & Design', label: 'Product & Design' },
+  { value: 'Information Technology', label: 'Information Technology' },
+  { value: 'Cybersecurity', label: 'Cybersecurity' },
+  { value: 'Human Resources', label: 'Human Resources' },
+  { value: 'Finance & Accounts', label: 'Finance & Accounts' },
+  { value: 'Sales & Marketing', label: 'Sales & Marketing' },
+  { value: 'Legal & Compliance', label: 'Legal & Compliance' },
+  { value: 'Operations', label: 'Operations' },
 ];
 
 const PROCESSOR_PRESETS = [
@@ -89,6 +102,12 @@ export default function AssetFormModalController({
   onSave,
   onClose,
 }: AssetFormModalControllerProps): React.JSX.Element {
+  // Query active employees and registered work locations
+  const { data: employees = [] } =
+    TanstackQueryClientService.current.employees.useEmployeesQuery();
+  const { data: workLocations = ['Pune, Maharastra'] } =
+    TanstackQueryClientService.current.configuration.useWorkLocationsQuery();
+
   const [deviceName, setDeviceName] = useState(initialAsset?.deviceName || '');
   const [assetNumber] = useState(
     initialAsset?.assetNumber || `AST-2026-${Math.floor(1000 + Math.random() * 9000)}`
@@ -125,29 +144,72 @@ export default function AssetFormModalController({
   });
 
   const [screenSize, setScreenSize] = useState(initialAsset?.hardwareSpecs?.screenSize || '16.0"');
+
+  // Custody & Assignment State
+  const [assignedEmployeeId, setAssignedEmployeeId] = useState<string>(
+    initialAsset?.assignedToEmployeeId || 'UNASSIGNED'
+  );
+  const [assignedDepartment, setAssignedDepartment] = useState<string>(
+    initialAsset?.department || 'Engineering'
+  );
+  const [assignedLocation, setAssignedLocation] = useState<string>(
+    initialAsset?.currentLocation || workLocations[0] || 'Pune, Maharastra'
+  );
+
   const [notes, setNotes] = useState(initialAsset?.aiNotes || '');
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
 
   React.useEffect(() => {
     if (isOpen) {
       setExitDirection('down');
+      if (!initialAsset && workLocations.length > 0 && !assignedLocation) {
+        setAssignedLocation(workLocations[0]);
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialAsset, workLocations]);
 
-  const [lifecycleStatus] = useState<LifecycleStatus>(
-    initialAsset?.lifecycleStatus || 'Inventory'
-  );
+  // Employee Select Options for Searchable Dropdown
+  const employeeSelectOptions: SelectOption[] = React.useMemo(() => {
+    return [
+      {
+        value: 'UNASSIGNED',
+        label: 'Unassigned (In Inventory / Stock)',
+        sublabel: 'Device remains unallocated in central IT asset pool',
+      },
+      ...employees.map((emp) => ({
+        value: emp.id,
+        label: `${emp.name} (${emp.employeeCode})`,
+        sublabel: `${emp.department} • ${emp.officeLocation || 'Pune, Maharastra'}`,
+      })),
+    ];
+  }, [employees]);
+
+  // Location Select Options
+  const locationSelectOptions: SelectOption[] = React.useMemo(() => {
+    const locSet = new Set<string>(workLocations.length > 0 ? workLocations : ['Pune, Maharastra']);
+    employees.forEach((e) => {
+      if (e.officeLocation) locSet.add(e.officeLocation);
+    });
+    return Array.from(locSet).map((loc) => ({ value: loc, label: loc }));
+  }, [workLocations, employees]);
+
+  // Handle Employee Change & Auto-Sync Location/Department
+  const handleEmployeeChange = (empId: string) => {
+    setAssignedEmployeeId(empId);
+    if (empId !== 'UNASSIGNED') {
+      const matched = employees.find((e) => e.id === empId || e.employeeCode === empId);
+      if (matched) {
+        if (matched.department) setAssignedDepartment(matched.department);
+        if (matched.officeLocation) setAssignedLocation(matched.officeLocation);
+      }
+    }
+  };
 
   const handleCancel = () => {
     setExitDirection('up');
     setTimeout(() => {
       onClose();
     }, 0);
-  };
-
-  const handleHeaderClose = () => {
-    setExitDirection('down');
-    onClose();
   };
 
   // Multi-Storage Helpers
@@ -196,49 +258,49 @@ export default function AssetFormModalController({
 
     setExitDirection('up');
 
-    const mappedStorageDrives: StorageDrive[] = storageDrives.map((d) => ({
+    const formattedDrives: StorageDrive[] = storageDrives.map((d) => ({
       id: d.id,
       capacity: `${d.sizeNumber} ${d.unit}`,
-      type: d.type as any,
+      type: d.type as StorageDrive['type'],
     }));
 
-    const aggregatedStorage = mappedStorageDrives
-      .map((d, index) =>
-        mappedStorageDrives.length > 1
-          ? `[Drive ${index + 1}: ${d.capacity} ${d.type}]`
-          : `${d.capacity} ${d.type}`
-      )
-      .join(' + ');
+    const primaryDrive = formattedDrives[0];
+    const totalStorageGbs = storageDrives.reduce((acc, curr) => {
+      const inGbs = curr.unit === 'TB' ? curr.sizeNumber * 1024 : curr.sizeNumber;
+      return acc + inGbs;
+    }, 0);
+
+    const isAssigned = assignedEmployeeId !== 'UNASSIGNED';
+    const assignedEmp = isAssigned
+      ? employees.find((e) => e.id === assignedEmployeeId || e.employeeCode === assignedEmployeeId)
+      : null;
 
     onSave({
-      id: initialAsset?.id || `AST-${Date.now()}`,
       deviceName: deviceName.trim(),
-      assetNumber,
+      serialNumber: serialNumber.trim().toUpperCase(),
       category,
-      subtype: (category === 'Mobile' ? 'Smartphones & Tablets' : 'Laptop') as AssetSubtype,
-      serialNumber: serialNumber.trim(),
-      companyTag: assetNumber,
-      hostname: `CORP-${deviceName.replace(/\s+/g, '-').toUpperCase()}`,
-      manufacturer: manufacturer.trim() || 'Enterprise Vendor',
+      manufacturer: manufacturer.trim() || 'Enterprise Hardware',
+      brand: manufacturer.trim() || 'Generic Enterprise',
       model: deviceName.trim(),
-      brand: manufacturer.trim() || 'Enterprise',
       productFamily: category,
-      sku: `SKU-${serialNumber.slice(0, 6).toUpperCase()}`,
+      sku: `${category.toUpperCase().slice(0, 3)}-${serialNumber.trim().toUpperCase().slice(0, 4)}`,
       releaseYear: 2026,
-      lifecycleStatus,
-      currentLocation: 'HQ Warehouse',
-      department: 'Unassigned',
-      businessUnit: 'Corporate Operations',
-      costCenter: 'CC-100-GEN',
-      barcodeValue: serialNumber.replace(/[^0-9]/g, '') || '904100990011',
+      lifecycleStatus: isAssigned ? 'Assigned' : 'Inventory',
+      currentLocation: assignedLocation || 'Pune, Maharastra',
+      department: assignedDepartment || 'Engineering',
+      assignedToEmployeeId: isAssigned ? (assignedEmp?.id || assignedEmployeeId) : undefined,
+      assignedToEmployeeName: isAssigned ? (assignedEmp?.name || undefined) : undefined,
+      assignedDate: isAssigned ? new Date().toISOString().split('T')[0] : undefined,
       hardwareSpecs: {
         cpu: processor,
-        ramGbs: Number(ramGbs) || 16,
+        processor: processor,
+        ramGbs: ramGbs,
         ram: `${ramGbs} GB`,
-        storage: aggregatedStorage,
-        storageDrives: mappedStorageDrives,
+        storageGbs: totalStorageGbs,
+        storageType: primaryDrive?.type?.includes('NVMe') ? 'NVMe' : 'SSD',
+        storage: formattedDrives.map((d) => d.capacity).join(' + '),
+        storageDrives: formattedDrives,
         screenSize: screenSize,
-        storageType: mappedStorageDrives.some((d) => d.type.includes('NVMe')) ? 'NVMe' : 'SSD',
       },
       procurement: {
         purchaseDate: new Date().toISOString().split('T')[0],
@@ -275,7 +337,7 @@ export default function AssetFormModalController({
         isCompliant: true,
       },
       network: {
-        officeLocation: 'HQ Warehouse',
+        officeLocation: assignedLocation || 'Pune, Maharastra',
       },
       health: {
         overallScore: 98,
@@ -302,24 +364,24 @@ export default function AssetFormModalController({
   return (
     <ModalSharedComponent
       isOpen={isOpen}
-      onClose={handleHeaderClose}
+      onClose={onClose}
       title={initialAsset ? 'Edit Enterprise IT Asset' : 'Register New Enterprise IT Asset'}
       subtitle={`Auto-Generated Asset Identifier: ${assetNumber}`}
       maxWidth="3xl"
-      minHeight="min-h-[580px]"
+      scrollMode="backdrop"
       animationType="slide-up"
       exitDirection={exitDirection}
     >
-      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full min-h-[520px] text-xs space-y-6">
-        <div className="space-y-5">
-          {/* General Equipment Information */}
-          <div className="space-y-3">
-            <h4 className="text-[11px] font-semibold tracking-wider text-slate-500 dark:text-zinc-400 uppercase flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-[#0C2086] dark:text-blue-400" />
-              General Equipment Information
+      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full text-xs">
+        <div>
+          {/* Section 1: General Equipment Information */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800">
+              <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+              1. General Equipment Information
             </h4>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputSharedComponent
                 label="Device Name / Model Title *"
                 value={deviceName}
@@ -336,7 +398,7 @@ export default function AssetFormModalController({
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <CustomSelectSharedComponent
                 label="Equipment Category *"
                 value={category}
@@ -353,7 +415,7 @@ export default function AssetFormModalController({
             </div>
 
             {/* Financial Cost & Currency Selector */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputSharedComponent
                 label={`Original Purchase Cost (${currency === 'INR' ? '₹' : '$'})`}
                 type="number"
@@ -372,17 +434,16 @@ export default function AssetFormModalController({
             </div>
           </div>
 
-          {/* Hardware Specifications Section */}
-          <div className="space-y-4 pt-4 border-t border-slate-200 dark:border-zinc-800/80">
-            <h4 className="text-[11px] font-semibold tracking-wider text-slate-500 dark:text-zinc-400 uppercase flex items-center gap-1.5">
+          {/* Section 2: Hardware Specifications & Performance Details */}
+          <div className="space-y-4 pt-8">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
               <Cpu className="w-3.5 h-3.5 text-emerald-500" />
-              Hardware Specifications & Performance Details
+              2. Hardware Specifications & Performance Details
             </h4>
 
             {/* Processor (CPU) */}
             <div className="space-y-2">
               <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <Cpu className="w-3.5 h-3.5 text-blue-500" />
                 Processor (CPU) Architecture
               </label>
               <InputSharedComponent
@@ -390,13 +451,13 @@ export default function AssetFormModalController({
                 onChange={(e) => setProcessor(e.target.value)}
                 placeholder="e.g. Apple M3 Max / Intel Core i9-14900HX"
               />
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                 {PROCESSOR_PRESETS.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setProcessor(item)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       processor === item
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -411,7 +472,6 @@ export default function AssetFormModalController({
             {/* System Memory (RAM) - Strict GB Only */}
             <div className="space-y-2">
               <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <MemoryStick className="w-3.5 h-3.5 text-indigo-500" />
                 System Memory (RAM in Gigabytes)
               </label>
               
@@ -430,13 +490,13 @@ export default function AssetFormModalController({
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                 {RAM_NUMERIC_PRESETS.map((val) => (
                   <button
                     key={val}
                     type="button"
                     onClick={() => setRamGbs(val)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       ramGbs === val
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -452,7 +512,6 @@ export default function AssetFormModalController({
             <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                  <HardDrive className="w-3.5 h-3.5 text-amber-500" />
                   Storage Drive Configuration (Dual / Multi-Drive Support)
                 </label>
                 <button
@@ -522,7 +581,7 @@ export default function AssetFormModalController({
                     </div>
 
                     {/* Quick Capacity Preset Chips */}
-                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                    <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                       {DRIVE_PRESET_ITEMS.map((preset) => {
                         const isSelected = drive.sizeNumber === preset.sizeNumber && drive.unit === preset.unit;
                         return (
@@ -530,9 +589,9 @@ export default function AssetFormModalController({
                             key={preset.label}
                             type="button"
                             onClick={() => handleApplyDrivePreset(drive.id, preset.sizeNumber, preset.unit)}
-                            className={`px-1.5 py-0.5 rounded text-[9.5px] font-medium border transition-all ${
+                            className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                               isSelected
-                                ? 'bg-[#0C2086] text-white border-[#0C2086]'
+                                ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                                 : 'bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-700'
                             }`}
                           >
@@ -549,7 +608,6 @@ export default function AssetFormModalController({
             {/* Display / Screen Size */}
             <div className="space-y-2 pt-2">
               <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <Monitor className="w-3.5 h-3.5 text-cyan-500" />
                 Display / Screen Size
               </label>
               <InputSharedComponent
@@ -557,13 +615,13 @@ export default function AssetFormModalController({
                 onChange={(e) => setScreenSize(e.target.value)}
                 placeholder="e.g. 16.0-inch Liquid Retina XDR"
               />
-              <div className="flex flex-wrap gap-1.5 pt-1">
+              <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                 {SCREEN_SIZE_PRESETS.map((item) => (
                   <button
                     key={item}
                     type="button"
                     onClick={() => setScreenSize(item)}
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
+                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       screenSize === item
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -574,17 +632,76 @@ export default function AssetFormModalController({
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Administrative Notes Section */}
-            <div className="space-y-2 pt-3 border-t border-slate-200 dark:border-zinc-800/80">
-              <label className="text-[11px] font-medium text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                <FileText className="w-3.5 h-3.5 text-amber-500" />
-                Administrative & Provisioning Notes (Optional)
+          {/* Section 3: Custody, Assignment & Deployment */}
+          <div className="space-y-4 pt-8">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+              <UserCheck className="w-3.5 h-3.5 text-indigo-500" />
+              3. Custody, Assignment & Deployment
+            </h4>
+
+            {/* Searchable Assign to Employee Dropdown */}
+            <div>
+              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                Assign to Team Member / Custodian
+              </label>
+              <CustomSelectSharedComponent
+                value={assignedEmployeeId}
+                options={employeeSelectOptions}
+                onChange={handleEmployeeChange}
+                searchable={true}
+                searchPlaceholder="Search employee by name, ID, or department..."
+                size="md"
+                placeholder="Select an employee or leave unassigned..."
+              />
+              <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">
+                Assigning an employee will automatically update the device lifecycle status to <span className="font-semibold text-indigo-600 dark:text-indigo-400 font-mono">Assigned</span>.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
+                  Primary Deployment Location
+                </label>
+                <CustomSelectSharedComponent
+                  value={assignedLocation}
+                  options={locationSelectOptions}
+                  onChange={setAssignedLocation}
+                  size="sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1 flex items-center gap-1">
+                  Allocated Department
+                </label>
+                <CustomSelectSharedComponent
+                  value={assignedDepartment}
+                  options={DEPARTMENT_SELECT_OPTIONS}
+                  onChange={setAssignedDepartment}
+                  size="sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Administrative & Provisioning Notes */}
+          <div className="space-y-4 pt-8">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+              <FileText className="w-3.5 h-3.5 text-amber-500" />
+              4. Administrative & Provisioning Notes
+            </h4>
+
+            <div>
+              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                Special Instructions, Tagging & Exceptions (Optional)
               </label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add special provisioning instructions, warranty exceptions, or location tags..."
+                placeholder="Add special provisioning instructions, warranty exceptions, vendor RMA references, or custom configuration tags..."
                 rows={3}
                 className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all resize-y"
               />

@@ -11,7 +11,7 @@ namespace AssetsphereOrchestratorServiceLayerMSC.Features.Employees;
 
 [ApiController]
 [Route(ApplicationRouteFactory.EmployeeRoutes.ControllerURL)]
-[Authorize]
+[Authorize(Roles = "OPERATOR,ADMIN,DEVELOPER")]
 public sealed class EmployeesController : ControllerBase
 {
     private readonly EmployeesService _employeesService;

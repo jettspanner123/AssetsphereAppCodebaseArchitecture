@@ -33,7 +33,9 @@ string[] allowedOrigins = allowedOriginsString.Split(',', StringSplitOptions.Rem
 // 2. Database Context Registration (PostgreSQL with Supabase support & fallback)
 builder.Services.AddDbContext<AssetsphereDbContext>(options =>
 {
-    if (!string.IsNullOrWhiteSpace(dbConnectionString) && dbConnectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase))
+    if (!string.IsNullOrWhiteSpace(dbConnectionString) &&
+        dbConnectionString.Contains("Host=", StringComparison.OrdinalIgnoreCase) &&
+        !dbConnectionString.Contains("[YOUR-DATABASE-PASSWORD]", StringComparison.OrdinalIgnoreCase))
     {
         try
         {

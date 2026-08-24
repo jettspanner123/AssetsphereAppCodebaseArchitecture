@@ -3,6 +3,7 @@ import LoginScreenCardStaticComponent from './Components/static/LoginScreenCardS
 import LoginScreenCON from './Constants/LoginScreenCON';
 import { LoginCredentials, LoginFormErrors, LoginAuthState } from './Models/LoginScreenModel';
 import LoginScreenService from './Services/LoginScreenService';
+import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 import AnimatedThemeToggleSharedComponent from '../../Shared/Components/AnimatedThemeToggleSharedComponent';
 
 export interface LoginScreenControllerProps {
@@ -27,8 +28,34 @@ export default function LoginScreenController({
   });
 
   const [errors, setErrors] = useState<LoginFormErrors>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMicrosoftLoading, setIsMicrosoftLoading] = useState<boolean>(false);
+
+  // TanStack Query Mutation for credential login via centralized service
+  const loginMutation = TanstackQueryClientService.current.authentication.loginMutation({
+    onSuccess: (authState: LoginAuthState) => {
+      onLoginSuccess(authState);
+    },
+    onError: (err: unknown) => {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Authentication failed. Please verify your credentials and try again.';
+      setErrors({ general: errorMessage });
+    },
+  });
+
+  // TanStack Query Mutation for Microsoft SSO via centralized service
+  const microsoftLoginMutation = TanstackQueryClientService.current.authentication.microsoftLoginMutation({
+    onSuccess: (authState: LoginAuthState) => {
+      onLoginSuccess(authState);
+    },
+    onError: (err: unknown) => {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.';
+      setErrors({ general: errorMessage });
+    },
+  });
 
   const handleFieldChange = (field: keyof LoginCredentials, value: string | boolean) => {
     setCredentials((prev) => ({
@@ -44,7 +71,7 @@ export default function LoginScreenController({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = LoginScreenService.current.validate(credentials);
 
@@ -53,33 +80,11 @@ export default function LoginScreenController({
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const authState = await LoginScreenService.current.authenticateWithCredentials(credentials);
-      onLoginSuccess(authState);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : 'Authentication failed. Please verify your credentials and try again.';
-      setErrors({ general: errorMessage });
-    } finally {
-      setIsLoading(false);
-    }
+    loginMutation.mutate(credentials);
   };
 
-  const handleMicrosoftLogin = async () => {
-    try {
-      setIsMicrosoftLoading(true);
-      const authState = await LoginScreenService.current.authenticateWithMicrosoft();
-      onLoginSuccess(authState);
-    } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.';
-      setErrors({ general: errorMessage });
-    } finally {
-      setIsMicrosoftLoading(false);
-    }
+  const handleMicrosoftLogin = () => {
+    microsoftLoginMutation.mutate();
   };
 
   return (
@@ -102,8 +107,8 @@ export default function LoginScreenController({
         <LoginScreenCardStaticComponent
           credentials={credentials}
           errors={errors}
-          isLoading={isLoading}
-          isMicrosoftLoading={isMicrosoftLoading}
+          isLoading={loginMutation.isPending}
+          isMicrosoftLoading={microsoftLoginMutation.isPending}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}

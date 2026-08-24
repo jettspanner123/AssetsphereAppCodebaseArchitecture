@@ -12,12 +12,12 @@ public static class DatabaseSeederUtility
 {
     public static async Task SeedInitialDataAsync(AssetsphereDbContext context)
     {
-        // 1. Seed Admin User
-        if (!await context.Users.AnyAsync())
-        {
-            string adminEmail = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_EMAIL", "admin@assetsphere.internal");
-            string adminPassword = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_PASSWORD", "AssetsphereAdmin2026!");
+        // 1. Seed Initial Users (Admin and Standard User with Least Role)
+        string adminEmail = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_EMAIL", "admin@assetsphere.internal");
+        string adminPassword = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ADMIN_PASSWORD", "AssetsphereAdmin2026!");
 
+        if (!await context.Users.AnyAsync(u => u.Email == adminEmail))
+        {
             UserEntityClass adminUser = new UserEntityClass
             {
                 Id = Guid.NewGuid(),
@@ -35,6 +35,31 @@ public static class DatabaseSeederUtility
 
             await context.Users.AddAsync(adminUser);
         }
+
+        string userEmail = "user@assetsphere.internal";
+        string userPassword = "AssetsphereUser2026!";
+
+        if (!await context.Users.AnyAsync(u => u.Email == userEmail))
+        {
+            UserEntityClass standardUser = new UserEntityClass
+            {
+                Id = Guid.NewGuid(),
+                Email = userEmail,
+                PasswordHash = PasswordHashHelper.Current.HashPassword(userPassword),
+                FirstName = "Alex",
+                LastName = "Taylor",
+                Role = UserRoleType.USER, // Least Role
+                Department = DepartmentType.Operations,
+                AvatarUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = "seeder"
+            };
+
+            await context.Users.AddAsync(standardUser);
+        }
+
+        await context.SaveChangesAsync();
 
         // 2. Seed Employees
         if (!await context.Employees.AnyAsync())

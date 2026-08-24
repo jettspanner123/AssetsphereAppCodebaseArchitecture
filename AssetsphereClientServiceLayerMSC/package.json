@@ -14,6 +14,7 @@
     "@google/genai": "^2.4.0",
     "@modelcontextprotocol/server-sequential-thinking": "^2026.7.4",
     "@tailwindcss/vite": "^4.1.14",
+    "@tanstack/react-query": "^5.102.2",
     "@tanstack/react-router": "^1.170.31",
     "@vitejs/plugin-react": "^5.0.4",
     "dotenv": "^17.2.3",

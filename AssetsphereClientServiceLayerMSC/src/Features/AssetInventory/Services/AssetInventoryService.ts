@@ -98,6 +98,22 @@ export default class AssetInventoryService {
     return dtos.map(this.mapDtoToAsset);
   }
 
+  public async getAssetById(id: string): Promise<Asset> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.assetInventory.getById(id), {
+      method: 'GET',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch asset with ID ${id} (HTTP ${response.status})`);
+    }
+
+    const json = await response.json();
+    const dto: BackendAssetDTO = json.data;
+    return this.mapDtoToAsset(dto);
+  }
+
   public async createAsset(request: CreateAssetRequest): Promise<Asset> {
     const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
     const response = await fetch(config.endpoints.assetInventory.create, {
@@ -114,6 +130,22 @@ export default class AssetInventoryService {
 
     const createdDto: BackendAssetDTO = json.data;
     return this.mapDtoToAsset(createdDto);
+  }
+
+  public async deleteAsset(id: string): Promise<boolean> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.assetInventory.delete(id), {
+      method: 'DELETE',
+      headers: this.getAuthHeaders(),
+    });
+
+    if (!response.ok) {
+      const json = await response.json().catch(() => ({}));
+      const errorMsg = json.message || `Asset deletion failed with HTTP ${response.status}`;
+      throw new Error(errorMsg);
+    }
+
+    return true;
   }
 
   private mapDtoToAsset(dto: BackendAssetDTO): Asset {
@@ -145,9 +177,13 @@ export default class AssetInventoryService {
       usefulLifeYears: Math.round(dto.usefulLifeMonths / 12) || 3,
       salvageValue: dto.salvageValue,
       totalCostOfOwnership: dto.purchasePrice,
+      aiNotes: dto.notes || undefined,
       hardwareSpecs: {
         cpu: dto.specs?.processor,
-        ramGbs: dto.specs?.ram ? parseInt(dto.specs.ram) || undefined : undefined,
+        ramGbs: dto.specs?.ramGbs || (dto.specs?.ram ? parseInt(dto.specs.ram) || undefined : undefined),
+        ram: dto.specs?.ram || (dto.specs?.ramGbs ? `${dto.specs.ramGbs} GB` : undefined),
+        storage: dto.specs?.storage,
+        storageDrives: dto.specs?.storageDrives as any,
         screenSize: dto.specs?.screenSize,
         gpu: dto.specs?.graphics,
         resolution: dto.specs?.resolution,

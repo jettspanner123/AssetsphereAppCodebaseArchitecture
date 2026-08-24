@@ -25,8 +25,6 @@ export interface HeaderStaticComponentProps {
   onNavigateTab?: (tab: TabType) => void;
   onNavigateSettings?: () => void;
   onNavigateDevDashboard?: () => void;
-  showMockData?: boolean;
-  onToggleShowMockData?: () => void;
   onSignOut?: () => void;
 }
 
@@ -47,8 +45,6 @@ export default function HeaderStaticComponent({
   onNavigateTab,
   onNavigateSettings,
   onNavigateDevDashboard,
-  showMockData,
-  onToggleShowMockData,
   onSignOut,
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -182,8 +178,6 @@ export default function HeaderStaticComponent({
             onNavigateDevDashboard={onNavigateDevDashboard}
             currentTheme={currentTheme}
             onToggleTheme={onToggleTheme}
-            showMockData={showMockData}
-            onToggleShowMockData={onToggleShowMockData}
             onSignOut={onSignOut}
           />
         </div>

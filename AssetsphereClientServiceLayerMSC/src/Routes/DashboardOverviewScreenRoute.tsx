@@ -10,6 +10,7 @@ export interface DashboardOverviewScreenRouteProps {
   tickets: ServiceTicket[];
   recommendations: AIRecommendation[];
   campaign: VerificationCampaign;
+  isLoading?: boolean;
   onSelectAsset: (asset: Asset) => void;
   onOpenAIAssistant: () => void;
   onNavigateTab: (tab: any) => void;
@@ -20,6 +21,7 @@ export default function DashboardOverviewScreenRoute({
   tickets,
   recommendations,
   campaign,
+  isLoading = false,
   onSelectAsset,
   onOpenAIAssistant,
   onNavigateTab,
@@ -30,6 +32,7 @@ export default function DashboardOverviewScreenRoute({
       tickets={tickets}
       recommendations={recommendations}
       campaign={campaign}
+      isLoading={isLoading}
       onSelectAsset={onSelectAsset}
       onOpenAIAssistant={onOpenAIAssistant}
       onNavigateTab={onNavigateTab}

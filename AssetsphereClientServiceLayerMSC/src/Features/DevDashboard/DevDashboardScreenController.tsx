@@ -13,8 +13,6 @@ export interface DevDashboardScreenControllerProps {
   onToggleTheme: () => void;
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
-  showMockData: boolean;
-  onToggleShowMockData: () => void;
   onNavigateAppDashboard: () => void;
   onNavigateSettings: () => void;
   onSignOut: () => void;
@@ -25,8 +23,6 @@ export default function DevDashboardScreenController({
   onToggleTheme,
   deploymentMode,
   onToggleDeploymentMode,
-  showMockData,
-  onToggleShowMockData,
   onNavigateAppDashboard,
   onNavigateSettings,
   onSignOut,
@@ -52,8 +48,6 @@ export default function DevDashboardScreenController({
         unreadCount={0}
         isNotificationsOpen={false}
         onToggleNotifications={() => {}}
-        showMockData={showMockData}
-        onToggleShowMockData={onToggleShowMockData}
         onNavigateDevDashboard={() => setActiveDevTab('overview')}
         onNavigateSettings={onNavigateSettings}
         onSignOut={onSignOut}

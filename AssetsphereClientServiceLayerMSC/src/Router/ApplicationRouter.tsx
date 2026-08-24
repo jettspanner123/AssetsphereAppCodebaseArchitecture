@@ -77,8 +77,9 @@ function RootLayout(): React.JSX.Element {
 // 1.1 Dashboard Shared Context
 // ==========================================
 export interface DashboardContextType {
-  showMockData: boolean;
   assets: Asset[];
+  isLoadingAssets: boolean;
+  refetchAssets: () => void;
   employees: Employee[];
   licenses: SoftwareLicense[];
   orders: PurchaseOrder[];
@@ -96,18 +97,28 @@ export const DashboardContext = React.createContext<DashboardContextType | null>
 export function useDashboard(): DashboardContextType {
   const ctx = React.useContext(DashboardContext);
   if (!ctx) {
-    const showMockData = UserPreferencesUtility.current.getShowMockData(true);
-    const mockAssets = MockDataSeederService.current.getAssets();
     return {
-      showMockData,
-      assets: showMockData ? mockAssets : [],
-      employees: showMockData ? MockDataSeederService.current.getEmployees() : [],
-      licenses: showMockData ? MockDataSeederService.current.getSoftwareLicenses() : [],
-      orders: showMockData ? MockDataSeederService.current.getPurchaseOrders() : [],
-      tickets: showMockData ? MockDataSeederService.current.getServiceTickets() : [],
-      vendors: showMockData ? MockDataSeederService.current.getVendors() : [],
-      recommendations: showMockData ? MockDataSeederService.current.getAIRecommendations() : [],
-      campaign: MockDataSeederService.current.getVerificationCampaigns()[0],
+      assets: [],
+      isLoadingAssets: false,
+      refetchAssets: () => {},
+      employees: [],
+      licenses: [],
+      orders: [],
+      tickets: [],
+      vendors: [],
+      recommendations: [],
+      campaign: {
+        id: 'CMP-EMPTY',
+        title: 'No Active Verification Campaign',
+        targetDepartment: 'N/A',
+        startDate: 'N/A',
+        endDate: 'N/A',
+        totalTargetAssets: 0,
+        verifiedAssetsCount: 0,
+        flaggedDiscrepancies: 0,
+        status: 'Draft' as const,
+        description: 'Clean database mode.',
+      },
       onImportAssets: () => {},
       onSaveAsset: () => {},
       onDeleteAsset: () => {},
@@ -162,47 +173,36 @@ export function DashboardShell(): React.JSX.Element {
     );
   };
 
-  // Show Mock Data Toggle State
-  const [showMockData, setShowMockDataState] = useState<boolean>(() =>
-    UserPreferencesUtility.current.getShowMockData(true)
-  );
-
-  const handleToggleShowMockData = () => {
-    const next = !showMockData;
-    setShowMockDataState(next);
-    UserPreferencesUtility.current.setShowMockData(next);
-  };
-
   // Notification states
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
 
-  // Portfolio State Sourced from MockDataSeederService
-  const [mockAssetsList, setMockAssetsList] = useState<Asset[]>(() =>
-    MockDataSeederService.current.getAssets()
-  );
+  // Live Database Assets Query via TanStack Query
+  const {
+    data: dbAssets = [],
+    isLoading: isLoadingAssets,
+    refetch: refetchAssets,
+  } = TanstackQueryClientService.current.assets.useAssetsQuery();
 
-  const assets = showMockData ? mockAssetsList : [];
-  const employees = showMockData ? MockDataSeederService.current.getEmployees() : [];
-  const licenses = showMockData ? MockDataSeederService.current.getSoftwareLicenses() : [];
-  const orders = showMockData ? MockDataSeederService.current.getPurchaseOrders() : [];
-  const tickets = showMockData ? MockDataSeederService.current.getServiceTickets() : [];
-  const vendors = showMockData ? MockDataSeederService.current.getVendors() : [];
-  const recommendations = showMockData ? MockDataSeederService.current.getAIRecommendations() : [];
-  const campaign = showMockData
-    ? MockDataSeederService.current.getVerificationCampaigns()[0]
-    : {
-        id: 'CMP-EMPTY',
-        title: 'No Active Verification Campaign',
-        targetDepartment: 'N/A',
-        startDate: 'N/A',
-        endDate: 'N/A',
-        totalTargetAssets: 0,
-        verifiedAssetsCount: 0,
-        flaggedDiscrepancies: 0,
-        status: 'Draft' as const,
-        description: 'Mock data is currently hidden.',
-      };
+  const assets = dbAssets;
+  const employees: Employee[] = [];
+  const licenses: SoftwareLicense[] = [];
+  const orders: PurchaseOrder[] = [];
+  const tickets: ServiceTicket[] = [];
+  const vendors: Vendor[] = [];
+  const recommendations: AIRecommendation[] = [];
+  const campaign: VerificationCampaign = {
+    id: 'CMP-EMPTY',
+    title: 'No Active Verification Campaign',
+    targetDepartment: 'N/A',
+    startDate: 'N/A',
+    endDate: 'N/A',
+    totalTargetAssets: 0,
+    verifiedAssetsCount: 0,
+    flaggedDiscrepancies: 0,
+    status: 'Draft' as const,
+    description: 'Clean database mode.',
+  };
 
   const nonCompliantCount = assets.filter((a) => !a.security?.isCompliant).length;
   const openTicketCount = tickets.filter(
@@ -365,7 +365,6 @@ export function DashboardShell(): React.JSX.Element {
 
   const createAssetMutation = TanstackQueryClientService.current.assets.useCreateAssetMutation({
     onSuccess: (createdAsset) => {
-      setMockAssetsList((prev) => [createdAsset, ...prev]);
       toast.success('Device Registered Successfully', {
         description: `Asset ${createdAsset.assetNumber} (${createdAsset.deviceName}) has been saved to the database.`,
       });
@@ -378,53 +377,58 @@ export function DashboardShell(): React.JSX.Element {
     },
   });
 
-  const handleSaveAsset = (assetData: Partial<Asset>) => {
-    if (assetData.id && !assetData.id.startsWith('AST-')) {
-      setMockAssetsList((prev) =>
-        prev.map((a) => (a.id === assetData.id ? ({ ...a, ...assetData } as Asset) : a))
-      );
-      toast.success('Asset Updated', {
-        description: `Asset ${assetData.assetNumber || assetData.deviceName} updated.`,
+  const deleteAssetMutation = TanstackQueryClientService.current.assets.useDeleteAssetMutation({
+    onSuccess: () => {
+      toast.success('Asset Deleted', {
+        description: 'Asset removed successfully from the database.',
       });
-      handleCloseAddAsset();
-    } else {
-      const ramNumber = assetData.hardwareSpecs?.ramGbs || 16;
-      const ramString = `${ramNumber} GB`;
-      const drives = assetData.hardwareSpecs?.storageDrives || [
-        { capacity: '512 GB', type: 'NVMe SSD' },
-      ];
-      const aggregatedStorage = assetData.hardwareSpecs?.storage ||
-        drives.map((d) => `${d.capacity} ${d.type}`).join(' + ');
+    },
+    onError: (error: any) => {
+      toast.error('Deletion Failed', {
+        description: error.message || 'Unable to delete asset from the database.',
+      });
+    },
+  });
 
-      createAssetMutation.mutate({
-        serialNumber: assetData.serialNumber || `SN-${Date.now()}`,
-        category: assetData.category || 'Computing',
-        subtype: assetData.subtype || 'Laptop',
-        modelName: assetData.deviceName || 'Enterprise IT Device',
-        manufacturer: assetData.manufacturer || 'Enterprise Vendor',
-        purchasePrice: assetData.procurement?.purchaseCost || 1499,
-        currency: assetData.procurement?.currency || 'USD',
-        location: assetData.currentLocation || 'HQ Warehouse',
-        notes: assetData.aiNotes,
-        specs: {
-          processor: assetData.hardwareSpecs?.cpu || 'Apple M3 Pro',
-          ramGbs: ramNumber,
-          ram: ramString,
-          storage: aggregatedStorage,
-          storageDrives: drives,
-          screenSize: assetData.hardwareSpecs?.screenSize || '16.0"',
-        },
-      });
-    }
+  const handleSaveAsset = (assetData: Partial<Asset>) => {
+    const ramNumber = assetData.hardwareSpecs?.ramGbs || 16;
+    const ramString = `${ramNumber} GB`;
+    const drives = assetData.hardwareSpecs?.storageDrives || [
+      { capacity: '512 GB', type: 'NVMe SSD' },
+    ];
+    const aggregatedStorage = assetData.hardwareSpecs?.storage ||
+      drives.map((d) => `${d.capacity} ${d.type}`).join(' + ');
+
+    createAssetMutation.mutate({
+      serialNumber: assetData.serialNumber || `SN-${Date.now()}`,
+      category: assetData.category || 'Computing',
+      subtype: assetData.subtype || 'Laptop',
+      modelName: assetData.deviceName || 'Enterprise IT Device',
+      manufacturer: assetData.manufacturer || 'Enterprise Vendor',
+      purchasePrice: assetData.procurement?.purchaseCost || 1499,
+      currency: assetData.procurement?.currency || 'USD',
+      location: assetData.currentLocation || 'HQ Warehouse',
+      notes: assetData.aiNotes,
+      specs: {
+        processor: assetData.hardwareSpecs?.cpu || 'Apple M3 Pro',
+        ramGbs: ramNumber,
+        ram: ramString,
+        storage: aggregatedStorage,
+        storageDrives: drives,
+        screenSize: assetData.hardwareSpecs?.screenSize || '16.0"',
+      },
+    });
   };
 
-  const handleImportAssets = (importedAssets: Asset[]) => {
-    setMockAssetsList(importedAssets);
-    MockDataSeederService.current.setAssets(importedAssets);
+  const handleImportAssets = (_importedAssets: Asset[]) => {
+    toast.info('CSV Import processed.');
+    refetchAssets();
   };
 
   const handleDeleteAsset = (asset: Asset) => {
-    setMockAssetsList((prev) => prev.filter((a) => a.id !== asset.id));
+    if (window.confirm(`Are you sure you want to delete asset "${asset.deviceName}" (${asset.assetNumber})?`)) {
+      deleteAssetMutation.mutate(asset.id);
+    }
   };
 
   // Selected entities for modals derived from search params
@@ -442,8 +446,9 @@ export function DashboardShell(): React.JSX.Element {
   return (
     <DashboardContext.Provider
       value={{
-        showMockData,
         assets,
+        isLoadingAssets,
+        refetchAssets,
         employees,
         licenses,
         orders,
@@ -473,8 +478,6 @@ export function DashboardShell(): React.JSX.Element {
         nonCompliantCount={nonCompliantCount}
         openTicketCount={openTicketCount}
         unreadAlertCount={unreadAlertCount}
-        showMockData={showMockData}
-        onToggleShowMockData={handleToggleShowMockData}
         onNavigateDevDashboard={() => navigate({ to: ApplicationRouteCON.DEV_DASHBOARD })}
         onSignOut={() => setIsSignOutModalOpen(true)}
       >
@@ -727,7 +730,7 @@ const dashboardOverviewRoute = createRoute({
   path: '/',
   component: function DashboardOverviewComponent() {
     const navigate = useNavigate();
-    const { assets, tickets, recommendations, campaign } = useDashboard();
+    const { assets, tickets, recommendations, campaign, isLoadingAssets } = useDashboard();
 
     return (
       <DashboardOverviewScreenRoute
@@ -735,6 +738,7 @@ const dashboardOverviewRoute = createRoute({
         tickets={tickets}
         recommendations={recommendations}
         campaign={campaign}
+        isLoading={isLoadingAssets}
         onSelectAsset={(asset) =>
           navigate({
             to: '.',
@@ -765,11 +769,12 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const { assets, onImportAssets, onDeleteAsset } = useDashboard();
+    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets } = useDashboard();
 
     return (
       <AssetInventoryScreenRoute
         assets={assets}
+        isLoading={isLoadingAssets}
         onImportAssets={onImportAssets}
         onDeleteAsset={onDeleteAsset}
         onSelectAsset={(asset) =>
@@ -988,9 +993,6 @@ const devDashboardRoute = createRoute({
     const [deploymentMode, setDeploymentMode] = useState<
       'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync'
     >('Enterprise Cloud Sync');
-    const [showMockData, setShowMockDataState] = useState<boolean>(() =>
-      UserPreferencesUtility.current.getShowMockData(true)
-    );
 
     return (
       <DevDashboardScreenRoute
@@ -1005,12 +1007,6 @@ const devDashboardRoute = createRoute({
             p === 'Self-Hosted Air-Gapped' ? 'Enterprise Cloud Sync' : 'Self-Hosted Air-Gapped'
           )
         }
-        showMockData={showMockData}
-        onToggleShowMockData={() => {
-          const next = !showMockData;
-          setShowMockDataState(next);
-          UserPreferencesUtility.current.setShowMockData(next);
-        }}
         onNavigateAppDashboard={() => navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW })}
         onNavigateSettings={() => navigate({ to: ApplicationRouteCON.DASHBOARD_SETTINGS })}
         onSignOut={() => {

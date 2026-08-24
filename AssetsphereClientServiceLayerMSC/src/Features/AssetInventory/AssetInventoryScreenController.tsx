@@ -41,6 +41,7 @@ import ApplicationPermissionService from '@/src/Services/ApplicationPermissionSe
 
 export interface AssetInventoryScreenControllerProps {
   assets: Asset[];
+  isLoading?: boolean;
   onSelectAsset: (asset: Asset) => void;
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
@@ -59,6 +60,7 @@ export interface AssetInventoryScreenControllerProps {
 
 export default function AssetInventoryScreenController({
   assets,
+  isLoading = false,
   onSelectAsset,
   onOpenAddModal,
   onOpenQRBadgeModal,
@@ -566,8 +568,30 @@ export default function AssetInventoryScreenController({
       </CardSharedComponent>
       </div>
 
+      {/* Loading Skeleton */}
+      {isLoading && (
+        <CardSharedComponent className="p-0 overflow-hidden">
+          <div className="overflow-x-auto w-full p-4 space-y-3">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-zinc-800/60 animate-pulse">
+                <div className="flex items-center gap-4">
+                  <div className="h-4 w-24 bg-slate-200 dark:bg-zinc-800 rounded" />
+                  <div className="h-4 w-48 bg-slate-200 dark:bg-zinc-800 rounded" />
+                  <div className="h-4 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="h-4 w-16 bg-slate-200 dark:bg-zinc-800 rounded" />
+                  <div className="h-4 w-20 bg-slate-200 dark:bg-zinc-800 rounded" />
+                  <div className="h-6 w-16 bg-slate-200 dark:bg-zinc-800 rounded" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardSharedComponent>
+      )}
+
       {/* Fallback Empty State */}
-      {filteredAssets.length === 0 && (
+      {!isLoading && filteredAssets.length === 0 && (
         <EmptyStateSharedComponent
           icon={<Laptop className="w-6 h-6 text-slate-400 dark:text-zinc-500" />}
           title={
@@ -580,11 +604,22 @@ export default function AssetInventoryScreenController({
               ? 'No assets matched your search query or active filter criteria. Try clearing search filters or changing parameters.'
               : 'Your enterprise hardware asset registry is currently empty. Register your first device or import assets via CSV.'
           }
+          actionButton={
+            <ButtonSharedComponent
+              variant="primary"
+              size="sm"
+              onClick={onOpenAddModal}
+              icon={<Plus className="w-3.5 h-3.5" />}
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white"
+            >
+              Register First Device
+            </ButtonSharedComponent>
+          }
         />
       )}
 
       {/* Main Content Area View Modes */}
-      {viewMode === 'table' && filteredAssets.length > 0 && (
+      {!isLoading && viewMode === 'table' && filteredAssets.length > 0 && (
         <CardSharedComponent className="p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[1100px] whitespace-nowrap' : ''}`}>
@@ -695,7 +730,7 @@ export default function AssetInventoryScreenController({
       )}
 
       {/* Grid View Mode with Dynamic Column Density (2 vs 3 per row) */}
-      {viewMode === 'grid' && filteredAssets.length > 0 && (
+      {!isLoading && viewMode === 'grid' && filteredAssets.length > 0 && (
         <div
           onContextMenu={(e) => handleContainerContextMenu(e)}
           className={`grid grid-cols-1 ${
@@ -766,8 +801,8 @@ export default function AssetInventoryScreenController({
                     e.stopPropagation();
                     onOpenQRBadgeModal(asset);
                   }}
-                  className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer shrink-0"
-                  title="Generate QR Badge"
+                  className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+                  title="View / Print QR Asset Tag"
                 >
                   <QrCode className="w-3.5 h-3.5" />
                 </button>
@@ -778,7 +813,7 @@ export default function AssetInventoryScreenController({
       )}
 
       {/* Kanban Board View Mode */}
-      {viewMode === 'kanban' && filteredAssets.length > 0 && (
+      {!isLoading && viewMode === 'kanban' && filteredAssets.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {AssetInventoryCON.LIFECYCLE_OPTIONS.filter((opt) => opt !== 'ALL').map((status) => {
             const statusAssets = filteredAssets.filter((a) => a.lifecycleStatus === status);

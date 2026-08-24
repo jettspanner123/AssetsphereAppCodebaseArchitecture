@@ -6,8 +6,6 @@ export interface DevDashboardScreenRouteProps {
   onToggleTheme: () => void;
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
-  showMockData: boolean;
-  onToggleShowMockData: () => void;
   onNavigateAppDashboard: () => void;
   onNavigateSettings: () => void;
   onSignOut: () => void;

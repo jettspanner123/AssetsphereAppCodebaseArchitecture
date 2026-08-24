@@ -26,8 +26,6 @@ export default function NavigationController({
   activeTab,
   onSelectTab,
   unreadAlertCount,
-  showMockData,
-  onToggleShowMockData,
   onNavigateDevDashboard,
   onSignOut,
 }: NavigationControllerProps): React.JSX.Element {
@@ -50,8 +48,6 @@ export default function NavigationController({
         onNavigateTab={onSelectTab}
         onNavigateSettings={() => onSelectTab('settings')}
         onNavigateDevDashboard={onNavigateDevDashboard}
-        showMockData={showMockData}
-        onToggleShowMockData={onToggleShowMockData}
         onSignOut={onSignOut}
       />
       <div className="flex-1 flex w-full items-start">

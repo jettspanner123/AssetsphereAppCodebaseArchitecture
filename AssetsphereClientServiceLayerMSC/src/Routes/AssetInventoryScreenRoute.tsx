@@ -4,6 +4,7 @@ import { Asset } from '../Types/AssetType';
 
 export interface AssetInventoryScreenRouteProps {
   assets: Asset[];
+  isLoading?: boolean;
   onSelectAsset: (asset: Asset) => void;
   onOpenAddModal: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
@@ -22,6 +23,7 @@ export interface AssetInventoryScreenRouteProps {
 
 export default function AssetInventoryScreenRoute({
   assets,
+  isLoading = false,
   onSelectAsset,
   onOpenAddModal,
   onOpenQRBadgeModal,
@@ -40,6 +42,7 @@ export default function AssetInventoryScreenRoute({
   return (
     <AssetInventoryScreenController
       assets={assets}
+      isLoading={isLoading}
       onSelectAsset={onSelectAsset}
       onOpenAddModal={onOpenAddModal}
       onOpenQRBadgeModal={onOpenQRBadgeModal}

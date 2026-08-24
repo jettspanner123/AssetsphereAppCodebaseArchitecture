@@ -1,8 +1,11 @@
 import {
   QueryClient,
   useMutation,
+  useQuery,
   UseMutationOptions,
   UseMutationResult,
+  UseQueryOptions,
+  UseQueryResult,
 } from '@tanstack/react-query';
 import { LoginCredentials, LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
@@ -10,6 +13,7 @@ import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models
 import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
 import { Asset } from '../Types/AssetType';
 import { CreateAssetRequest } from '../Features/AssetInventory/Services/AssetInventoryService';
+import TanstackQueryKeysCON from '../Constants/TanstackQueryKeysCON';
 
 export class AuthenticationQueryService {
   // Login Mutations
@@ -86,6 +90,40 @@ export class AuthenticationQueryService {
 export class AssetQueryService {
   constructor(private readonly getClient: () => QueryClient) {}
 
+  public useAssetsQuery(
+    options?: Omit<UseQueryOptions<Asset[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Asset[], Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.ASSETS,
+      queryFn: async () => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.getAllAssets();
+      },
+      ...options,
+    });
+  }
+
+  public assetsQuery(
+    options?: Omit<UseQueryOptions<Asset[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Asset[], Error> {
+    return this.useAssetsQuery(options);
+  }
+
+  public useAssetByIdQuery(
+    id: string,
+    options?: Omit<UseQueryOptions<Asset, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Asset, Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.ASSET_DETAIL(id),
+      queryFn: async () => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.getAssetById(id);
+      },
+      enabled: Boolean(id),
+      ...options,
+    });
+  }
+
   public useCreateAssetMutation(
     options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
   ): UseMutationResult<Asset, Error, CreateAssetRequest> {
@@ -95,7 +133,7 @@ export class AssetQueryService {
         return await AssetInventoryService.current.createAsset(request);
       },
       onSuccess: (...args) => {
-        this.getClient().invalidateQueries({ queryKey: ['assets'] });
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
         options?.onSuccess?.(...args);
       },
       ...options,
@@ -106,6 +144,28 @@ export class AssetQueryService {
     options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
   ): UseMutationResult<Asset, Error, CreateAssetRequest> {
     return this.useCreateAssetMutation(options);
+  }
+
+  public useDeleteAssetMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.deleteAsset(id);
+      },
+      onSuccess: (...args) => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        options?.onSuccess?.(...args);
+      },
+      ...options,
+    });
+  }
+
+  public deleteAssetMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return this.useDeleteAssetMutation(options);
   }
 }
 

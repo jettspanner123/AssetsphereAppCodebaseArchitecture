@@ -39,6 +39,7 @@ export interface DashboardScreenControllerProps {
   tickets: ServiceTicket[];
   recommendations: AIRecommendation[];
   campaign: VerificationCampaign;
+  isLoading?: boolean;
   onSelectAsset: (asset: Asset) => void;
   onOpenAIAssistant: () => void;
   onNavigateTab: (tab: any) => void;
@@ -49,6 +50,7 @@ export default function DashboardScreenController({
   tickets,
   recommendations,
   campaign,
+  isLoading = false,
   onSelectAsset,
   onOpenAIAssistant,
   onNavigateTab,
@@ -109,10 +111,16 @@ export default function DashboardScreenController({
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {totalAssets}
-            </span>
-            <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">devices</span>
+            {isLoading ? (
+              <div className="h-7 w-16 bg-slate-200 dark:bg-zinc-800 rounded animate-pulse" />
+            ) : (
+              <>
+                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                  {totalAssets}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">devices</span>
+              </>
+            )}
           </div>
         </CardSharedComponent>
 
@@ -125,9 +133,13 @@ export default function DashboardScreenController({
             </span>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              ${totalValuation.toLocaleString()}
-            </span>
+            {isLoading ? (
+              <div className="h-7 w-24 bg-slate-200 dark:bg-zinc-800 rounded animate-pulse" />
+            ) : (
+              <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                ${totalValuation.toLocaleString()}
+              </span>
+            )}
           </div>
         </CardSharedComponent>
 
@@ -140,12 +152,18 @@ export default function DashboardScreenController({
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {Math.round(((totalAssets - nonCompliantCount) / (totalAssets || 1)) * 100)}%
-            </span>
-            <BadgeSharedComponent variant={nonCompliantCount === 0 ? 'success' : 'danger'} size="sm">
-              {nonCompliantCount === 0 ? 'Optimal' : `${nonCompliantCount} Flags`}
-            </BadgeSharedComponent>
+            {isLoading ? (
+              <div className="h-7 w-20 bg-slate-200 dark:bg-zinc-800 rounded animate-pulse" />
+            ) : (
+              <>
+                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                  {Math.round(((totalAssets - nonCompliantCount) / (totalAssets || 1)) * 100)}%
+                </span>
+                <BadgeSharedComponent variant={nonCompliantCount === 0 ? 'success' : 'danger'} size="sm">
+                  {nonCompliantCount === 0 ? 'Optimal' : `${nonCompliantCount} Flags`}
+                </BadgeSharedComponent>
+              </>
+            )}
           </div>
         </CardSharedComponent>
 
@@ -158,12 +176,18 @@ export default function DashboardScreenController({
             </span>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {activeTicketsCount}
-            </span>
-            <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
-              Avg Health: {avgHealthScore}%
-            </span>
+            {isLoading ? (
+              <div className="h-7 w-16 bg-slate-200 dark:bg-zinc-800 rounded animate-pulse" />
+            ) : (
+              <>
+                <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                  {activeTicketsCount}
+                </span>
+                <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
+                  Avg Health: {avgHealthScore}%
+                </span>
+              </>
+            )}
           </div>
         </CardSharedComponent>
       </div>

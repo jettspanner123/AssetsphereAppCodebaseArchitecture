@@ -12,7 +12,7 @@ import {
   Check,
 } from 'lucide-react';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
-import { TabType } from '../../../../types';
+import { TabType } from '../../../../Types/NavigationType';
 
 export interface NotificationItem {
   id: string;

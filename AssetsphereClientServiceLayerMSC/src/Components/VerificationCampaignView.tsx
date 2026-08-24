@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { VerificationCampaign, Asset } from '../types';
+import { VerificationCampaign } from '../Types/VerificationCampaignType';
+import { Asset } from '../Types/AssetType';
 import { QrCode, CheckCircle2, AlertCircle, Clock, Search, RefreshCw } from 'lucide-react';
 
 interface VerificationCampaignViewProps {

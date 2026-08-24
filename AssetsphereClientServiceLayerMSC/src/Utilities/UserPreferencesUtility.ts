@@ -1,4 +1,4 @@
-import { TabType } from '../types';
+import { TabType } from '../Types/NavigationType';
 
 export default class UserPreferencesUtility {
   public static current: UserPreferencesUtility = new UserPreferencesUtility();

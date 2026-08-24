@@ -1,6 +1,6 @@
 import React from 'react';
 import ProcurementScreenController from '../Features/Procurement/ProcurementScreenController';
-import { PurchaseOrder } from '../types';
+import { PurchaseOrder } from '../Types/ProcurementType';
 
 export interface ProcurementScreenRouteProps {
   orders: PurchaseOrder[];

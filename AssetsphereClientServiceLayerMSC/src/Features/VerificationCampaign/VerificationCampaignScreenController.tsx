@@ -1,5 +1,5 @@
 import React from 'react';
-import { VerificationCampaign } from '../../types';
+import { VerificationCampaign } from '../../Types/VerificationCampaignType';
 import { QrCode } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';

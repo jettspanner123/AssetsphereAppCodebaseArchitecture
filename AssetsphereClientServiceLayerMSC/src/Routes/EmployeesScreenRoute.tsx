@@ -1,6 +1,7 @@
 import React from 'react';
 import EmployeesScreenController from '../Features/Employees/EmployeesScreenController';
-import { Employee, Asset } from '../types';
+import { Employee } from '../Types/EmployeeType';
+import { Asset } from '../Types/AssetType';
 
 export interface EmployeesScreenRouteProps {
   employees: Employee[];

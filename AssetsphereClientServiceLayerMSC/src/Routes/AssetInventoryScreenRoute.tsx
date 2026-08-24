@@ -1,6 +1,6 @@
 import React from 'react';
 import AssetInventoryScreenController from '../Features/AssetInventory/AssetInventoryScreenController';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 
 export interface AssetInventoryScreenRouteProps {
   assets: Asset[];

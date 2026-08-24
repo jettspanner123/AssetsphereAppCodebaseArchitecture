@@ -27,7 +27,7 @@ import AssetImportProcessorService, {
   ParsedCSVData,
 } from '../Services/AssetImportProcessorService';
 import ImportFieldDropdownComponent from './ImportFieldDropdownComponent';
-import { Asset } from '../../../types';
+import { Asset } from '../../../Types/AssetType';
 
 export interface AssetImportModalControllerProps {
   isOpen: boolean;

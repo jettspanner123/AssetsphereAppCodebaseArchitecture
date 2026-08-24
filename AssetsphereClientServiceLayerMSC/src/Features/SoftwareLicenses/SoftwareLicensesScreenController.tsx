@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SoftwareLicense } from '../../types';
+import { SoftwareLicense } from '../../Types/SoftwareLicenseType';
 import {
   Calendar,
   Users,

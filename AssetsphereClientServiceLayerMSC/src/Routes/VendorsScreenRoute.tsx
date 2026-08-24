@@ -1,6 +1,6 @@
 import React from 'react';
 import VendorsScreenController from '../Features/Vendors/VendorsScreenController';
-import { Vendor } from '../types';
+import { Vendor } from '../Types/VendorType';
 
 export interface VendorsScreenRouteProps {
   vendors: Vendor[];

@@ -205,8 +205,8 @@ export interface SecurityAndCompliance {
   bitlockerEnabled: boolean;
   encryptionStatus: 'Encrypted' | 'Unencrypted' | 'Partial';
   patchLevel: string;
-  securityBaselineScore: number; // 0-100
-  complianceScore: number; // 0-100
+  securityBaselineScore: number;
+  complianceScore: number;
   isCompliant: boolean;
   nonComplianceReasons?: string[];
 }
@@ -224,13 +224,13 @@ export interface NetworkConfig {
 }
 
 export interface AssetHealthMetric {
-  overallScore: number; // 0 - 100
+  overallScore: number;
   deviceAgeMonths: number;
-  batteryHealthPct?: number; // 0 - 100
+  batteryHealthPct?: number;
   repairCount: number;
   warrantyStatus: 'Active' | 'Expiring Soon' | 'Expired';
   downtimeHoursTotal: number;
-  performanceIndex: number; // 0 - 100
+  performanceIndex: number;
   smartStatus?: 'GOOD' | 'WARNING' | 'CRITICAL';
   securityCompliancePct: number;
 }
@@ -275,7 +275,7 @@ export interface ChainOfCustodyRecord {
 
 export interface Asset {
   id: string;
-  assetNumber: string; // e.g. AST-2026-9042
+  assetNumber: string;
   qrCodeUrl?: string;
   barcodeValue: string;
   rfidTag?: string;
@@ -286,7 +286,6 @@ export interface Asset {
   category: AssetCategory;
   subtype: AssetSubtype;
   
-  // Product Information
   manufacturer: string;
   brand: string;
   model: string;
@@ -297,19 +296,16 @@ export interface Asset {
   releaseYear: number;
   countryOfOrigin?: string;
 
-  // Status & Location
   lifecycleStatus: LifecycleStatus;
   currentLocation: string;
   department: string;
   businessUnit: string;
   costCenter: string;
 
-  // Assigned Employee
   assignedToEmployeeId?: string;
   assignedToEmployeeName?: string;
   assignedDate?: string;
 
-  // Specifications, Financials, Warranty, Security
   hardwareSpecs?: HardwareSpecs;
   procurement: ProcurementInfo;
   warranty: WarrantyInfo;
@@ -318,14 +314,12 @@ export interface Asset {
   installedSoftware?: SoftwareInventoryItem[];
   health: AssetHealthMetric;
 
-  // Financials
   currentValue: number;
   depreciationMethod: DepreciationMethod;
   usefulLifeYears: number;
   salvageValue: number;
   totalCostOfOwnership: number;
 
-  // History & Audit
   timeline: TimelineEvent[];
   chainOfCustody: ChainOfCustodyRecord[];
   lastVerifiedDate?: string;
@@ -333,168 +327,3 @@ export interface Asset {
   isVerificationPending?: boolean;
   aiNotes?: string;
 }
-
-export interface Employee {
-  id: string;
-  employeeCode: string; // e.g. EMP-1042
-  name: string;
-  email: string;
-  phone: string;
-  department: string;
-  businessUnit: string;
-  costCenter: string;
-  managerName: string;
-  designation: string;
-  officeLocation: string;
-  floor: string;
-  desk: string;
-  employmentType: 'Full-time' | 'Contractor' | 'Vendor' | 'Intern';
-  joiningDate: string;
-  exitDate?: string;
-  avatarUrl?: string;
-  assignedAssetCount: number;
-  isOnboardingPending?: boolean;
-  isOffboardingActive?: boolean;
-}
-
-export interface AssetAllocation {
-  id: string;
-  assetId: string;
-  employeeId: string;
-  assignedDate: string;
-  assignedBy: string;
-  approvedBy: string;
-  expectedReturnDate?: string;
-  actualReturnDate?: string;
-  returnCondition?: 'Excellent' | 'Good' | 'Fair' | 'Damaged' | 'Requires Maintenance';
-  employeeSignature?: string;
-  managerApprovalStatus: 'Approved' | 'Pending' | 'Rejected';
-}
-
-export interface ServiceTicket {
-  id: string;
-  ticketNumber: string; // e.g. TCK-8812
-  assetId: string;
-  assetName: string;
-  assetNumber: string;
-  reportedBy: string;
-  reportedDate: string;
-  problemDescription: string;
-  rootCause?: string;
-  resolution?: string;
-  assignedEngineer: string;
-  repairVendor: string;
-  partsReplaced?: string[];
-  repairCost: number;
-  downtimeHours: number;
-  status: 'Open' | 'In Progress' | 'Awaiting Parts' | 'Resolved' | 'Closed';
-  priority: 'Low' | 'Medium' | 'High' | 'Critical';
-}
-
-export type Vendor = VendorProfile;
-
-export interface VendorProfile {
-  id: string;
-  name: string;
-  contactPerson: string;
-  email: string;
-  phone: string;
-  ratingScore: number; // 1-5
-  slaTargetHours: number;
-  activeContractsCount: number;
-  amcAssetsCount: number;
-  performanceScore: number; // 0-100
-  address: string;
-  categoriesSupplied: AssetCategory[];
-}
-
-export interface PurchaseOrder {
-  id: string;
-  poNumber: string; // e.g. PO-2026-0041
-  requestorName: string;
-  department: string;
-  vendorName: string;
-  requestDate: string;
-  expectedDeliveryDate: string;
-  totalCost: number;
-  currency: string;
-  status: 'Draft' | 'Pending IT Approval' | 'Pending Finance' | 'PO Issued' | 'Delivered & QA' | 'Cancelled';
-  itemCount: number;
-  description: string;
-}
-
-export interface SoftwareLicense {
-  id: string;
-  softwareName: string;
-  publisher: string;
-  licenseKey: string;
-  licenseType: 'Named User' | 'Per Core' | 'Floating' | 'Enterprise Subscription';
-  totalSeats: number;
-  allocatedSeats: number;
-  costPerSeat: number;
-  currency: string;
-  purchaseDate: string;
-  expirationDate: string;
-  complianceStatus: 'Compliant' | 'Over Allocated' | 'Under Utilized' | 'Expiring Soon';
-  assignedDepartments: string[];
-}
-
-export interface VerificationCampaign {
-  id: string;
-  title: string;
-  targetDepartment: string;
-  startDate: string;
-  endDate: string;
-  totalTargetAssets: number;
-  verifiedAssetsCount: number;
-  flaggedDiscrepancies: number;
-  status: 'Draft' | 'Active' | 'Completed' | 'Archived';
-  description: string;
-}
-
-export interface SecurityComplianceFramework {
-  frameworkName: 'ISO 27001' | 'SOC2' | 'NIST' | 'CIS' | 'GDPR';
-  overallScorePct: number;
-  compliantDeviceCount: number;
-  nonCompliantDeviceCount: number;
-  criticalGaps: string[];
-}
-
-export interface AIRecommendation {
-  id: string;
-  assetId?: string;
-  assetName?: string;
-  category: 'Replacement' | 'Warranty Extension' | 'Hardware Upgrade' | 'Reallocation' | 'Cost Saving' | 'Security Risk';
-  title: string;
-  explanation: string;
-  impact: 'High' | 'Medium' | 'Low';
-  estimatedCostOrSaving: string;
-  actionableStep: string;
-}
-
-export interface CloudResource {
-  id: string;
-  provider: string;
-  name: string;
-  type: string;
-  region: string;
-  cost: number;
-  status: string;
-}
-
-export type TabType =
-  | 'dashboard'
-  | 'inventory'
-  | 'employees'
-  | 'licenses'
-  | 'cloud'
-  | 'procurement'
-  | 'servicedesk'
-  | 'vendors'
-  | 'compliance'
-  | 'verification'
-  | 'ai_assistant'
-  | 'analytics'
-  | 'settings';
-
-

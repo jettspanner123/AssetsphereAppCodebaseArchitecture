@@ -4,7 +4,7 @@ import {
   ServiceTicket,
   AIRecommendation,
   VerificationCampaign,
-} from '../types';
+} from '../Types';
 import {
   PieChart,
   Pie,

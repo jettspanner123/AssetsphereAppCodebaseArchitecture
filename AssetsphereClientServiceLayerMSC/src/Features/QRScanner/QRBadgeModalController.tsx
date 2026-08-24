@@ -1,5 +1,5 @@
 import React from 'react';
-import { Asset } from '../../types';
+import { Asset } from '../../Types/AssetType';
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import { Printer, QrCode } from 'lucide-react';

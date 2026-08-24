@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PurchaseOrder } from '../../types';
+import { PurchaseOrder } from '../../Types/ProcurementType';
 import {
   Search,
   DollarSign,

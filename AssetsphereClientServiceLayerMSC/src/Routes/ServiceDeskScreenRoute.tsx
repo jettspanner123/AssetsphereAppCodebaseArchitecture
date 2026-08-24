@@ -1,6 +1,6 @@
 import React from 'react';
 import ServiceDeskScreenController from '../Features/ServiceDesk/ServiceDeskScreenController';
-import { ServiceTicket } from '../types';
+import { ServiceTicket } from '../Types/ServiceTicketType';
 
 export interface ServiceDeskScreenRouteProps {
   tickets: ServiceTicket[];

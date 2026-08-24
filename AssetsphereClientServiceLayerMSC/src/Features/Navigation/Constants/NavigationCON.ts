@@ -12,7 +12,7 @@ import {
   QrCode,
   Layers,
 } from 'lucide-react';
-import { TabType } from '../../../types';
+import { TabType } from '../../../Types/NavigationType';
 
 export default class NavigationCON {
   public static readonly BRAND_TITLE: string = 'AssetSphere';

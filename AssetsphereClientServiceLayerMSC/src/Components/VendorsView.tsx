@@ -1,5 +1,5 @@
 import React from 'react';
-import { Vendor } from '../types';
+import { Vendor } from '../Types/VendorType';
 import { Building2, Star, ShieldCheck } from 'lucide-react';
 
 interface VendorsViewProps {

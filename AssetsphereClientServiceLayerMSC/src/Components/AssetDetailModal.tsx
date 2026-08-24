@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, TimelineEvent, ChainOfCustodyRecord } from '../types';
+import { Asset, TimelineEvent, ChainOfCustodyRecord } from '../Types/AssetType';
 import { fetchAssetDiagnostics, AIDiagnosticsResult } from '../Services/aiService';
 import {
   X,

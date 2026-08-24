@@ -1,6 +1,9 @@
 import React from 'react';
 import DashboardScreenController from '../Features/Dashboard/DashboardScreenController';
-import { Asset, ServiceTicket, AIRecommendation, VerificationCampaign } from '../types';
+import { Asset } from '../Types/AssetType';
+import { ServiceTicket } from '../Types/ServiceTicketType';
+import { AIRecommendation } from '../Types/AIAssistantType';
+import { VerificationCampaign } from '../Types/VerificationCampaignType';
 
 export interface DashboardOverviewScreenRouteProps {
   assets: Asset[];

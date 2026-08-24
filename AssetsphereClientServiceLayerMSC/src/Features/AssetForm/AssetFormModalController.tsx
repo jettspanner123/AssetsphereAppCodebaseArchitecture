@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../types';
+import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../Types/AssetType';
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
 import InputSharedComponent from '../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';

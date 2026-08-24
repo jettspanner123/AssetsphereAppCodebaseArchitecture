@@ -9,7 +9,7 @@ import {
   SecurityComplianceFramework,
   AIRecommendation,
   CloudResource,
-} from '../types';
+} from '../Types';
 
 export const mockEmployees: Employee[] = [
   {

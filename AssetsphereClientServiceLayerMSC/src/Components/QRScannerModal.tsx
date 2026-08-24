@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 import { X, QrCode, Camera, Upload, CheckCircle2, AlertCircle, Search } from 'lucide-react';
 
 interface QRScannerModalProps {

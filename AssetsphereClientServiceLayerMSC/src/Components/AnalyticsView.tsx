@@ -1,5 +1,5 @@
 import React from 'react';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 import { BarChart3, Download, DollarSign, TrendingDown } from 'lucide-react';
 
 interface AnalyticsViewProps {

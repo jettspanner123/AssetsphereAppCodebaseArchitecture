@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import NavigationCON from '../../Constants/NavigationCON';
-import { TabType } from '../../../../types';
+import { TabType } from '../../../../Types/NavigationType';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
 
 export interface SidebarStaticComponentProps {

@@ -1,6 +1,6 @@
 import React from 'react';
 import AnalyticsScreenController from '../Features/Analytics/AnalyticsScreenController';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 
 export interface AnalyticsScreenRouteProps {
   assets: Asset[];

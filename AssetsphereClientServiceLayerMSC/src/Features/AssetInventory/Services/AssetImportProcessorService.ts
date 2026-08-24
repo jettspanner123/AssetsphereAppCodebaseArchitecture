@@ -1,4 +1,4 @@
-import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../../types';
+import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../../../Types/AssetType';
 
 export interface ImportResultItem {
   rowNumber: number;

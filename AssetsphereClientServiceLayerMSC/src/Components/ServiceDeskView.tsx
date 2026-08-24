@@ -1,5 +1,5 @@
 import React from 'react';
-import { ServiceTicket } from '../types';
+import { ServiceTicket } from '../Types/ServiceTicketType';
 import { Wrench, Clock, CheckCircle2, AlertTriangle, User } from 'lucide-react';
 
 interface ServiceDeskViewProps {

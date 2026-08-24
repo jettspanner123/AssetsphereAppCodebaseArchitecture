@@ -1,4 +1,4 @@
-import { AssetCategory } from '../../../types';
+import { AssetCategory } from '../../../Types/AssetType';
 
 export default class AssetInventoryCON {
   public static readonly TITLE: string = 'Asset Inventory Management';

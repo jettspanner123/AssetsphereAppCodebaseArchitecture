@@ -1,6 +1,6 @@
 import React from 'react';
 import VerificationCampaignScreenController from '../Features/VerificationCampaign/VerificationCampaignScreenController';
-import { VerificationCampaign } from '../types';
+import { VerificationCampaign } from '../Types/VerificationCampaignType';
 
 export interface VerificationCampaignScreenRouteProps {
   campaign: VerificationCampaign;

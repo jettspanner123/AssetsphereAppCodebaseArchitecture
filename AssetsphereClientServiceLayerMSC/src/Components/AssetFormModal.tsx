@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../types';
+import { Asset, AssetCategory, AssetSubtype, LifecycleStatus } from '../Types/AssetType';
 import { X, CheckCircle2, Laptop } from 'lucide-react';
 
 interface AssetFormModalProps {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SoftwareLicense } from '../types';
+import { SoftwareLicense } from '../Types/SoftwareLicenseType';
 import { Key, AlertTriangle, CheckCircle2, ShieldAlert, DollarSign } from 'lucide-react';
 
 interface SoftwareLicensesViewProps {

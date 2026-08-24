@@ -1,6 +1,6 @@
 import React from 'react';
 import SoftwareLicensesScreenController from '../Features/SoftwareLicenses/SoftwareLicensesScreenController';
-import { SoftwareLicense } from '../types';
+import { SoftwareLicense } from '../Types/SoftwareLicenseType';
 
 export interface SoftwareLicensesScreenRouteProps {
   licenses: SoftwareLicense[];

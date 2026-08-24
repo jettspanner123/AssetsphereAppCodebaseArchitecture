@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Asset, AssetCategory, LifecycleStatus } from '../types';
+import { Asset, AssetCategory, LifecycleStatus } from '../Types/AssetType';
 import {
   Search,
   Plus,

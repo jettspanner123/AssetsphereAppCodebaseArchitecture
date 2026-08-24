@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ServiceTicket } from '../../types';
+import { ServiceTicket } from '../../Types/ServiceTicketType';
 import {
   Search,
   Grid,

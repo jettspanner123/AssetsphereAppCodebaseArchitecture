@@ -1,5 +1,5 @@
 import React from 'react';
-import { PurchaseOrder } from '../types';
+import { PurchaseOrder } from '../Types/ProcurementType';
 import { ShoppingCart, CheckCircle2, Clock, DollarSign, FileText } from 'lucide-react';
 
 interface ProcurementViewProps {

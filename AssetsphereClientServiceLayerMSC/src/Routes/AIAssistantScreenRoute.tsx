@@ -1,6 +1,6 @@
 import React from 'react';
 import AIAssistantScreenController from '../Features/AIAssistant/AIAssistantScreenController';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 
 export interface AIAssistantScreenRouteProps {
   assets: Asset[];

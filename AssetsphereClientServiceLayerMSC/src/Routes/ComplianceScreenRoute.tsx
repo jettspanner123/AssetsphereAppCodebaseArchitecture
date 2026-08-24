@@ -1,6 +1,6 @@
 import React from 'react';
 import ComplianceScreenController from '../Features/Compliance/ComplianceScreenController';
-import { Asset } from '../types';
+import { Asset } from '../Types/AssetType';
 
 export interface ComplianceScreenRouteProps {
   assets: Asset[];

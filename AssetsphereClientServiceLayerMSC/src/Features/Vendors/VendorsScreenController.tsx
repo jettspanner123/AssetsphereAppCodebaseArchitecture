@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Vendor } from '../../types';
+import { Vendor } from '../../Types/VendorType';
 import {
   Search,
   Mail,

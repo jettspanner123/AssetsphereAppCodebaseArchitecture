@@ -24,7 +24,7 @@ import {
   VerificationCampaign,
   AIRecommendation,
   TabType,
-} from '../types';
+} from '../Types';
 import ApplicationThemeUtility from '../Utilities/ApplicationThemeUtility';
 import UserPreferencesUtility from '../Utilities/UserPreferencesUtility';
 import ExportUtility from '../Utilities/ExportUtility';

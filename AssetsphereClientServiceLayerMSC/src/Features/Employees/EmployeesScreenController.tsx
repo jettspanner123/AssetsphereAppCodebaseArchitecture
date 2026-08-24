@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Employee, Asset } from '../../types';
+import { Employee } from '../../Types/EmployeeType';
+import { Asset } from '../../Types/AssetType';
 import {
   Search,
   Laptop,

@@ -1,10 +1,17 @@
-import { SignupFormData, SignupFormErrors, SignupAuthState } from '../Models/SignupScreenModel';
+import { toast } from 'sonner';
+import {
+  SignupFormData,
+  SignupFormErrors,
+  SignupAuthState,
+  BackendAuthResponseDTO,
+  BackendApiResponseEnvelope,
+} from '../Models/SignupScreenModel';
 import SignupScreenCON from '../Constants/SignupScreenCON';
+import ApplicationNetworkAPIConfiguration from '../../../Configurations/ApplicationNetworkAPIConfiguration';
+import ApplicationLocalStorageService from '@/src/Services/ApplicationLocalStorageService';
 
 export default class SignupScreenService {
   public static current: SignupScreenService = new SignupScreenService();
-
-  private authStorageKey: string = 'assetsphere_auth_session';
 
   public validate(formData: SignupFormData): SignupFormErrors {
     const errors: SignupFormErrors = {};
@@ -41,38 +48,92 @@ export default class SignupScreenService {
   }
 
   public async registerWithCredentials(formData: SignupFormData): Promise<SignupAuthState> {
-    // Simulate registration network delay
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const registerEndpoint = config.endpoints.authentication.register;
 
+    // Split full name by first space into FirstName and LastName
+    const trimmedName = formData.fullName.trim();
+    const nameParts = trimmedName.split(/\s+/);
+    const firstName = nameParts[0] || 'Enterprise';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    let response: Response;
+    try {
+      response = await fetch(registerEndpoint, {
+        method: 'POST',
+        headers: config.headers,
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+          firstName,
+          lastName,
+          role: 'USER',
+        }),
+      });
+    } catch (networkError) {
+      console.error('Backend registration network error:', networkError);
+      toast.error('Authentication Server Unreachable', {
+        description: `Unable to connect to orchestrator service at ${config.baseUrl}. Please verify the backend is running.`,
+      });
+      throw new Error('Authentication server is offline or unreachable.');
+    }
+
+    let payload: BackendApiResponseEnvelope<BackendAuthResponseDTO> | null = null;
+    try {
+      payload = (await response.json()) as BackendApiResponseEnvelope<BackendAuthResponseDTO>;
+    } catch {
+      toast.error('Invalid Server Response', {
+        description: 'Received an unexpected response format from the server.',
+      });
+      throw new Error('Invalid response received from authentication server.');
+    }
+
+    if (!response.ok || !payload || !payload.success || !payload.data) {
+      const errorMessage =
+        payload?.message ||
+        payload?.errors?.join(', ') ||
+        'Registration failed. Please try again.';
+
+      toast.error('Registration Failed', {
+        description: errorMessage,
+      });
+      throw new Error(errorMessage);
+    }
+
+    const authData: BackendAuthResponseDTO = payload.data;
+
+    // Save tokens via dedicated LocalStorage Service
+    ApplicationLocalStorageService.current.setAuthTokens({
+      accessToken: authData.accessToken,
+      refreshToken: authData.refreshToken,
+      expiresAt: authData.expiresAt,
+    });
+
+    const userProfile = authData.user;
     const authState: SignupAuthState = {
       isAuthenticated: true,
-      userEmail: formData.email.trim(),
-      userName: formData.fullName.trim() || formData.email.split('@')[0] || 'Enterprise User',
-      userRole: 'Enterprise Admin',
+      userEmail: userProfile.email,
+      userName: userProfile.fullName || `${userProfile.firstName} ${userProfile.lastName}`.trim() || 'Enterprise User',
+      userRole: String(userProfile.role || 'USER'),
+      accessToken: authData.accessToken,
+      refreshToken: authData.refreshToken,
     };
 
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.authStorageKey, JSON.stringify(authState));
-    }
+    // Persist authenticated session
+    ApplicationLocalStorageService.current.setAuthSession(authState);
+
+    toast.success('Registration Successful', {
+      description: `Welcome to AssetSphere, ${authState.userName}!`,
+    });
 
     return authState;
   }
 
   public async authenticateWithMicrosoft(): Promise<SignupAuthState> {
-    // Simulate Microsoft SSO OAuth handshake
-    await new Promise((resolve) => setTimeout(resolve, 800));
-
-    const authState: SignupAuthState = {
-      isAuthenticated: true,
-      userEmail: 'admin@weplm.enterprise.com',
-      userName: 'Microsoft Azure User',
-      userRole: 'Global Asset Administrator',
-    };
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.authStorageKey, JSON.stringify(authState));
-    }
-
-    return authState;
+    toast.info('Microsoft SSO Integration', {
+      description: 'Redirecting to corporate identity provider...',
+    });
+    throw new Error('Microsoft Single Sign-On requires Azure Active Directory setup.');
   }
 }
+

@@ -137,6 +137,17 @@ public class AssetsphereDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.ConfigurationKey).IsUnique();
         });
+
+        // Map all entity properties to snake_case column names for PostgreSQL/Supabase compatibility
+        foreach (var entity in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entity.GetProperties())
+            {
+                string propertyName = property.Name;
+                string snakeCase = string.Concat(propertyName.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+                property.SetColumnName(snakeCase);
+            }
+        }
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

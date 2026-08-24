@@ -3,6 +3,7 @@ import SignupScreenCardStaticComponent from './Components/static/SignupScreenCar
 import SignupScreenCON from './Constants/SignupScreenCON';
 import { SignupFormData, SignupFormErrors, SignupAuthState } from './Models/SignupScreenModel';
 import SignupScreenService from './Services/SignupScreenService';
+import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 import AnimatedThemeToggleSharedComponent from '../../Shared/Components/AnimatedThemeToggleSharedComponent';
 
 export interface SignupScreenControllerProps {
@@ -27,8 +28,34 @@ export default function SignupScreenController({
   });
 
   const [errors, setErrors] = useState<SignupFormErrors>({});
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isMicrosoftLoading, setIsMicrosoftLoading] = useState<boolean>(false);
+
+  // TanStack Query Mutation for user registration via centralized service
+  const registerMutation = TanstackQueryClientService.current.authentication.registerMutation({
+    onSuccess: (authState: SignupAuthState) => {
+      onSignupSuccess(authState);
+    },
+    onError: (err: unknown) => {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Registration failed. Please try again or contact IT support.';
+      setErrors({ general: errorMessage });
+    },
+  });
+
+  // TanStack Query Mutation for Microsoft SSO via centralized service
+  const microsoftSignupMutation = TanstackQueryClientService.current.authentication.microsoftSignupMutation({
+    onSuccess: (authState: SignupAuthState) => {
+      onSignupSuccess(authState);
+    },
+    onError: (err: unknown) => {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.';
+      setErrors({ general: errorMessage });
+    },
+  });
 
   const handleFieldChange = (field: keyof SignupFormData, value: string | boolean) => {
     setFormData((prev) => ({
@@ -44,7 +71,7 @@ export default function SignupScreenController({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = SignupScreenService.current.validate(formData);
 
@@ -53,27 +80,11 @@ export default function SignupScreenController({
       return;
     }
 
-    try {
-      setIsLoading(true);
-      const authState = await SignupScreenService.current.registerWithCredentials(formData);
-      onSignupSuccess(authState);
-    } catch {
-      setErrors({ general: 'Registration failed. Please try again or contact IT support.' });
-    } finally {
-      setIsLoading(false);
-    }
+    registerMutation.mutate(formData);
   };
 
-  const handleMicrosoftLogin = async () => {
-    try {
-      setIsMicrosoftLoading(true);
-      const authState = await SignupScreenService.current.authenticateWithMicrosoft();
-      onSignupSuccess(authState);
-    } catch {
-      setErrors({ general: 'Microsoft Single Sign-On failed. Please contact IT Helpdesk.' });
-    } finally {
-      setIsMicrosoftLoading(false);
-    }
+  const handleMicrosoftLogin = () => {
+    microsoftSignupMutation.mutate();
   };
 
   return (
@@ -96,8 +107,8 @@ export default function SignupScreenController({
         <SignupScreenCardStaticComponent
           formData={formData}
           errors={errors}
-          isLoading={isLoading}
-          isMicrosoftLoading={isMicrosoftLoading}
+          isLoading={registerMutation.isPending}
+          isMicrosoftLoading={microsoftSignupMutation.isPending}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}

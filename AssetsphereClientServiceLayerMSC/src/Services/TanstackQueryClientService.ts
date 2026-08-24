@@ -6,8 +6,11 @@ import {
 } from '@tanstack/react-query';
 import { LoginCredentials, LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
+import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models/SignupScreenModel';
+import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
 
 export class AuthenticationQueryService {
+  // Login Mutations
   public useLoginMutation(
     options?: UseMutationOptions<LoginAuthState, Error, LoginCredentials>
   ): UseMutationResult<LoginAuthState, Error, LoginCredentials> {
@@ -40,6 +43,41 @@ export class AuthenticationQueryService {
     options?: UseMutationOptions<LoginAuthState, Error, void>
   ): UseMutationResult<LoginAuthState, Error, void> {
     return this.useMicrosoftLoginMutation(options);
+  }
+
+  // Register Mutations
+  public useRegisterMutation(
+    options?: UseMutationOptions<SignupAuthState, Error, SignupFormData>
+  ): UseMutationResult<SignupAuthState, Error, SignupFormData> {
+    return useMutation({
+      mutationFn: async (formData: SignupFormData): Promise<SignupAuthState> => {
+        return await SignupScreenService.current.registerWithCredentials(formData);
+      },
+      ...options,
+    });
+  }
+
+  public registerMutation(
+    options?: UseMutationOptions<SignupAuthState, Error, SignupFormData>
+  ): UseMutationResult<SignupAuthState, Error, SignupFormData> {
+    return this.useRegisterMutation(options);
+  }
+
+  public useMicrosoftSignupMutation(
+    options?: UseMutationOptions<SignupAuthState, Error, void>
+  ): UseMutationResult<SignupAuthState, Error, void> {
+    return useMutation({
+      mutationFn: async (): Promise<SignupAuthState> => {
+        return await SignupScreenService.current.authenticateWithMicrosoft();
+      },
+      ...options,
+    });
+  }
+
+  public microsoftSignupMutation(
+    options?: UseMutationOptions<SignupAuthState, Error, void>
+  ): UseMutationResult<SignupAuthState, Error, void> {
+    return this.useMicrosoftSignupMutation(options);
   }
 }
 

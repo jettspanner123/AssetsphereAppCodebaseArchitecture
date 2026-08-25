@@ -195,19 +195,6 @@ export default function EmployeeDetailModalController({
                 <span className="hidden sm:inline">Call</span>
               </a>
             )}
-
-            <PermissionGuardSharedComponent
-              permission={ApplicationPermissionCON.CAN_WRITE_ORGANIZATION}
-            >
-              <ButtonSharedComponent
-                variant="outline"
-                size="sm"
-                onClick={() => onEditEmployee(displayEmployee)}
-                icon={<Edit className="w-3.5 h-3.5" />}
-              >
-                Edit Profile
-              </ButtonSharedComponent>
-            </PermissionGuardSharedComponent>
           </div>
         </div>
 

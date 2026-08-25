@@ -310,3 +310,20 @@ This document tracks all features, permission adjustments, architectural refacto
   - Updated `AssignedDepartment` to `string?` across `AssetEntityClass`, `AssetCreateDTO`, `AssetUpdateDTO`, `AssetResponseDTO`, and `AssetAssignDTO`.
   - Updated `AssetInventoryService.cs` to assign department strings directly into the underlying Postgres `text` column.
 - **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend daemon running on `http://localhost:5125`.
+
+### 22. Toast Notification for Work Location Operations in Settings
+- **Files**:
+  - [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx)
+- **Changes**:
+  - Removed top temporary success banner div from the Settings layout.
+  - Replaced with clean Sonner `toast.success(...)` notifications on adding and deleting work locations.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified toast triggers properly on location creation and deletion.
+
+### 23. Real-Time Pending User Requests Notifier in Sidebar
+- **Files**:
+  - [`SidebarStaticComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Navigation/Components/static/SidebarStaticComponent.tsx)
+- **Changes**:
+  - Connected `usePendingUsersQuery('pending')` directly into the sidebar navigation tree.
+  - When expanded: displays an amber badge with the live count of pending user registration requests.
+  - When collapsed: displays a pulsing amber indicator dot on the top-right of the User Requests icon.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified live count displays accurately.

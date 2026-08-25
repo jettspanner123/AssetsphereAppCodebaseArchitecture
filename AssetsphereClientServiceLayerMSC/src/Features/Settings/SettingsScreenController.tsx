@@ -7,9 +7,9 @@ import {
   AlertTriangle,
   Users,
   Laptop,
-  CheckCircle2,
   Info,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
@@ -42,7 +42,6 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
 
   // Local Form State
   const [newLocation, setNewLocation] = useState('');
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // In-button error shake state
   const [buttonErrorText, setButtonErrorText] = useState<string | null>(null);
@@ -108,12 +107,10 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
     }
 
     try {
-      setSuccessMessage(null);
       await addWorkLocationMutation.mutateAsync({ location: trimmed });
       setNewLocation('');
       setButtonErrorText(null);
-      setSuccessMessage(`'${trimmed}' has been added to work locations.`);
-      setTimeout(() => setSuccessMessage(null), 4000);
+      toast.success(`'${trimmed}' has been added to work locations.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to Add Location';
       triggerButtonError(msg.length > 32 ? 'Failed to Add Location' : msg);
@@ -121,7 +118,6 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
   };
 
   const initiateDeleteLocation = (loc: string) => {
-    setSuccessMessage(null);
     const { employeeCount, assetCount } = getDependenciesForLocation(loc);
 
     if (employeeCount > 0 || assetCount > 0) {
@@ -143,8 +139,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
     try {
       await deleteWorkLocationMutation.mutateAsync({ location: locToDelete });
       setIsDeleteModalOpen(false);
-      setSuccessMessage(`'${locToDelete}' was removed from work locations.`);
-      setTimeout(() => setSuccessMessage(null), 4000);
+      toast.success(`'${locToDelete}' was removed from work locations.`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Failed to delete work location.';
       triggerButtonError(msg);
@@ -163,22 +158,6 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
           Manage corporate physical facilities, regional operational sites, and asset deployment locations
         </p>
       </div>
-
-      {/* Success Notification Alert */}
-      {successMessage && (
-        <div className="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 text-emerald-700 dark:text-emerald-300 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{successMessage}</span>
-          </div>
-          <button
-            onClick={() => setSuccessMessage(null)}
-            className="text-xs font-semibold hover:underline ml-2"
-          >
-            Dismiss
-          </button>
-        </div>
-      )}
 
       {/* Single Unified Card with Middle Divider */}
       <CardSharedComponent className="p-0 overflow-hidden">

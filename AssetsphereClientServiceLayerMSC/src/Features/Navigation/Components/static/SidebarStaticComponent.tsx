@@ -6,6 +6,7 @@ import { TabType } from '../../../../Types/NavigationType';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
 import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
 import useAuthenticationStateStore from '@/src/Store/AuthenticationStateStore';
+import TanstackQueryClientService from '@/src/Services/TanstackQueryClientService';
 
 export interface SidebarStaticComponentProps {
   activeTab: TabType;
@@ -26,6 +27,14 @@ export default function SidebarStaticComponent({
 
   // Subscribe to user role to re-render when auth changes
   const userRole = useAuthenticationStateStore((state) => state.user?.role);
+
+  // Live pending user requests query for notifier
+  const canAccessUserRequests = ApplicationPermissionService.current.canAccessTab('user_requests');
+  const { data: pendingUsers = [] } =
+    TanstackQueryClientService.current.authentication.usePendingUsersQuery('pending', {
+      enabled: canAccessUserRequests,
+    });
+  const pendingRequestsCount = pendingUsers.length;
 
   const isCollapsed =
     externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
@@ -106,6 +115,16 @@ export default function SidebarStaticComponent({
                       <BadgeSharedComponent variant="info" size="sm">
                         {item.badge}
                       </BadgeSharedComponent>
+                    )}
+
+                    {item.id === 'user_requests' && pendingRequestsCount > 0 && (
+                      isCollapsed ? (
+                        <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0 absolute top-1.5 right-1.5 animate-pulse" />
+                      ) : (
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0 font-mono">
+                          {pendingRequestsCount}
+                        </span>
+                      )
                     )}
 
                     {item.id === 'compliance' && unreadAlertCount > 0 && (

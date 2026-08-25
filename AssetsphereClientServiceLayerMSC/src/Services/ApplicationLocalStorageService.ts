@@ -14,11 +14,20 @@ export default class ApplicationLocalStorageService {
   private readonly refreshTokenStorageKey: string = ApplicationLocalStorageCON.REFRESH_TOKEN_STORAGE_KEY;
   private readonly authSessionStorageKey: string = ApplicationLocalStorageCON.AUTH_SESSION_STORAGE_KEY;
 
-  // Access Token Management
+  // Access Token Management (Tab-scoped sessionStorage with smart localStorage inheritance)
   public getAccessToken(): string | null {
     if (typeof window === 'undefined') return null;
     try {
-      return localStorage.getItem(this.accessTokenStorageKey);
+      const sessionToken = sessionStorage.getItem(this.accessTokenStorageKey);
+      if (sessionToken) return sessionToken;
+
+      // Smart Inheritance: If new tab has no sessionToken, bootstrap from localStorage
+      const localToken = localStorage.getItem(this.accessTokenStorageKey);
+      if (localToken) {
+        sessionStorage.setItem(this.accessTokenStorageKey, localToken);
+        return localToken;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -27,9 +36,10 @@ export default class ApplicationLocalStorageService {
   public setAccessToken(token: string): void {
     if (typeof window !== 'undefined') {
       try {
+        sessionStorage.setItem(this.accessTokenStorageKey, token);
         localStorage.setItem(this.accessTokenStorageKey, token);
       } catch (error) {
-        console.error('Failed to save access token to localStorage:', error);
+        console.error('Failed to save access token:', error);
       }
     }
   }
@@ -38,7 +48,15 @@ export default class ApplicationLocalStorageService {
   public getRefreshToken(): string | null {
     if (typeof window === 'undefined') return null;
     try {
-      return localStorage.getItem(this.refreshTokenStorageKey);
+      const sessionToken = sessionStorage.getItem(this.refreshTokenStorageKey);
+      if (sessionToken) return sessionToken;
+
+      const localToken = localStorage.getItem(this.refreshTokenStorageKey);
+      if (localToken) {
+        sessionStorage.setItem(this.refreshTokenStorageKey, localToken);
+        return localToken;
+      }
+      return null;
     } catch {
       return null;
     }
@@ -47,9 +65,10 @@ export default class ApplicationLocalStorageService {
   public setRefreshToken(token: string): void {
     if (typeof window !== 'undefined') {
       try {
+        sessionStorage.setItem(this.refreshTokenStorageKey, token);
         localStorage.setItem(this.refreshTokenStorageKey, token);
       } catch (error) {
-        console.error('Failed to save refresh token to localStorage:', error);
+        console.error('Failed to save refresh token:', error);
       }
     }
   }
@@ -63,21 +82,30 @@ export default class ApplicationLocalStorageService {
   public clearAuthTokens(): void {
     if (typeof window !== 'undefined') {
       try {
+        sessionStorage.removeItem(this.accessTokenStorageKey);
+        sessionStorage.removeItem(this.refreshTokenStorageKey);
         localStorage.removeItem(this.accessTokenStorageKey);
         localStorage.removeItem(this.refreshTokenStorageKey);
       } catch (error) {
-        console.error('Failed to clear tokens from localStorage:', error);
+        console.error('Failed to clear tokens:', error);
       }
     }
   }
 
-  // Auth Session State Management
+  // Auth Session State Management (Tab-scoped sessionStorage with smart inheritance)
   public getAuthSession(): LoginAuthState | null {
     if (typeof window === 'undefined') return null;
     try {
-      const data = localStorage.getItem(this.authSessionStorageKey);
-      if (data) {
-        return JSON.parse(data) as LoginAuthState;
+      const sessionData = sessionStorage.getItem(this.authSessionStorageKey);
+      if (sessionData) {
+        return JSON.parse(sessionData) as LoginAuthState;
+      }
+
+      // Smart Inheritance: If new tab has no sessionData, bootstrap from localStorage
+      const localData = localStorage.getItem(this.authSessionStorageKey);
+      if (localData) {
+        sessionStorage.setItem(this.authSessionStorageKey, localData);
+        return JSON.parse(localData) as LoginAuthState;
       }
     } catch {
       return null;
@@ -88,9 +116,10 @@ export default class ApplicationLocalStorageService {
   public setAuthSession(session: LoginAuthState): void {
     if (typeof window !== 'undefined') {
       try {
+        sessionStorage.setItem(this.authSessionStorageKey, JSON.stringify(session));
         localStorage.setItem(this.authSessionStorageKey, JSON.stringify(session));
       } catch (error) {
-        console.error('Failed to save auth session to localStorage:', error);
+        console.error('Failed to save auth session:', error);
       }
     }
   }
@@ -98,9 +127,10 @@ export default class ApplicationLocalStorageService {
   public clearAuthSession(): void {
     if (typeof window !== 'undefined') {
       try {
+        sessionStorage.removeItem(this.authSessionStorageKey);
         localStorage.removeItem(this.authSessionStorageKey);
       } catch (error) {
-        console.error('Failed to clear auth session from localStorage:', error);
+        console.error('Failed to clear auth session:', error);
       }
     }
   }

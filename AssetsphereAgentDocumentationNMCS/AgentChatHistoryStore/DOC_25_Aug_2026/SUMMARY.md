@@ -10,6 +10,10 @@ This document tracks all features, permission adjustments, architectural refacto
    - Removed the redundant top "Edit Profile" button located in the header profile ribbon alongside Email and Call buttons in [`EmployeeDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeDetailModalController.tsx).
    - Retained the primary solid blue **"Edit Profile"** button in the modal footer, guarded by [`PermissionGuardSharedComponent`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/PermissionGuardSharedComponent.tsx) using `ApplicationPermissionCON.CAN_WRITE_ORGANIZATION`.
    - Ensures only `ADMIN`, `DEVELOPER`, and `OPERATOR` roles can access the edit profile action, while standard `USER` role is strictly prevented from editing employee directory records.
+2. **Tab-Isolated Session Storage with Smart Bootstrap Inheritance**:
+   - Re-architected [`ApplicationLocalStorageService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationLocalStorageService.ts) to prioritize tab-scoped `sessionStorage` over origin-scoped `localStorage`.
+   - Solved cross-tab account leakage where opening/logging into multiple accounts across different tabs caused page refreshes in Tab 1 to switch to Tab 2's account.
+   - Added smart inheritance so brand new tabs (`Ctrl+T` or typed URLs) seamlessly inherit the active session from `localStorage`, but once opened, every tab operates in strict isolation.
 
 ---
 
@@ -35,4 +39,12 @@ This document tracks all features, permission adjustments, architectural refacto
       </ButtonSharedComponent>
     </PermissionGuardSharedComponent>
     ```
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors.
+
+### 2. Tab-Isolated Session Storage with Smart Bootstrap Inheritance
+- **File**: [`ApplicationLocalStorageService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationLocalStorageService.ts)
+- **Changes**:
+  - Updated `getAccessToken()`, `getRefreshToken()`, and `getAuthSession()` to read from `sessionStorage` first. If `sessionStorage` is empty on new tab startup, it bootstraps from `localStorage` baseline into `sessionStorage`.
+  - Updated `setAccessToken()`, `setRefreshToken()`, and `setAuthSession()` to save to both `sessionStorage` (for the active tab) and `localStorage` (for future new tabs).
+  - Updated `clearAuthTokens()`, `clearAuthSession()`, and `clearAllAuthData()` to clear tokens and session states from both stores.
 - **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors.

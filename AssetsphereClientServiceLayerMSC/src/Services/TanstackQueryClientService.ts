@@ -509,6 +509,38 @@ export class ConfigurationQueryService {
       ...options,
     });
   }
+
+  public useAddWorkLocationMutation(
+    options?: Omit<UseMutationOptions<string[], Error, { location: string }>, 'mutationFn'>
+  ): UseMutationResult<string[], Error, { location: string }> {
+    return useMutation({
+      mutationFn: async ({ location }: { location: string }) => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.addWorkLocation(location);
+      },
+      onSuccess: (data) => {
+        this.getClient().setQueryData(TanstackQueryKeysCON.WORK_LOCATIONS, data);
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.WORK_LOCATIONS });
+      },
+      ...options,
+    });
+  }
+
+  public useDeleteWorkLocationMutation(
+    options?: Omit<UseMutationOptions<string[], Error, { location: string }>, 'mutationFn'>
+  ): UseMutationResult<string[], Error, { location: string }> {
+    return useMutation({
+      mutationFn: async ({ location }: { location: string }) => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.deleteWorkLocation(location);
+      },
+      onSuccess: (data) => {
+        this.getClient().setQueryData(TanstackQueryKeysCON.WORK_LOCATIONS, data);
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.WORK_LOCATIONS });
+      },
+      ...options,
+    });
+  }
 }
 
 export default class TanstackQueryClientService {

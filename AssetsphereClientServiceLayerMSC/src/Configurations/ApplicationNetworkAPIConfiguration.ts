@@ -28,6 +28,8 @@ export interface NetworkAPIEndpoints {
     getByKey: (key: string) => string;
     addDesignation: string;
     addDepartment: string;
+    addWorkLocation: string;
+    deleteWorkLocation: string;
   };
 }
 
@@ -82,6 +84,8 @@ export default class ApplicationNetworkAPIConfiguration {
           getByKey: (key: string) => `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/${key}`,
           addDesignation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDesignation`,
           addDepartment: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDepartment`,
+          addWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddWorkLocation`,
+          deleteWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/DeleteWorkLocation`,
         },
       },
     };

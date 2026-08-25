@@ -61,4 +61,33 @@ public sealed class ConfigurationConstantController : ControllerBase
         ConfigurationConstantResponseDTO result = await _configurationService.AddDepartmentAsync(request.Department);
         return Ok(ApiResponseClass<ConfigurationConstantResponseDTO>.Succeeded(result, "Department added successfully."));
     }
+
+    [HttpPost("AddWorkLocation")]
+    public async Task<ActionResult<ApiResponseClass<ConfigurationConstantResponseDTO>>> AddWorkLocation([FromBody] AddWorkLocationRequestDTO request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Location))
+        {
+            return BadRequest(ApiResponseClass<ConfigurationConstantResponseDTO>.Failed("Location name is required.", null, 400));
+        }
+
+        ConfigurationConstantResponseDTO result = await _configurationService.AddWorkLocationAsync(request.Location);
+        return Ok(ApiResponseClass<ConfigurationConstantResponseDTO>.Succeeded(result, "Work location added successfully."));
+    }
+
+    [HttpPost("DeleteWorkLocation")]
+    public async Task<ActionResult<ApiResponseClass<ConfigurationConstantResponseDTO>>> DeleteWorkLocation([FromBody] DeleteWorkLocationRequestDTO request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Location))
+        {
+            return BadRequest(ApiResponseClass<ConfigurationConstantResponseDTO>.Failed("Location name is required.", null, 400));
+        }
+
+        var (succeeded, errorMessage, result) = await _configurationService.DeleteWorkLocationAsync(request.Location);
+        if (!succeeded)
+        {
+            return BadRequest(ApiResponseClass<ConfigurationConstantResponseDTO>.Failed(errorMessage ?? "Failed to delete work location.", null, 400));
+        }
+
+        return Ok(ApiResponseClass<ConfigurationConstantResponseDTO>.Succeeded(result!, "Work location deleted successfully."));
+    }
 }

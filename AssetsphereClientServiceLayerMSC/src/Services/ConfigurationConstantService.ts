@@ -149,4 +149,68 @@ export default class ConfigurationConstantService {
 
     return await this.getDesignations();
   }
+
+  public async addWorkLocation(location: string): Promise<string[]> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.configurationConstant.addWorkLocation, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({
+        location: location.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorJson = await response.json().catch(() => null);
+      const msg = errorJson?.message || `Failed to add work location (HTTP ${response.status})`;
+      throw new Error(msg);
+    }
+
+    const json = await response.json();
+    const dto: ConfigurationConstantDTO = json.data;
+    if (dto && dto.configurationValue) {
+      try {
+        const parsed = JSON.parse(dto.configurationValue);
+        if (Array.isArray(parsed)) {
+          return parsed as string[];
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return await this.getWorkLocations();
+  }
+
+  public async deleteWorkLocation(location: string): Promise<string[]> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.configurationConstant.deleteWorkLocation, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({
+        location: location.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorJson = await response.json().catch(() => null);
+      const msg = errorJson?.message || `Failed to delete work location (HTTP ${response.status})`;
+      throw new Error(msg);
+    }
+
+    const json = await response.json();
+    const dto: ConfigurationConstantDTO = json.data;
+    if (dto && dto.configurationValue) {
+      try {
+        const parsed = JSON.parse(dto.configurationValue);
+        if (Array.isArray(parsed)) {
+          return parsed as string[];
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return await this.getWorkLocations();
+  }
 }

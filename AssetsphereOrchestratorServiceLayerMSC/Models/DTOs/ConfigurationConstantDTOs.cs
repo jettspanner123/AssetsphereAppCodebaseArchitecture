@@ -27,3 +27,13 @@ public sealed class AddDepartmentRequestDTO
 {
     public string Department { get; set; } = string.Empty;
 }
+
+public sealed class AddWorkLocationRequestDTO
+{
+    public string Location { get; set; } = string.Empty;
+}
+
+public sealed class DeleteWorkLocationRequestDTO
+{
+    public string Location { get; set; } = string.Empty;
+}

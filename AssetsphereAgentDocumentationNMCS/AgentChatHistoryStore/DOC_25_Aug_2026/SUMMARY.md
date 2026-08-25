@@ -262,3 +262,39 @@ This document tracks all features, permission adjustments, architectural refacto
   - Replaced static `DEPARTMENT_SELECT_OPTIONS` with dynamic `useDesignationsQuery()` departments list in [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx).
   - Added `searchable={true}` and `+ Create New Department` footer action button to the Allocated Department dropdown, wiring up the nested [`CreateDepartmentModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDepartmentModalController.tsx) component.
 - **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 18. Work Locations Management & Guarded Deletion in Settings
+- **Files**:
+  - [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx)
+  - [`ConfigurationConstantController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/ConfigurationConstantController.cs)
+  - [`ConfigurationConstantService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/Services/ConfigurationConstantService.cs)
+  - [`ConfigurationConstantDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/ConfigurationConstantDTOs.cs)
+  - [`ConfigurationConstantService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ConfigurationConstantService.ts)
+  - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts)
+  - [`ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts)
+- **Changes**:
+  - Removed obsolete "Deployment Mode" and "Appearance" cards from the Settings view.
+  - Added backend endpoints: `POST /Api/V1/ConfigurationConstant/AddWorkLocation` and `POST /Api/V1/ConfigurationConstant/DeleteWorkLocation`.
+  - Implemented server-side and client-side dependency guards: before deleting a work location, queries both active employees (`Location`) and active assets (`Location`). If either has assigned dependencies, deletion is strictly blocked with a descriptive informational modal detailing exact counts.
+  - Added `ConfirmationModalSharedComponent` (danger variant) for safely deleting unassigned locations.
+  - Built a modern Two-Column layout: Left card for "Register Work Location" with automatic trimming and duplicate prevention; Right card for "Active Work Locations Directory" with real-time employee and asset count badges.
+- **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 19. Single Unified Card Layout & Shaking In-Button Error State
+- **Files**:
+  - [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx)
+  - [`index.css`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/index.css)
+- **Changes**:
+  - Merged separate cards into a single unified card container with a middle divider (`divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-zinc-800`).
+  - Replaced top error alert with an in-button dynamic state: on validation error (e.g. duplicate location name), the "Add Work Location" button turns red (`bg-rose-600`), updates text to `"{Location} Already Exists"`, executes a horizontal side-to-side shake animation (`.animate-shake`), and smoothly returns to normal after 2.8 seconds.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 20. Confirmation Modal Exit Animation Lifecycle Fix
+- **Files**:
+  - [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx)
+- **Root Cause**:
+  - In [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx), the confirmation modal was conditionally rendered as `{locationToDelete && <ConfirmationModalSharedComponent isOpen={true} />}`. When `locationToDelete` was set to `null` on close, React immediately unmounted the component tree, preventing `AnimatePresence` from executing the exit animation.
+- **Changes**:
+  - Kept `<ConfirmationModalSharedComponent>` and the warning `<ModalSharedComponent>` continuously mounted with boolean `isOpen={isDeleteModalOpen}` and `isOpen={isWarningModalOpen}`.
+  - Preserved target location strings across dismissal transitions, enabling smooth Framer Motion exit animations (backdrop fade-out and slide/scale-down).
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified smooth entry and exit transitions.

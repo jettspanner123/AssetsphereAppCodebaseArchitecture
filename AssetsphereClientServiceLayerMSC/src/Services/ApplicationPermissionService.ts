@@ -96,6 +96,8 @@ export default class ApplicationPermissionService {
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_PROCUREMENT);
       case 'vendors':
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_VENDORS);
+      case 'user_requests':
+        return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_USER_REQUESTS);
       case 'servicedesk':
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_SERVICEDESK);
       case 'compliance':

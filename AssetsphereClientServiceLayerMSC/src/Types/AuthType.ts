@@ -25,7 +25,29 @@ export interface UserProfileType {
   role: UserRoleType | string;
   department?: DepartmentType | string | null;
   avatarUrl?: string | null;
+  isVerified?: boolean;
   lastLoginAt?: string | null;
+}
+
+export interface PendingUserType {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  role: UserRoleType | string;
+  department?: string | null;
+  createdAt: string;
+  isVerified: boolean;
+  isDeleted?: boolean;
+  status?: string;
+}
+
+export interface RegisterResponseType {
+  message: string;
+  isVerified: boolean;
+  isPendingApproval: boolean;
+  user: UserProfileType;
 }
 
 export interface AuthTokensType {

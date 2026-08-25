@@ -19,6 +19,9 @@ import { UserProfileType } from '@/src/Types';
 
 export interface SignupAuthState {
   isAuthenticated: boolean;
+  isVerified?: boolean;
+  isPendingApproval?: boolean;
+  message?: string;
   userEmail: string | null;
   userName: string | null;
   userRole: string | null;

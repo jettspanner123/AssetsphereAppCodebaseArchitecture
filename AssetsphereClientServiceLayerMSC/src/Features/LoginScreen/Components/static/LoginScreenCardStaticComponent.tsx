@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
+import VerificationPendingCardSharedComponent from '../../../../Shared/Components/VerificationPendingCardSharedComponent';
 import LoginScreenCON from '../../Constants/LoginScreenCON';
 import { LoginCredentials, LoginFormErrors } from '../../Models/LoginScreenModel';
 import weplmLogo from '../../../../assets/weplm.jpeg';
@@ -10,11 +11,14 @@ export interface LoginScreenCardStaticComponentProps {
   errors: LoginFormErrors;
   isLoading: boolean;
   isMicrosoftLoading: boolean;
+  isPendingApproval?: boolean;
+  pendingEmail?: string;
   onFieldChange: (field: keyof LoginCredentials, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
   onNavigateSignup?: () => void;
   onNavigateForgotPassword?: () => void;
+  onResetPendingView?: () => void;
 }
 
 export default function LoginScreenCardStaticComponent({
@@ -22,13 +26,27 @@ export default function LoginScreenCardStaticComponent({
   errors,
   isLoading,
   isMicrosoftLoading,
+  isPendingApproval,
+  pendingEmail,
   onFieldChange,
   onSubmit,
   onMicrosoftLogin,
   onNavigateSignup,
   onNavigateForgotPassword,
+  onResetPendingView,
 }: LoginScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  if (isPendingApproval) {
+    return (
+      <VerificationPendingCardSharedComponent
+        email={pendingEmail || credentials.email}
+        role="USER"
+        onBackToSignIn={onResetPendingView || (() => {})}
+        maxWidthClassName="max-w-md"
+      />
+    );
+  }
 
   return (
     <div
@@ -57,11 +75,21 @@ export default function LoginScreenCardStaticComponent({
         </p>
       </div>
 
-      {/* General Error Banner */}
+      {/* General Error / Verification Banner */}
       {errors.general && (
-        <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
-          {errors.general}
-        </div>
+        errors.general.includes('VERIFICATION_PENDING') ? (
+          <div className="mb-5 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs font-medium flex items-start gap-2.5 shadow-sm text-left">
+            <span className="shrink-0 text-amber-500 mt-0.5 font-bold text-sm">⚠️</span>
+            <div>
+              <span className="font-bold block text-amber-900 dark:text-amber-200 mb-0.5">Account Approval Pending</span>
+              <span>{errors.general.replace('VERIFICATION_PENDING:', '').trim()}</span>
+            </div>
+          </div>
+        ) : (
+          <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
+            {errors.general}
+          </div>
+        )
       )}
 
       {/* Microsoft SSO Action */}

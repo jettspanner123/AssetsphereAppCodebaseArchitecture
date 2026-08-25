@@ -28,6 +28,8 @@ export default function LoginScreenController({
   });
 
   const [errors, setErrors] = useState<LoginFormErrors>({});
+  const [isPendingApproval, setIsPendingApproval] = useState<boolean>(false);
+  const [pendingEmail, setPendingEmail] = useState<string>('');
 
   // TanStack Query Mutation for credential login via centralized service
   const loginMutation = TanstackQueryClientService.current.authentication.loginMutation({
@@ -39,7 +41,13 @@ export default function LoginScreenController({
         err instanceof Error
           ? err.message
           : 'Authentication failed. Please verify your credentials and try again.';
-      setErrors({ general: errorMessage });
+
+      if (errorMessage.includes('VERIFICATION_PENDING')) {
+        setIsPendingApproval(true);
+        setPendingEmail(credentials.email);
+      } else {
+        setErrors({ general: errorMessage });
+      }
     },
   });
 
@@ -109,11 +117,17 @@ export default function LoginScreenController({
           errors={errors}
           isLoading={loginMutation.isPending}
           isMicrosoftLoading={microsoftLoginMutation.isPending}
+          isPendingApproval={isPendingApproval}
+          pendingEmail={pendingEmail}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}
           onNavigateSignup={onNavigateSignup}
           onNavigateForgotPassword={onNavigateForgotPassword}
+          onResetPendingView={() => {
+            setIsPendingApproval(false);
+            setErrors({});
+          }}
         />
       </main>
 

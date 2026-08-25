@@ -17,7 +17,12 @@ import { Employee } from '../Types/EmployeeType';
 import { CreateEmployeeRequest } from '../Features/Employees/Services/EmployeesDirectoryService';
 import TanstackQueryKeysCON from '../Constants/TanstackQueryKeysCON';
 
+import { PendingUserType, UserProfileType } from '../Types/AuthType';
+import UserRequestsService from '../Features/UserRequests/Services/UserRequestsService';
+
 export class AuthenticationQueryService {
+  constructor(private readonly getClient?: () => QueryClient) {}
+
   // Login Mutations
   public useLoginMutation(
     options?: UseMutationOptions<LoginAuthState, Error, LoginCredentials>
@@ -86,6 +91,81 @@ export class AuthenticationQueryService {
     options?: UseMutationOptions<SignupAuthState, Error, void>
   ): UseMutationResult<SignupAuthState, Error, void> {
     return this.useMicrosoftSignupMutation(options);
+  }
+
+  // Pending Users Query (Operator / Admin / Developer)
+  public usePendingUsersQuery(
+    status: string = 'pending',
+    options?: Omit<UseQueryOptions<PendingUserType[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<PendingUserType[], Error> {
+    return useQuery({
+      queryKey: [...TanstackQueryKeysCON.PENDING_USERS, status],
+      queryFn: async () => {
+        return await UserRequestsService.current.getPendingUsers(status);
+      },
+      ...options,
+    });
+  }
+
+  public pendingUsersQuery(
+    status: string = 'pending',
+    options?: Omit<UseQueryOptions<PendingUserType[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<PendingUserType[], Error> {
+    return this.usePendingUsersQuery(status, options);
+  }
+
+  // Approve User Mutation
+  public useApproveUserMutation(
+    options?: UseMutationOptions<UserProfileType, Error, string>
+  ): UseMutationResult<UserProfileType, Error, string> {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        return await UserRequestsService.current.approveUser(id);
+      },
+      onSuccess: async (...args) => {
+        const [, approvedId] = args;
+        this.getClient?.()?.setQueryData<PendingUserType[]>(
+          TanstackQueryKeysCON.PENDING_USERS,
+          (old) => (old ? old.filter((u) => u.id !== approvedId) : [])
+        );
+        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        (options?.onSuccess as any)?.(...args);
+      },
+      ...options,
+    });
+  }
+
+  public approveUserMutation(
+    options?: UseMutationOptions<UserProfileType, Error, string>
+  ): UseMutationResult<UserProfileType, Error, string> {
+    return this.useApproveUserMutation(options);
+  }
+
+  // Reject User Mutation
+  public useRejectUserMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        return await UserRequestsService.current.rejectUser(id);
+      },
+      onSuccess: async (...args) => {
+        const [, rejectedId] = args;
+        this.getClient?.()?.setQueryData<PendingUserType[]>(
+          TanstackQueryKeysCON.PENDING_USERS,
+          (old) => (old ? old.filter((u) => u.id !== rejectedId) : [])
+        );
+        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        (options?.onSuccess as any)?.(...args);
+      },
+      ...options,
+    });
+  }
+
+  public rejectUserMutation(
+    options?: UseMutationOptions<boolean, Error, string>
+  ): UseMutationResult<boolean, Error, string> {
+    return this.useRejectUserMutation(options);
   }
 }
 
@@ -392,7 +472,7 @@ export default class TanstackQueryClientService {
     },
   });
 
-  public readonly authentication: AuthenticationQueryService = new AuthenticationQueryService();
+  public readonly authentication: AuthenticationQueryService = new AuthenticationQueryService(() => this.client);
   public readonly assets: AssetQueryService = new AssetQueryService(() => this.client);
   public readonly employees: EmployeeQueryService = new EmployeeQueryService(() => this.client);
   public readonly configuration: ConfigurationQueryService = new ConfigurationQueryService(() => this.client);

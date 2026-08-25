@@ -144,6 +144,30 @@ using (IServiceScope scope = app.Services.CreateScope())
     try
     {
         dbContext.Database.EnsureCreated();
+        try
+        {
+            await dbContext.Database.ExecuteSqlRawAsync(
+                @"DO $$ 
+                BEGIN 
+                    IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'AS_UsersTBL' OR table_name = 'as_userstbl') THEN
+                        BEGIN
+                            ALTER TABLE ""AS_UsersTBL"" DROP COLUMN IF EXISTS ""IsVerified"";
+                        EXCEPTION WHEN OTHERS THEN
+                        END;
+                        BEGIN
+                            ALTER TABLE ""AS_UsersTBL"" ADD COLUMN IF NOT EXISTS is_verified boolean NOT NULL DEFAULT false;
+                            ALTER TABLE ""AS_UsersTBL"" ALTER COLUMN is_verified SET DEFAULT false;
+                        EXCEPTION WHEN OTHERS THEN
+                        END;
+                    END IF;
+                END $$;");
+        }
+        catch (Exception rawEx)
+        {
+            ILogger<Program> logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Raw SQL column addition note: {Message}", rawEx.Message);
+        }
+
         await DatabaseSeederUtility.SeedInitialDataAsync(dbContext);
     }
     catch (Exception ex)

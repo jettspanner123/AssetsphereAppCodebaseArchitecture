@@ -102,16 +102,9 @@ export default class SignupScreenService {
       throw new Error(errorMessage);
     }
 
-    const authData: BackendAuthResponseDTO = payload.data;
+    const responseData: any = payload.data;
+    const userProfile = responseData.user || responseData;
 
-    // Save tokens via dedicated LocalStorage Service
-    ApplicationLocalStorageService.current.setAuthTokens({
-      accessToken: authData.accessToken,
-      refreshToken: authData.refreshToken,
-      expiresAt: authData.expiresAt,
-    });
-
-    const userProfile = authData.user;
     const typedUser: UserProfileType = {
       id: userProfile.id,
       email: userProfile.email,
@@ -121,30 +114,63 @@ export default class SignupScreenService {
       role: String(userProfile.role || 'USER'),
       department: userProfile.department ? String(userProfile.department) : null,
       avatarUrl: userProfile.avatarUrl || null,
+      isVerified: Boolean(responseData.isVerified ?? userProfile.isVerified ?? false),
       lastLoginAt: userProfile.lastLoginAt || null,
     };
 
-    // Save to Zustand State Store
-    useAuthenticationStateStore.getState().setAuth(
-      {
-        accessToken: authData.accessToken,
-        refreshToken: authData.refreshToken,
-        expiresAt: authData.expiresAt,
-      },
-      typedUser
-    );
+    // If account is pending operator verification, return pending state without storing auth tokens
+    if (!typedUser.isVerified || responseData.isPendingApproval) {
+      const authState: SignupAuthState = {
+        isAuthenticated: false,
+        isVerified: false,
+        isPendingApproval: true,
+        message:
+          responseData.message ||
+          payload.message ||
+          'Your account creation request has been submitted to the Operator for review. Please wait for approval before logging in.',
+        userEmail: typedUser.email,
+        userName: typedUser.fullName,
+        userRole: typedUser.role,
+        user: typedUser,
+      };
+
+      toast.info('Account Request Submitted', {
+        description: authState.message,
+      });
+
+      return authState;
+    }
+
+    // Otherwise, if verified (e.g. admin creation / direct verification)
+    if (responseData.accessToken) {
+      ApplicationLocalStorageService.current.setAuthTokens({
+        accessToken: responseData.accessToken,
+        refreshToken: responseData.refreshToken,
+        expiresAt: responseData.expiresAt,
+      });
+
+      useAuthenticationStateStore.getState().setAuth(
+        {
+          accessToken: responseData.accessToken,
+          refreshToken: responseData.refreshToken,
+          expiresAt: responseData.expiresAt,
+        },
+        typedUser
+      );
+    }
 
     const authState: SignupAuthState = {
       isAuthenticated: true,
+      isVerified: true,
+      isPendingApproval: false,
       userEmail: typedUser.email,
       userName: typedUser.fullName,
       userRole: typedUser.role,
-      accessToken: authData.accessToken,
-      refreshToken: authData.refreshToken,
+      accessToken: responseData.accessToken,
+      refreshToken: responseData.refreshToken,
       user: typedUser,
     };
 
-    // Persist authenticated session
     ApplicationLocalStorageService.current.setAuthSession(authState);
 
     toast.success('Registration Successful', {

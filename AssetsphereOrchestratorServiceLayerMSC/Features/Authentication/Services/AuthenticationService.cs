@@ -41,6 +41,11 @@ public sealed class AuthenticationService
             throw new ValidationCException("This account is currently inactive. Please contact your system administrator.");
         }
 
+        if (!user.IsVerified)
+        {
+            throw new ValidationCException("VERIFICATION_PENDING: Your account is pending verification by an Operator. Please wait for approval or contact your administrator.");
+        }
+
         string accessToken = JwtTokenHelper.Current.GenerateAccessToken(user);
         string refreshToken = JwtTokenHelper.Current.GenerateRefreshToken();
         int refreshDays = ENValidator.Current.GetIntValue("ASSETSPHERE_JWT_REFRESH_EXPIRY_DAYS", 7);
@@ -60,7 +65,7 @@ public sealed class AuthenticationService
         };
     }
 
-    public async Task<AuthResponseDTO> RegisterAsync(RegisterRequestDTO request)
+    public async Task<RegisterResponseDTO> RegisterAsync(RegisterRequestDTO request)
     {
         if (!EmailSValidator.Current.Validate(request.Email))
         {
@@ -85,31 +90,96 @@ public sealed class AuthenticationService
             PasswordHash = PasswordHashHelper.Current.HashPassword(request.Password),
             FirstName = request.FirstName.Trim(),
             LastName = request.LastName.Trim(),
-            Role = request.Role,
+            Role = UserRoleType.USER, // Strictly USER role for public registration
             Department = request.Department,
             IsActive = true,
+            IsVerified = false, // Verification required by Operator
             CreatedAt = DateTime.UtcNow,
             CreatedBy = "registration"
         };
 
-        string accessToken = JwtTokenHelper.Current.GenerateAccessToken(newUser);
-        string refreshToken = JwtTokenHelper.Current.GenerateRefreshToken();
-        int refreshDays = ENValidator.Current.GetIntValue("ASSETSPHERE_JWT_REFRESH_EXPIRY_DAYS", 7);
-
-        newUser.RefreshToken = refreshToken;
-        newUser.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(refreshDays);
-        newUser.LastLoginAt = DateTime.UtcNow;
-
         await _dbContext.Users.AddAsync(newUser);
         await _dbContext.SaveChangesAsync();
 
-        return new AuthResponseDTO
+        return new RegisterResponseDTO
         {
-            AccessToken = accessToken,
-            RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(ENValidator.Current.GetIntValue("ASSETSPHERE_JWT_EXPIRY_MINUTES", 1440)),
+            Message = "Your account creation request has been submitted to the Operator for review. Please wait for approval before logging in.",
+            IsVerified = false,
+            IsPendingApproval = true,
             User = MapToUserProfile(newUser)
         };
+    }
+
+    public async Task<List<PendingUserDTO>> GetPendingUsersAsync(string? status = "pending")
+    {
+        IQueryable<UserEntityClass> query = _dbContext.Users.AsQueryable();
+
+        switch (status?.ToLowerInvariant())
+        {
+            case "approved":
+                query = query.Where(u => u.IsVerified && !u.IsDeleted);
+                break;
+            case "rejected":
+                query = query.Where(u => u.IsDeleted);
+                break;
+            case "all":
+                // Retrieve all requests/users
+                break;
+            case "pending":
+            default:
+                query = query.Where(u => !u.IsVerified && !u.IsDeleted);
+                break;
+        }
+
+        return await query
+            .OrderByDescending(u => u.CreatedAt)
+            .Select(u => new PendingUserDTO
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+                Role = u.Role,
+                Department = u.Department,
+                CreatedAt = u.CreatedAt,
+                IsVerified = u.IsVerified,
+                IsDeleted = u.IsDeleted
+            })
+            .ToListAsync();
+    }
+
+    public async Task<UserProfileDTO> ApproveUserAsync(Guid id)
+    {
+        UserEntityClass? user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            throw new EntityNotFoundCException("User", id);
+        }
+
+        user.IsVerified = true;
+        user.IsActive = true;
+        user.UpdatedAt = DateTime.UtcNow;
+        user.UpdatedBy = "operator_approval";
+
+        await _dbContext.SaveChangesAsync();
+
+        return MapToUserProfile(user);
+    }
+
+    public async Task<bool> RejectUserAsync(Guid id)
+    {
+        UserEntityClass? user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
+        if (user == null)
+        {
+            throw new EntityNotFoundCException("User", id);
+        }
+
+        user.IsDeleted = true;
+        user.DeletedAt = DateTime.UtcNow;
+        user.UpdatedBy = "operator_rejection";
+
+        await _dbContext.SaveChangesAsync();
+        return true;
     }
 
     public async Task<UserProfileDTO> GetCurrentUserAsync(Guid userId)
@@ -167,6 +237,7 @@ public sealed class AuthenticationService
             Role = user.Role,
             Department = user.Department,
             AvatarUrl = user.AvatarUrl,
+            IsVerified = user.IsVerified,
             LastLoginAt = user.LastLoginAt
         };
     }

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { User, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
+import VerificationPendingCardSharedComponent from '../../../../Shared/Components/VerificationPendingCardSharedComponent';
 import SignupScreenCON from '../../Constants/SignupScreenCON';
 import { SignupFormData, SignupFormErrors } from '../../Models/SignupScreenModel';
+import { UserProfileType } from '@/src/Types';
 import weplmLogo from '../../../../assets/weplm.jpeg';
 
 export interface SignupScreenCardStaticComponentProps {
@@ -10,6 +12,8 @@ export interface SignupScreenCardStaticComponentProps {
   errors: SignupFormErrors;
   isLoading: boolean;
   isMicrosoftLoading: boolean;
+  isPendingApproval?: boolean;
+  submittedUser?: UserProfileType | null;
   onFieldChange: (field: keyof SignupFormData, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
@@ -21,6 +25,8 @@ export default function SignupScreenCardStaticComponent({
   errors,
   isLoading,
   isMicrosoftLoading,
+  isPendingApproval,
+  submittedUser,
   onFieldChange,
   onSubmit,
   onMicrosoftLogin,
@@ -28,6 +34,18 @@ export default function SignupScreenCardStaticComponent({
 }: SignupScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+
+  if (isPendingApproval) {
+    return (
+      <VerificationPendingCardSharedComponent
+        email={submittedUser?.email || formData.email}
+        fullName={submittedUser?.fullName || formData.fullName}
+        role="USER"
+        onBackToSignIn={onNavigateLogin || (() => {})}
+        maxWidthClassName="max-w-xl"
+      />
+    );
+  }
 
   return (
     <div

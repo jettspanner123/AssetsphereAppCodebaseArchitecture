@@ -8,4 +8,5 @@ export default class TanstackQueryKeysCON {
   public static readonly CONFIGURATION_CONSTANT = (key: string) => ['configuration', key] as const;
   public static readonly WORK_LOCATIONS = ['configuration', 'WORK_LOCATIONS'] as const;
   public static readonly AUTH_SESSION = ['auth', 'session'] as const;
+  public static readonly PENDING_USERS = ['auth', 'pending-users'] as const;
 }

@@ -60,28 +60,28 @@ public sealed class AuthenticationController : ControllerBase
 
     [HttpPost(ApplicationRouteFactory.AuthenticationRoutes.Register)]
     [AllowAnonymous]
-    public async Task<ActionResult<ApiResponseClass<AuthResponseDTO>>> Register([FromBody] RegisterRequestDTO? request)
+    public async Task<ActionResult<ApiResponseClass<RegisterResponseDTO>>> Register([FromBody] RegisterRequestDTO? request)
     {
         try
         {
             AuthenticationAssertion.Current.CheckForNullRequest(request);
             AuthenticationAssertion.Current.AssertRegisterRequest(request);
 
-            AuthResponseDTO response = await _authenticationService.RegisterAsync(request);
+            RegisterResponseDTO response = await _authenticationService.RegisterAsync(request);
             return Created(
                 $"{ApplicationRouteFactory.AuthenticationRoutes.ControllerURL}/{ApplicationRouteFactory.AuthenticationRoutes.Me}",
-                ApiResponseClass<AuthResponseDTO>.Succeeded(response, "User registered successfully.", 201)
+                ApiResponseClass<RegisterResponseDTO>.Succeeded(response, response.Message, 201)
             );
         }
         catch (ValidationCException valEx)
         {
             _logger.LogWarning("Registration validation failed: {Message}", valEx.Message);
-            return BadRequest(ApiResponseClass<AuthResponseDTO>.Failed(valEx.Message, valEx.ValidationErrors, 400));
+            return BadRequest(ApiResponseClass<RegisterResponseDTO>.Failed(valEx.Message, valEx.ValidationErrors, 400));
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Unexpected error occurred during user registration: {Email}", request?.Email);
-            return StatusCode(500, ApiResponseClass<AuthResponseDTO>.Failed(
+            return StatusCode(500, ApiResponseClass<RegisterResponseDTO>.Failed(
                 "An unexpected error occurred while registering the user.",
                 new List<string> { ex.Message },
                 500
@@ -149,6 +149,86 @@ public sealed class AuthenticationController : ControllerBase
             _logger.LogError(ex, "Unexpected error occurred while retrieving user profile.");
             return StatusCode(500, ApiResponseClass<UserProfileDTO>.Failed(
                 "An unexpected error occurred while retrieving current user profile.",
+                new List<string> { ex.Message },
+                500
+            ));
+        }
+    }
+
+    [HttpGet(ApplicationRouteFactory.AuthenticationRoutes.PendingUsers)]
+    [Authorize(Roles = "ADMIN,OPERATOR,DEVELOPER")]
+    public async Task<ActionResult<ApiResponseClass<List<PendingUserDTO>>>> GetPendingUsers([FromQuery] string? status = "pending")
+    {
+        try
+        {
+            List<PendingUserDTO> pendingUsers = await _authenticationService.GetPendingUsersAsync(status);
+            return Ok(ApiResponseClass<List<PendingUserDTO>>.Succeeded(
+                pendingUsers,
+                "User registration requests retrieved successfully.",
+                200
+            ));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to retrieve user registration requests with status: {Status}", status);
+            return StatusCode(500, ApiResponseClass<List<PendingUserDTO>>.Failed(
+                "An unexpected error occurred while retrieving user registration requests.",
+                new List<string> { ex.Message },
+                500
+            ));
+        }
+    }
+
+    [HttpPost(ApplicationRouteFactory.AuthenticationRoutes.ApproveUser)]
+    [Authorize(Roles = "ADMIN,OPERATOR,DEVELOPER")]
+    public async Task<ActionResult<ApiResponseClass<UserProfileDTO>>> ApproveUser([FromRoute] Guid id)
+    {
+        try
+        {
+            UserProfileDTO profile = await _authenticationService.ApproveUserAsync(id);
+            return Ok(ApiResponseClass<UserProfileDTO>.Succeeded(
+                profile,
+                $"User {profile.FullName} has been approved successfully.",
+                200
+            ));
+        }
+        catch (EntityNotFoundCException notFoundEx)
+        {
+            return NotFound(ApiResponseClass<UserProfileDTO>.Failed(notFoundEx.Message, null, 404));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to approve user registration for ID: {Id}", id);
+            return StatusCode(500, ApiResponseClass<UserProfileDTO>.Failed(
+                "An unexpected error occurred while approving user registration.",
+                new List<string> { ex.Message },
+                500
+            ));
+        }
+    }
+
+    [HttpPost(ApplicationRouteFactory.AuthenticationRoutes.RejectUser)]
+    [Authorize(Roles = "ADMIN,OPERATOR,DEVELOPER")]
+    public async Task<ActionResult<ApiResponseClass<bool>>> RejectUser([FromRoute] Guid id)
+    {
+        try
+        {
+            bool success = await _authenticationService.RejectUserAsync(id);
+            return Ok(ApiResponseClass<bool>.Succeeded(
+                success,
+                "User registration request has been rejected.",
+                200
+            ));
+        }
+        catch (EntityNotFoundCException notFoundEx)
+        {
+            return NotFound(ApiResponseClass<bool>.Failed(notFoundEx.Message, null, 404));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to reject user registration for ID: {Id}", id);
+            return StatusCode(500, ApiResponseClass<bool>.Failed(
+                "An unexpected error occurred while rejecting user registration.",
                 new List<string> { ex.Message },
                 500
             ));

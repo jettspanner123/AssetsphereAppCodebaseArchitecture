@@ -55,6 +55,7 @@ public static class DatabaseSeederUtility
                     Department = DepartmentType.ITInfrastructure,
                     AvatarUrl = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
                     IsActive = true,
+                    IsVerified = true,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "seeder"
                 };
@@ -66,12 +67,14 @@ public static class DatabaseSeederUtility
                 existingAdmin.PasswordHash = PasswordHashHelper.Current.HashPassword(adminPassword);
                 existingAdmin.Role = UserRoleType.ADMIN;
                 existingAdmin.IsActive = true;
+                existingAdmin.IsVerified = true;
             }
 
             string userEmail = "user@assetsphere.internal";
             string userPassword = "AssetsphereUser2026!";
 
-            if (!await context.Users.AnyAsync(u => u.Email == userEmail))
+            var existingUser = await context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            if (existingUser == null)
             {
                 UserEntityClass standardUser = new UserEntityClass
                 {
@@ -84,17 +87,23 @@ public static class DatabaseSeederUtility
                     Department = DepartmentType.Operations,
                     AvatarUrl = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80",
                     IsActive = true,
+                    IsVerified = true,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "seeder"
                 };
 
                 await context.Users.AddAsync(standardUser);
             }
+            else
+            {
+                existingUser.IsVerified = true;
+            }
 
             string operatorEmail = "operator@assetsphere.internal";
             string operatorPassword = "AssetsphereOperator2026!";
 
-            if (!await context.Users.AnyAsync(u => u.Email == operatorEmail))
+            var existingOperator = await context.Users.FirstOrDefaultAsync(u => u.Email == operatorEmail);
+            if (existingOperator == null)
             {
                 UserEntityClass operatorUser = new UserEntityClass
                 {
@@ -107,17 +116,23 @@ public static class DatabaseSeederUtility
                     Department = DepartmentType.ITInfrastructure,
                     AvatarUrl = "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150&auto=format&fit=crop&q=80",
                     IsActive = true,
+                    IsVerified = true,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "seeder"
                 };
 
                 await context.Users.AddAsync(operatorUser);
             }
+            else
+            {
+                existingOperator.IsVerified = true;
+            }
 
             string developerEmail = "developer@assetsphere.internal";
             string developerPassword = "AssetsphereDeveloper2026!";
 
-            if (!await context.Users.AnyAsync(u => u.Email == developerEmail))
+            var existingDev = await context.Users.FirstOrDefaultAsync(u => u.Email == developerEmail);
+            if (existingDev == null)
             {
                 UserEntityClass developerUser = new UserEntityClass
                 {
@@ -130,11 +145,16 @@ public static class DatabaseSeederUtility
                     Department = DepartmentType.Engineering,
                     AvatarUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
                     IsActive = true,
+                    IsVerified = true,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = "seeder"
                 };
 
                 await context.Users.AddAsync(developerUser);
+            }
+            else
+            {
+                existingDev.IsVerified = true;
             }
 
             await context.SaveChangesAsync();

@@ -47,6 +47,7 @@ import AIAssistantScreenRoute from '../Routes/AIAssistantScreenRoute';
 import AnalyticsScreenRoute from '../Routes/AnalyticsScreenRoute';
 import SettingsScreenRoute from '../Routes/SettingsScreenRoute';
 import DevDashboardScreenRoute from '../Routes/DevDashboardScreenRoute';
+import UserRequestsScreenController from '../Features/UserRequests/UserRequestsScreenController';
 
 // Modals
 import NavigationController from '../Features/Navigation/NavigationController';
@@ -236,6 +237,7 @@ export function DashboardShell(): React.JSX.Element {
   else if (pathname.includes('procurement')) activeTab = 'procurement';
   else if (pathname.includes('service-desk')) activeTab = 'servicedesk';
   else if (pathname.includes('vendors')) activeTab = 'vendors';
+  else if (pathname.includes('user-requests')) activeTab = 'user_requests';
   else if (pathname.includes('compliance')) activeTab = 'compliance';
   else if (pathname.includes('verification-campaign')) activeTab = 'verification';
   else if (pathname.includes('ai-copilot')) activeTab = 'ai_assistant';
@@ -255,6 +257,7 @@ export function DashboardShell(): React.JSX.Element {
       dashboard: ApplicationRouteCON.DASHBOARD_OVERVIEW,
       inventory: ApplicationRouteCON.DASHBOARD_INVENTORY,
       employees: ApplicationRouteCON.DASHBOARD_EMPLOYEES,
+      user_requests: ApplicationRouteCON.DASHBOARD_USER_REQUESTS,
       licenses: ApplicationRouteCON.DASHBOARD_LICENSES,
       cloud: ApplicationRouteCON.DASHBOARD_CLOUD,
       procurement: ApplicationRouteCON.DASHBOARD_PROCUREMENT,
@@ -1236,6 +1239,15 @@ const devDashboardRoute = createRoute({
   },
 });
 
+// User Requests Route (Operator Approval)
+const userRequestsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: 'user-requests',
+  component: function UserRequestsComponent() {
+    return <UserRequestsScreenController />;
+  },
+});
+
 // ==========================================
 // 4. Construct Router Tree
 // ==========================================
@@ -1249,6 +1261,7 @@ const routeTree = rootRoute.addChildren([
     dashboardOverviewRoute,
     assetInventoryRoute,
     employeesRoute,
+    userRequestsRoute,
     softwareLicensesRoute,
     cloudInfrastructureRoute,
     procurementRoute,

@@ -7,9 +7,21 @@ export default class ApplicationThemeUtility {
 
   public getSavedTheme(): string {
     if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem(this.themeKey);
-      if (saved === ApplicationThemeCON.DARK || saved === ApplicationThemeCON.LIGHT) {
-        return saved;
+      try {
+        // Tab-scoped theme check
+        const sessionTheme = sessionStorage.getItem(this.themeKey);
+        if (sessionTheme === ApplicationThemeCON.DARK || sessionTheme === ApplicationThemeCON.LIGHT) {
+          return sessionTheme;
+        }
+
+        // Smart Bootstrap: If new tab has no sessionTheme, inherit from localStorage
+        const localTheme = localStorage.getItem(this.themeKey);
+        if (localTheme === ApplicationThemeCON.DARK || localTheme === ApplicationThemeCON.LIGHT) {
+          sessionStorage.setItem(this.themeKey, localTheme);
+          return localTheme;
+        }
+      } catch {
+        // Ignore storage access errors
       }
     }
     return ApplicationThemeCON.DARK; // Default to Dark Mode
@@ -17,7 +29,12 @@ export default class ApplicationThemeUtility {
 
   public applyTheme(theme: string): void {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(this.themeKey, theme);
+    try {
+      sessionStorage.setItem(this.themeKey, theme);
+      localStorage.setItem(this.themeKey, theme);
+    } catch {
+      // Ignore storage access errors
+    }
     if (theme === ApplicationThemeCON.DARK) {
       document.documentElement.classList.add('dark');
       document.body.classList.add('dark');

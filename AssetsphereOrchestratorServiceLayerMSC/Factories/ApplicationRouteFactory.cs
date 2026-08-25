@@ -30,6 +30,9 @@ public sealed class ApplicationRouteFactory
         public const string Register = "Register";
         public const string Me = "Me";
         public const string RefreshToken = "RefreshToken";
+        public const string PendingUsers = "PendingUsers";
+        public const string ApproveUser = "ApproveUser/{id}";
+        public const string RejectUser = "RejectUser/{id}";
     }
 
     public sealed class AssetInventoryRoutes

@@ -50,8 +50,10 @@ public class AssetsphereDbContext : DbContext
             entity.ToTable(DatabaseCON.UsersTable);
             entity.HasKey(e => e.Id);
             entity.HasIndex(e => e.Email).IsUnique();
+            entity.HasIndex(e => e.IsVerified);
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.Department).HasConversion<string>();
+            entity.Property(e => e.IsVerified).HasColumnName("is_verified").HasDefaultValue(false);
         });
 
         modelBuilder.Entity<AssetEntityClass>(entity =>

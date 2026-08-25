@@ -28,11 +28,16 @@ export default function SignupScreenController({
   });
 
   const [errors, setErrors] = useState<SignupFormErrors>({});
+  const [pendingSubmittedUser, setPendingSubmittedUser] = useState<SignupAuthState['user'] | null>(null);
 
   // TanStack Query Mutation for user registration via centralized service
   const registerMutation = TanstackQueryClientService.current.authentication.registerMutation({
     onSuccess: (authState: SignupAuthState) => {
-      onSignupSuccess(authState);
+      if (authState.isPendingApproval || !authState.isAuthenticated) {
+        setPendingSubmittedUser(authState.user || null);
+      } else {
+        onSignupSuccess(authState);
+      }
     },
     onError: (err: unknown) => {
       const errorMessage =
@@ -109,6 +114,8 @@ export default function SignupScreenController({
           errors={errors}
           isLoading={registerMutation.isPending}
           isMicrosoftLoading={microsoftSignupMutation.isPending}
+          isPendingApproval={Boolean(pendingSubmittedUser)}
+          submittedUser={pendingSubmittedUser}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}

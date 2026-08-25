@@ -33,6 +33,7 @@ public sealed class UserProfileDTO
     public UserRoleType Role { get; set; } = UserRoleType.USER;
     public DepartmentType? Department { get; set; }
     public string? AvatarUrl { get; set; }
+    public bool IsVerified { get; set; }
     public DateTime? LastLoginAt { get; set; }
 }
 
@@ -41,5 +42,28 @@ public sealed class AuthResponseDTO
     public string AccessToken { get; set; } = string.Empty;
     public string RefreshToken { get; set; } = string.Empty;
     public DateTime ExpiresAt { get; set; }
+    public UserProfileDTO User { get; set; } = new();
+}
+
+public sealed class PendingUserDTO
+{
+    public Guid Id { get; set; }
+    public string Email { get; set; } = string.Empty;
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string FullName => $"{FirstName} {LastName}".Trim();
+    public UserRoleType Role { get; set; } = UserRoleType.USER;
+    public DepartmentType? Department { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsVerified { get; set; }
+    public bool IsDeleted { get; set; }
+    public string Status => IsDeleted ? "Rejected" : (IsVerified ? "Approved" : "Pending");
+}
+
+public sealed class RegisterResponseDTO
+{
+    public string Message { get; set; } = string.Empty;
+    public bool IsVerified { get; set; }
+    public bool IsPendingApproval { get; set; }
     public UserProfileDTO User { get; set; } = new();
 }

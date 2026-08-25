@@ -29,7 +29,7 @@ export default function EmptyStateSharedComponent({
       </div>
 
       {/* Muted Heading */}
-      <h3 className="text-sm font-semibold text-slate-700 dark:text-zinc-300 font-serif-headline tracking-tight">
+      <h3 className="text-lg font-semibold text-slate-700 dark:text-zinc-300 font-serif-headline tracking-tight">
         {title}
       </h3>
 

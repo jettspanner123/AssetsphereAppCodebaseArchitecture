@@ -7,6 +7,7 @@ export type TabType =
   | 'procurement'
   | 'servicedesk'
   | 'vendors'
+  | 'user_requests'
   | 'compliance'
   | 'verification'
   | 'ai_assistant'

@@ -30,6 +30,8 @@ export default class ApplicationPermissionCON {
 
   public static readonly CAN_VIEW_TAB_EMPLOYEES: Set<UserRoleType> =
     ApplicationPermissionPreset.current.operatorRolePreset();
+  public static readonly CAN_VIEW_TAB_USER_REQUESTS: Set<UserRoleType> =
+    ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_VIEW_TAB_PROCUREMENT: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
   public static readonly CAN_VIEW_TAB_VENDORS: Set<UserRoleType> =

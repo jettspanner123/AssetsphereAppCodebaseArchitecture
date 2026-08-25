@@ -37,369 +37,318 @@ export default class UserPreferencesUtility {
   private complianceGridColumnsKey = 'assetsphere_compliance_grid_columns';
   private complianceSingleLineKey = 'assetsphere_compliance_single_line';
 
+  private showMockDataKey = 'assetsphere_show_mock_data';
+
+  // Smart Tab-Scoped Storage Accessors
+  private getStorageItem(key: string): string | null {
+    if (typeof window === 'undefined') return null;
+    try {
+      const sessionVal = sessionStorage.getItem(key);
+      if (sessionVal !== null) return sessionVal;
+      const localVal = localStorage.getItem(key);
+      if (localVal !== null) {
+        sessionStorage.setItem(key, localVal);
+        return localVal;
+      }
+    } catch {
+      // Ignore storage access errors
+    }
+    return null;
+  }
+
+  private setStorageItem(key: string, value: string): void {
+    if (typeof window === 'undefined') return;
+    try {
+      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value);
+    } catch {
+      // Ignore storage access errors
+    }
+  }
+
   // Active Tab Persistence
   public getActiveTab(defaultTab: TabType = 'dashboard'): TabType {
-    if (typeof window === 'undefined') return defaultTab;
-    const saved = localStorage.getItem(this.activeTabKey);
+    const saved = this.getStorageItem(this.activeTabKey);
     return (saved as TabType) || defaultTab;
   }
 
   public setActiveTab(tab: TabType): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.activeTabKey, tab);
-    }
+    this.setStorageItem(this.activeTabKey, tab);
   }
 
   // Software View Mode
   public getSoftwareViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.softwareViewModeKey);
+    const saved = this.getStorageItem(this.softwareViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setSoftwareViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.softwareViewModeKey, mode);
-    }
+    this.setStorageItem(this.softwareViewModeKey, mode);
   }
 
   // Software Grid Columns (2 vs 3) - Default: 2
   public getSoftwareGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.softwareGridColumnsKey);
+    const saved = this.getStorageItem(this.softwareGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setSoftwareGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.softwareGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.softwareGridColumnsKey, cols.toString());
   }
 
   // Software Single-Line Mode
   public getSoftwareSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.softwareSingleLineKey);
+    const saved = this.getStorageItem(this.softwareSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setSoftwareSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.softwareSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.softwareSingleLineKey, val.toString());
   }
 
   // Asset Inventory View Mode - Default: grid
   public getInventoryViewMode(defaultMode: 'table' | 'grid' = 'grid'): 'table' | 'grid' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.inventoryViewModeKey);
+    const saved = this.getStorageItem(this.inventoryViewModeKey);
     if (saved === 'table' || saved === 'grid') return saved;
     return defaultMode;
   }
 
   public setInventoryViewMode(mode: 'table' | 'grid'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.inventoryViewModeKey, mode);
-    }
+    this.setStorageItem(this.inventoryViewModeKey, mode);
   }
 
   // Asset Inventory Grid Columns (2 vs 3) - Default: 2
   public getInventoryGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.inventoryGridColumnsKey);
+    const saved = this.getStorageItem(this.inventoryGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setInventoryGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.inventoryGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.inventoryGridColumnsKey, cols.toString());
   }
 
   // Asset Inventory Single-Line Mode
   public getInventorySingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.inventorySingleLineKey);
+    const saved = this.getStorageItem(this.inventorySingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setInventorySingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.inventorySingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.inventorySingleLineKey, val.toString());
   }
 
   // Employees View Mode - Default: grid
   public getEmployeesViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.employeesViewModeKey);
+    const saved = this.getStorageItem(this.employeesViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setEmployeesViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.employeesViewModeKey, mode);
-    }
+    this.setStorageItem(this.employeesViewModeKey, mode);
   }
 
   // Employees Grid Columns (2 vs 3) - Default: 2
   public getEmployeesGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.employeesGridColumnsKey);
+    const saved = this.getStorageItem(this.employeesGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setEmployeesGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.employeesGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.employeesGridColumnsKey, cols.toString());
   }
 
   // Employees Single-Line Mode
   public getEmployeesSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.employeesSingleLineKey);
+    const saved = this.getStorageItem(this.employeesSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setEmployeesSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.employeesSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.employeesSingleLineKey, val.toString());
   }
 
   // Procurement View Mode - Default: grid
   public getProcurementViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.procurementViewModeKey);
+    const saved = this.getStorageItem(this.procurementViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setProcurementViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.procurementViewModeKey, mode);
-    }
+    this.setStorageItem(this.procurementViewModeKey, mode);
   }
 
   // Procurement Grid Columns (2 vs 3) - Default: 2
   public getProcurementGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.procurementGridColumnsKey);
+    const saved = this.getStorageItem(this.procurementGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setProcurementGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.procurementGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.procurementGridColumnsKey, cols.toString());
   }
 
   // Procurement Single-Line Mode
   public getProcurementSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.procurementSingleLineKey);
+    const saved = this.getStorageItem(this.procurementSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setProcurementSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.procurementSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.procurementSingleLineKey, val.toString());
   }
 
   // Vendors View Mode - Default: grid
   public getVendorsViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.vendorsViewModeKey);
+    const saved = this.getStorageItem(this.vendorsViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setVendorsViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.vendorsViewModeKey, mode);
-    }
+    this.setStorageItem(this.vendorsViewModeKey, mode);
   }
 
   // Vendors Grid Columns (2 vs 3) - Default: 2
   public getVendorsGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.vendorsGridColumnsKey);
+    const saved = this.getStorageItem(this.vendorsGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setVendorsGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.vendorsGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.vendorsGridColumnsKey, cols.toString());
   }
 
   // Vendors Single-Line Mode
   public getVendorsSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.vendorsSingleLineKey);
+    const saved = this.getStorageItem(this.vendorsSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setVendorsSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.vendorsSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.vendorsSingleLineKey, val.toString());
   }
 
   // Cloud View Mode - Default: grid
   public getCloudViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.cloudViewModeKey);
+    const saved = this.getStorageItem(this.cloudViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setCloudViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.cloudViewModeKey, mode);
-    }
+    this.setStorageItem(this.cloudViewModeKey, mode);
   }
 
   // Cloud Grid Columns (2 vs 3) - Default: 2
   public getCloudGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.cloudGridColumnsKey);
+    const saved = this.getStorageItem(this.cloudGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setCloudGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.cloudGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.cloudGridColumnsKey, cols.toString());
   }
 
   // Cloud Single-Line Mode
   public getCloudSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.cloudSingleLineKey);
+    const saved = this.getStorageItem(this.cloudSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setCloudSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.cloudSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.cloudSingleLineKey, val.toString());
   }
 
   // Service Desk View Mode - Default: grid
   public getServiceDeskViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.serviceDeskViewModeKey);
+    const saved = this.getStorageItem(this.serviceDeskViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setServiceDeskViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.serviceDeskViewModeKey, mode);
-    }
+    this.setStorageItem(this.serviceDeskViewModeKey, mode);
   }
 
   // Service Desk Grid Columns (2 vs 3) - Default: 2
   public getServiceDeskGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.serviceDeskGridColumnsKey);
+    const saved = this.getStorageItem(this.serviceDeskGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setServiceDeskGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.serviceDeskGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.serviceDeskGridColumnsKey, cols.toString());
   }
 
   // Service Desk Single-Line Mode
   public getServiceDeskSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.serviceDeskSingleLineKey);
+    const saved = this.getStorageItem(this.serviceDeskSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setServiceDeskSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.serviceDeskSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.serviceDeskSingleLineKey, val.toString());
   }
 
   // Compliance View Mode - Default: grid
   public getComplianceViewMode(defaultMode: 'grid' | 'list' = 'grid'): 'grid' | 'list' {
-    if (typeof window === 'undefined') return defaultMode;
-    const saved = localStorage.getItem(this.complianceViewModeKey);
+    const saved = this.getStorageItem(this.complianceViewModeKey);
     return saved === 'list' || saved === 'grid' ? saved : defaultMode;
   }
 
   public setComplianceViewMode(mode: 'grid' | 'list'): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.complianceViewModeKey, mode);
-    }
+    this.setStorageItem(this.complianceViewModeKey, mode);
   }
 
   // Compliance Grid Columns (2 vs 3) - Default: 2
   public getComplianceGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
-    if (typeof window === 'undefined') return defaultCols;
-    const saved = localStorage.getItem(this.complianceGridColumnsKey);
+    const saved = this.getStorageItem(this.complianceGridColumnsKey);
     if (saved === '2') return 2;
     if (saved === '3') return 3;
     return defaultCols;
   }
 
   public setComplianceGridColumns(cols: 2 | 3): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.complianceGridColumnsKey, cols.toString());
-    }
+    this.setStorageItem(this.complianceGridColumnsKey, cols.toString());
   }
 
   // Compliance Single-Line Mode
   public getComplianceSingleLine(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.complianceSingleLineKey);
+    const saved = this.getStorageItem(this.complianceSingleLineKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setComplianceSingleLine(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.complianceSingleLineKey, val.toString());
-    }
+    this.setStorageItem(this.complianceSingleLineKey, val.toString());
   }
 
   // Development Tools: Show Mock Data Preference
-  private showMockDataKey = 'assetsphere_show_mock_data';
-
   public getShowMockData(defaultVal: boolean = true): boolean {
-    if (typeof window === 'undefined') return defaultVal;
-    const saved = localStorage.getItem(this.showMockDataKey);
+    const saved = this.getStorageItem(this.showMockDataKey);
     if (saved !== null) return saved === 'true';
     return defaultVal;
   }
 
   public setShowMockData(val: boolean): void {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(this.showMockDataKey, val.toString());
-    }
+    this.setStorageItem(this.showMockDataKey, val.toString());
   }
 }

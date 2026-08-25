@@ -31,7 +31,7 @@ public sealed class AssetCreateDTO
     public string Status { get; set; } = "In Use";
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
-    public DepartmentType? AssignedDepartment { get; set; }
+    public string? AssignedDepartment { get; set; }
     public string Location { get; set; } = "HQ Floor 4";
     public decimal PurchasePrice { get; set; } = 0.0m;
     public string Currency { get; set; } = "USD";
@@ -63,7 +63,7 @@ public sealed class AssetUpdateDTO
     public string? Status { get; set; }
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
-    public DepartmentType? AssignedDepartment { get; set; }
+    public string? AssignedDepartment { get; set; }
     public string? Location { get; set; }
     public decimal? PurchasePrice { get; set; }
     public string? Currency { get; set; }
@@ -96,7 +96,7 @@ public sealed class AssetResponseDTO
     public string Status { get; set; } = string.Empty;
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
-    public DepartmentType? AssignedDepartment { get; set; }
+    public string? AssignedDepartment { get; set; }
     public string Location { get; set; } = string.Empty;
     public decimal PurchasePrice { get; set; }
     public string Currency { get; set; } = "USD";
@@ -130,7 +130,7 @@ public sealed class AssetAssignDTO
 {
     public string EmployeeId { get; set; } = string.Empty;
     public string EmployeeName { get; set; } = string.Empty;
-    public DepartmentType? Department { get; set; }
+    public string? Department { get; set; }
     public string? Location { get; set; }
 }
 

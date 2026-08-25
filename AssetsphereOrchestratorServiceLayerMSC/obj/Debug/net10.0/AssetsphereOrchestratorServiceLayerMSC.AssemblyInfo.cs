@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AssetsphereOrchestratorServiceLayerMSC")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ce98f57749d998a56d9e6e9f2d6a6d7ec4d8842")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5409add6d452576bd55ea0d7f60c9aec698cfd54")]
 [assembly: System.Reflection.AssemblyProductAttribute("AssetsphereOrchestratorServiceLayerMSC")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AssetsphereOrchestratorServiceLayerMSC")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

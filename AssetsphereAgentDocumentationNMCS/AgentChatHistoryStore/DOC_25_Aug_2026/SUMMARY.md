@@ -298,3 +298,15 @@ This document tracks all features, permission adjustments, architectural refacto
   - Kept `<ConfirmationModalSharedComponent>` and the warning `<ModalSharedComponent>` continuously mounted with boolean `isOpen={isDeleteModalOpen}` and `isOpen={isWarningModalOpen}`.
   - Preserved target location strings across dismissal transitions, enabling smooth Framer Motion exit animations (backdrop fade-out and slide/scale-down).
 - **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified smooth entry and exit transitions.
+
+### 21. Dynamic Department Validation Fix in Asset Creation (400 Bad Request Resolution)
+- **Files**:
+  - [`AssetEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/AssetEntityClass.cs)
+  - [`AssetDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/AssetDTOs.cs)
+  - [`AssetInventoryService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/AssetInventory/Services/AssetInventoryService.cs)
+- **Root Cause**:
+  - In [`AssetDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/AssetDTOs.cs) and [`AssetEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/AssetEntityClass.cs), `AssignedDepartment` was typed as the rigid enum `DepartmentType?`. When the client sent dynamic department names containing spaces or newly registered custom departments (e.g. `"Product Design"`, `"Operations"`, or custom titles), ASP.NET Core's JSON model binder rejected the payload with HTTP 400 (`"One or more validation errors occurred"`).
+- **Changes**:
+  - Updated `AssignedDepartment` to `string?` across `AssetEntityClass`, `AssetCreateDTO`, `AssetUpdateDTO`, `AssetResponseDTO`, and `AssetAssignDTO`.
+  - Updated `AssetInventoryService.cs` to assign department strings directly into the underlying Postgres `text` column.
+- **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend daemon running on `http://localhost:5125`.

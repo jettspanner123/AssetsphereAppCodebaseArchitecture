@@ -347,3 +347,55 @@ This document tracks all features, permission adjustments, architectural refacto
   - Executed two-step client pipeline: approves user account via `ApproveUser` API, then registers employee into `AS_EmployeesTBL` via Employee Creation API.
   - Refactored backend `Department` typing from rigid enum to dynamic `string` across Entity and DTOs.
 - **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend daemon running on `http://localhost:5125`.
+
+### 25. Settings Work Locations Card Padding (20px) & Info Notice Removal
+- **Files**:
+  - [`SettingsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Settings/SettingsScreenController.tsx)
+- **Changes**:
+  - Set inner left and right sections padding to `p-5` (`20px` / `1.25rem`).
+  - Removed the bottom info callout notice below the form while maintaining the clean grid layout structure.
+  - Preserved standard element spacing and clean visual hierarchy.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors.
+
+### 26. Enterprise Notifications System & `AS_NotificationTBL` Table System
+- **Files**:
+  - **Database**: `AS_NotificationTBL` created in Supabase PostgreSQL (`id`, `heading`, `description`, `icon`, `priority_level`, `type`, `created_at`, `updated_at`, `created_by`, `updated_by`, `is_deleted`, `deleted_at`, `view_by_users`, `packaged_data`, `action`, `target_roles`) with B-tree indexes.
+  - **Backend Models & Types**:
+    - [`PriorityLevelType.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Types/PriorityLevelType.cs) (`LOW`, `MID`, `HIGH`)
+    - [`NotificationType.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Types/NotificationType.cs) (`NEW_USER_ACCOUNT_CREATION_REQUEST`, `USER_ACCOUNT_APPROVED`, `USER_ACCOUNT_REJECTED`, `SYSTEM_BROADCAST`, `ASSET_ASSIGNED`, `WARRANTY_EXPIRING`, `COMPLIANCE_ALERT`, `MAINTENANCE_DUE`)
+    - [`NotificationEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/NotificationEntityClass.cs)
+    - [`NotificationDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/NotificationDTOs.cs)
+  - **Backend Infrastructure & Endpoints**:
+    - [`INotificationsService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Notifications/Services/INotificationsService.cs)
+    - [`NotificationsService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Notifications/Services/NotificationsService.cs)
+    - [`NotificationsController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Notifications/NotificationsController.cs) (`GET /Api/V1/Notifications`, `POST /Api/V1/Notifications/MarkAsRead/{id}`, `POST /Api/V1/Notifications/MarkAllAsRead`, `POST /Api/V1/Notifications`)
+    - [`DatabaseCON.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Constants/DatabaseCON.cs) & [`AssetsphereDbContext.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Data/AssetsphereDbContext.cs)
+    - [`AuthenticationService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Authentication/Services/AuthenticationService.cs) (Triggering dispatches on Register, Approve, and Reject)
+    - [`DatabaseSeederUtility.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Utilities/DatabaseSeederUtility.cs) (Seeded initial operational notifications)
+  - **Frontend MSC Layer & Components**:
+    - [`NotificationType.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Types/NotificationType.ts) & [`src/Types/index.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Types/index.ts)
+    - [`NotificationsService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Notifications/Services/NotificationsService.ts)
+    - [`ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts)
+    - [`TanstackQueryKeysCON.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Constants/TanstackQueryKeysCON.ts)
+    - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts) (`useNotificationsQuery` with 15s auto-poll, `useMarkNotificationAsReadMutation`, `useMarkAllNotificationsAsReadMutation`, `useCreateNotificationMutation`)
+    - [`NotificationsDropdownStaticComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Navigation/Components/static/NotificationsDropdownStaticComponent.tsx) (Live card feed, dynamic Lucide icons, priority badges, direct action button navigating to tab route and marking as read, "Clear All" / Mark all as read)
+    - [`HeaderStaticComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Navigation/Components/static/HeaderStaticComponent.tsx) (Reactive unread counter badge on notification bell)
+### 27. ApplicationSoundService & Live Notification Sound Watcher
+- **Files**:
+  - [`ApplicationSoundService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationSoundService.ts)
+  - [`useNotificationSoundWatcher.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Notifications/Hooks/useNotificationSoundWatcher.ts)
+  - [`NavigationController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Navigation/NavigationController.tsx)
+  - [`NotificationSound.mp3`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/assets/Sounds/NotificationSound.mp3)
+- **Changes**:
+  - Created [`ApplicationSoundService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationSoundService.ts) as a singleton audio management service with audio pre-buffering, default volume (0.75), mute controls, and browser autoplay error boundary protection.
+  - Implemented [`useNotificationSoundWatcher.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Notifications/Hooks/useNotificationSoundWatcher.ts) using ID set comparison:
+    - On initial app boot, silently captures existing notification IDs without playing audio.
+    - On subsequent 15-second polling intervals or live query refetches, detects newly arrived unread notification IDs and triggers `ApplicationSoundService.current.playNotificationSound()`.
+  - Mounted the watcher hook in [`NavigationController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Navigation/NavigationController.tsx) for persistent, dashboard-wide notification sound coverage across all views.
+- **Verification**: `npm run lint` (`tsc --noEmit`) passed with 0 errors.
+
+
+
+
+
+

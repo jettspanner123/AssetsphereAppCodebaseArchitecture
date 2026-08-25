@@ -560,5 +560,68 @@ public static class DatabaseSeederUtility
         {
             // Ignore
         }
+
+        // 11. Seed Initial Operational Notifications
+        try
+        {
+            if (!await context.Notifications.AnyAsync())
+            {
+                List<NotificationEntityClass> initialNotifications = new List<NotificationEntityClass>
+                {
+                    new NotificationEntityClass
+                    {
+                        Id = Guid.NewGuid(),
+                        Heading = "Pending Registration Requests",
+                        Description = "New user registration requests are awaiting operator directory verification and employee setup.",
+                        Icon = "UserPlus",
+                        PriorityLevel = PriorityLevelType.MID,
+                        Type = NotificationType.NEW_USER_ACCOUNT_CREATION_REQUEST,
+                        PackagedData = "{\"department\":\"Engineering\"}",
+                        Action = new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "requests" },
+                        TargetRoles = new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                        ViewByUsers = new List<string>(),
+                        CreatedAt = DateTime.UtcNow.AddMinutes(-25),
+                        CreatedBy = "system"
+                    },
+                    new NotificationEntityClass
+                    {
+                        Id = Guid.NewGuid(),
+                        Heading = "ISO 27001 Security Audit Alert",
+                        Description = "Unencrypted backup volume pool #2 detected on Storage SAN/NAS array AST-1008.",
+                        Icon = "ShieldAlert",
+                        PriorityLevel = PriorityLevelType.HIGH,
+                        Type = NotificationType.COMPLIANCE_ALERT,
+                        PackagedData = "{\"assetTag\":\"AST-1008\"}",
+                        Action = new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "compliance" },
+                        TargetRoles = new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                        ViewByUsers = new List<string>(),
+                        CreatedAt = DateTime.UtcNow.AddHours(-1),
+                        CreatedBy = "system"
+                    },
+                    new NotificationEntityClass
+                    {
+                        Id = Guid.NewGuid(),
+                        Heading = "Hardware Warranty Expiring Soon",
+                        Description = "Executive Studio Display 27\" (AST-1005) AppleCare+ coverage expires in 14 days.",
+                        Icon = "AlertTriangle",
+                        PriorityLevel = PriorityLevelType.LOW,
+                        Type = NotificationType.WARRANTY_EXPIRING,
+                        PackagedData = "{\"assetTag\":\"AST-1005\"}",
+                        Action = new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "inventory" },
+                        TargetRoles = new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                        ViewByUsers = new List<string>(),
+                        CreatedAt = DateTime.UtcNow.AddDays(-1),
+                        CreatedBy = "system"
+                    }
+                };
+
+                await context.Notifications.AddRangeAsync(initialNotifications);
+                await context.SaveChangesAsync();
+            }
+        }
+        catch
+        {
+            // Ignore
+        }
     }
 }

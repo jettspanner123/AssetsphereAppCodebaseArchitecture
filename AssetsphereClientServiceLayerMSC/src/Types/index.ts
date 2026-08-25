@@ -10,3 +10,5 @@ export * from './AIAssistantType';
 export * from './CloudResourceType';
 export * from './NavigationType';
 export * from './AuthType';
+export * from './NotificationType';
+

@@ -7,7 +7,6 @@ import {
   AlertTriangle,
   Users,
   Laptop,
-  Info,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
@@ -160,17 +159,17 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
       </div>
 
       {/* Single Unified Card with Middle Divider */}
-      <CardSharedComponent className="p-0 overflow-hidden">
+      <CardSharedComponent className="!p-0 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-slate-200 dark:divide-zinc-800">
           {/* Left Section (5 cols): Register Work Location Form */}
-          <div className="lg:col-span-5 p-6 flex flex-col justify-between space-y-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-zinc-800/60">
-                <div className="p-2.5 rounded-lg bg-[#0C2086]/10 dark:bg-blue-500/10 text-[#0C2086] dark:text-blue-400">
-                  <MapPin className="w-5 h-5" />
+          <div className="lg:col-span-5 p-5 space-y-4">
+            <div className="space-y-3.5">
+              <div className="flex items-center gap-2.5 pb-2.5 border-b border-slate-100 dark:border-zinc-800/60">
+                <div className="p-2 rounded-lg bg-[#0C2086]/10 dark:bg-blue-500/10 text-[#0C2086] dark:text-blue-400">
+                  <MapPin className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
                     Register Work Location
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-zinc-400">
@@ -179,7 +178,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                 </div>
               </div>
 
-              <form onSubmit={handleAddLocation} className="space-y-4 text-xs">
+              <form onSubmit={handleAddLocation} className="space-y-3 text-xs">
                 <div>
                   <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
                     Location Name / City <span className="text-rose-500">*</span>
@@ -198,12 +197,12 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                       className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                     />
                   </div>
-                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-4">
                     This location will instantly become available across all employee profiles and asset deployment forms.
                   </p>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-1">
                   <ButtonSharedComponent
                     type="submit"
                     variant={buttonErrorText ? 'danger' : 'primary'}
@@ -231,24 +230,17 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                 </div>
               </form>
             </div>
-
-            <div className="p-3 rounded-lg bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/40 flex items-start gap-2.5">
-              <Info className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-blue-900 dark:text-blue-300 leading-relaxed">
-                Work locations are synchronized in real-time. Deletion is automatically guarded if active employees or assets are currently assigned.
-              </p>
-            </div>
           </div>
 
           {/* Right Section (7 cols): Active Work Locations Directory */}
-          <div className="lg:col-span-7 p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800/60">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <Building2 className="w-5 h-5" />
+          <div className="lg:col-span-7 p-5 space-y-4">
+            <div className="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-zinc-800/60">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                  <Building2 className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
+                  <h3 className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
                     Active Work Locations Directory
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-zinc-400">
@@ -256,21 +248,21 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                   </p>
                 </div>
               </div>
-              <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
+              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300">
                 {workLocations.length} {workLocations.length === 1 ? 'Location' : 'Locations'}
               </span>
             </div>
 
             {isLocationsLoading ? (
-              <div className="py-12 text-center text-xs text-slate-400 dark:text-zinc-500">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-zinc-500">
                 Loading work locations...
               </div>
             ) : workLocations.length === 0 ? (
-              <div className="py-12 text-center text-xs text-slate-400 dark:text-zinc-500">
+              <div className="py-8 text-center text-xs text-slate-400 dark:text-zinc-500">
                 No work locations found. Use the form on the left to add one.
               </div>
             ) : (
-              <div className="space-y-2.5 max-h-[460px] overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-[380px] overflow-y-auto pr-1">
                 {workLocations.map((loc) => {
                   const { employeeCount, assetCount } = getDependenciesForLocation(loc);
                   const hasDependencies = employeeCount > 0 || assetCount > 0;
@@ -278,17 +270,17 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                   return (
                     <div
                       key={loc}
-                      className="p-3 rounded-lg bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
+                      className="p-2.5 rounded-lg bg-slate-50 dark:bg-zinc-900/60 border border-slate-200/80 dark:border-zinc-800/80 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-zinc-700 transition-all"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700/60 flex items-center justify-center shrink-0 text-slate-600 dark:text-zinc-300">
-                          <MapPin className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700/60 flex items-center justify-center shrink-0 text-slate-600 dark:text-zinc-300">
+                          <MapPin className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
                         </div>
                         <div className="min-w-0">
                           <div className="text-xs font-semibold text-slate-900 dark:text-white truncate">
                             {loc}
                           </div>
-                          <div className="flex items-center gap-3 mt-1 text-[11px] text-slate-500 dark:text-zinc-400">
+                          <div className="flex items-center gap-2.5 mt-0.5 text-[11px] text-slate-500 dark:text-zinc-400">
                             <span className="flex items-center gap-1">
                               <Users className="w-3 h-3 text-slate-400" />
                               {employeeCount} {employeeCount === 1 ? 'Employee' : 'Employees'}
@@ -310,9 +302,9 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                             ? `Cannot delete: in use by ${employeeCount} employees and ${assetCount} assets`
                             : `Delete ${loc}`
                         }
-                        className="p-2 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </div>
                   );

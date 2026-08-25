@@ -2,6 +2,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Constants;
 using AssetsphereOrchestratorServiceLayerMSC.Data;
 using AssetsphereOrchestratorServiceLayerMSC.Exceptions;
 using AssetsphereOrchestratorServiceLayerMSC.Features.Authentication.Constants;
+using AssetsphereOrchestratorServiceLayerMSC.Features.Notifications.Services;
 using AssetsphereOrchestratorServiceLayerMSC.Helpers;
 using AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
@@ -15,10 +16,12 @@ namespace AssetsphereOrchestratorServiceLayerMSC.Features.Authentication.Service
 public sealed class AuthenticationService
 {
     private readonly AssetsphereDbContext _dbContext;
+    private readonly INotificationsService _notificationsService;
 
-    public AuthenticationService(AssetsphereDbContext dbContext)
+    public AuthenticationService(AssetsphereDbContext dbContext, INotificationsService notificationsService)
     {
         _dbContext = dbContext;
+        _notificationsService = notificationsService;
     }
 
     public async Task<AuthResponseDTO> LoginAsync(LoginRequestDTO request)
@@ -101,6 +104,26 @@ public sealed class AuthenticationService
         await _dbContext.Users.AddAsync(newUser);
         await _dbContext.SaveChangesAsync();
 
+        // Dispatch system notification for Operator/Admin
+        try
+        {
+            await _notificationsService.DispatchNotificationAsync(
+                heading: "New User Registration Request",
+                description: $"{newUser.FirstName} {newUser.LastName} ({newUser.Email}) requested account access for {newUser.Department?.ToString() ?? "General"}.",
+                icon: "UserPlus",
+                priority: PriorityLevelType.MID,
+                type: NotificationType.NEW_USER_ACCOUNT_CREATION_REQUEST,
+                packagedData: new { userId = newUser.Id, email = newUser.Email, fullName = $"{newUser.FirstName} {newUser.LastName}", department = newUser.Department?.ToString() },
+                action: new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "requests" },
+                targetRoles: new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                createdBy: "registration"
+            );
+        }
+        catch
+        {
+            // Non-blocking notification dispatch
+        }
+
         return new RegisterResponseDTO
         {
             Message = "Your account creation request has been submitted to the Operator for review. Please wait for approval before logging in.",
@@ -163,6 +186,26 @@ public sealed class AuthenticationService
 
         await _dbContext.SaveChangesAsync();
 
+        // Dispatch approval notification
+        try
+        {
+            await _notificationsService.DispatchNotificationAsync(
+                heading: "User Account Approved",
+                description: $"{user.FirstName} {user.LastName} ({user.Email}) was approved and registered in Employee Directory.",
+                icon: "UserCheck",
+                priority: PriorityLevelType.LOW,
+                type: NotificationType.USER_ACCOUNT_APPROVED,
+                packagedData: new { userId = user.Id, email = user.Email, fullName = $"{user.FirstName} {user.LastName}" },
+                action: new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "requests" },
+                targetRoles: new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                createdBy: "operator_approval"
+            );
+        }
+        catch
+        {
+            // Non-blocking notification dispatch
+        }
+
         return MapToUserProfile(user);
     }
 
@@ -179,6 +222,27 @@ public sealed class AuthenticationService
         user.UpdatedBy = "operator_rejection";
 
         await _dbContext.SaveChangesAsync();
+
+        // Dispatch rejection notification
+        try
+        {
+            await _notificationsService.DispatchNotificationAsync(
+                heading: "Registration Request Rejected",
+                description: $"Registration request for {user.FirstName} {user.LastName} ({user.Email}) was declined.",
+                icon: "UserX",
+                priority: PriorityLevelType.LOW,
+                type: NotificationType.USER_ACCOUNT_REJECTED,
+                packagedData: new { userId = user.Id, email = user.Email, fullName = $"{user.FirstName} {user.LastName}" },
+                action: new NotificationActionClass { Kind = "OPEN_PAGE", Direction = "requests" },
+                targetRoles: new List<string> { "OPERATOR", "ADMIN", "DEVELOPER" },
+                createdBy: "operator_rejection"
+            );
+        }
+        catch
+        {
+            // Non-blocking notification dispatch
+        }
+
         return true;
     }
 

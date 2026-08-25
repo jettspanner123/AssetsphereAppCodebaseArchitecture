@@ -31,6 +31,13 @@ export interface NetworkAPIEndpoints {
     addWorkLocation: string;
     deleteWorkLocation: string;
   };
+  notifications: {
+    base: string;
+    getAll: string;
+    markAsRead: (id: string) => string;
+    markAllAsRead: string;
+    create: string;
+  };
 }
 
 export interface ApplicationNetworkAPIConfigurationDetails {
@@ -86,6 +93,13 @@ export default class ApplicationNetworkAPIConfiguration {
           addDepartment: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDepartment`,
           addWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddWorkLocation`,
           deleteWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/DeleteWorkLocation`,
+        },
+        notifications: {
+          base: `${this.defaultBaseUrl}/Api/V1/Notifications`,
+          getAll: `${this.defaultBaseUrl}/Api/V1/Notifications`,
+          markAsRead: (id: string) => `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAsRead/${id}`,
+          markAllAsRead: `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAllAsRead`,
+          create: `${this.defaultBaseUrl}/Api/V1/Notifications`,
         },
       },
     };

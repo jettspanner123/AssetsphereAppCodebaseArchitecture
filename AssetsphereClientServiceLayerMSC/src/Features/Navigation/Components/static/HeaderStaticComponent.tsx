@@ -7,6 +7,7 @@ import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../Types/NavigationType';
 import weplmLogo from '../../../../assets/weplm.jpeg';
 import useAuthenticationStateStore from '../../../../Store/AuthenticationStateStore';
+import TanstackQueryClientService from '../../../../Services/TanstackQueryClientService';
 
 export interface HeaderStaticComponentProps {
   globalSearch: string;
@@ -17,7 +18,7 @@ export interface HeaderStaticComponentProps {
   onToggleTheme: () => void;
   deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
   onToggleDeploymentMode: () => void;
-  unreadCount: number;
+  unreadCount?: number;
   isNotificationsOpen: boolean;
   onToggleNotifications: () => void;
   nonCompliantCount?: number;
@@ -37,7 +38,7 @@ export default function HeaderStaticComponent({
   onToggleTheme,
   deploymentMode,
   onToggleDeploymentMode,
-  unreadCount,
+  unreadCount: propUnreadCount,
   isNotificationsOpen,
   onToggleNotifications,
   nonCompliantCount = 0,
@@ -56,6 +57,18 @@ export default function HeaderStaticComponent({
     `${user?.firstName || ''} ${user?.lastName || ''}`.trim() ||
     'Enterprise User';
   const displayEmail = user?.email || '';
+
+  // Query live notifications for reactive unread badge
+  const { data: notifications = [] } =
+    TanstackQueryClientService.current.notifications.useNotificationsQuery(
+      user?.id,
+      user?.role
+    );
+
+  const effectiveUnreadCount =
+    notifications.length > 0 || user?.id
+      ? notifications.filter((n) => !n.isRead).length
+      : propUnreadCount ?? 0;
 
   const getInitials = (name: string, email: string): string => {
     if (name && name.trim() && name !== 'Enterprise User') {
@@ -130,9 +143,9 @@ export default function HeaderStaticComponent({
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
-            {unreadCount > 0 && (
+            {effectiveUnreadCount > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[10px] font-bold flex items-center justify-center">
-                {unreadCount}
+                {effectiveUnreadCount}
               </span>
             )}
           </button>

@@ -10,4 +10,5 @@ export default class TanstackQueryKeysCON {
   public static readonly EMPLOYEE_DESIGNATIONS = ['configuration', 'EMPLOYEE_DESIGNATIONS'] as const;
   public static readonly AUTH_SESSION = ['auth', 'session'] as const;
   public static readonly PENDING_USERS = ['auth', 'pending-users'] as const;
+  public static readonly NOTIFICATIONS = ['notifications'] as const;
 }

@@ -24,6 +24,7 @@ public class AssetsphereDbContext : DbContext
     public DbSet<AIRecommendationEntityClass> AIRecommendations => Set<AIRecommendationEntityClass>();
     public DbSet<AuditLogEntityClass> AuditLogs => Set<AuditLogEntityClass>();
     public DbSet<ConfigurationConstantEntityClass> ConfigurationConstants => Set<ConfigurationConstantEntityClass>();
+    public DbSet<NotificationEntityClass> Notifications => Set<NotificationEntityClass>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -43,6 +44,7 @@ public class AssetsphereDbContext : DbContext
         modelBuilder.Entity<AIRecommendationEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<AuditLogEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ConfigurationConstantEntityClass>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<NotificationEntityClass>().HasQueryFilter(e => !e.IsDeleted);
 
         // Table Mapping & Indexes
         modelBuilder.Entity<UserEntityClass>(entity =>
@@ -140,11 +142,31 @@ public class AssetsphereDbContext : DbContext
             entity.HasIndex(e => e.ConfigurationKey).IsUnique();
         });
 
+        modelBuilder.Entity<NotificationEntityClass>(entity =>
+        {
+            entity.ToTable(DatabaseCON.NotificationsTable);
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.PriorityLevel).HasConversion<string>();
+            entity.Property(e => e.Type).HasConversion<string>();
+            entity.OwnsOne(e => e.Action, b =>
+            {
+                b.ToJson("action");
+                b.Property(a => a.Kind).HasJsonPropertyName("kind");
+                b.Property(a => a.Direction).HasJsonPropertyName("direction");
+            });
+        });
+
         // Map all entity properties to snake_case column names for PostgreSQL/Supabase compatibility
         foreach (var entity in modelBuilder.Model.GetEntityTypes())
         {
+            if (entity.IsMappedToJson())
+                continue;
+
             foreach (var property in entity.GetProperties())
             {
+                if (property.DeclaringEntityType.IsMappedToJson())
+                    continue;
+
                 string propertyName = property.Name;
                 string snakeCase = string.Concat(propertyName.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
                 property.SetColumnName(snakeCase);

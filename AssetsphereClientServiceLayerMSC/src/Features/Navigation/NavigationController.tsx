@@ -1,6 +1,7 @@
 import React from 'react';
 import HeaderStaticComponent, { HeaderStaticComponentProps } from './Components/static/HeaderStaticComponent';
 import SidebarStaticComponent, { SidebarStaticComponentProps } from './Components/static/SidebarStaticComponent';
+import useNotificationSoundWatcher from '../Notifications/Hooks/useNotificationSoundWatcher';
 
 export interface NavigationControllerProps
   extends HeaderStaticComponentProps,
@@ -29,6 +30,8 @@ export default function NavigationController({
   onNavigateDevDashboard,
   onSignOut,
 }: NavigationControllerProps): React.JSX.Element {
+  // Global 15-second polling notification sound listener
+  useNotificationSoundWatcher();
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200">
       <HeaderStaticComponent

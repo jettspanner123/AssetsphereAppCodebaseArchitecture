@@ -543,6 +543,71 @@ export class ConfigurationQueryService {
   }
 }
 
+export class NotificationQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useNotificationsQuery(
+    userId?: string,
+    role?: string,
+    options?: Omit<UseQueryOptions<import('../Types/NotificationType').NotificationItemType[], Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<import('../Types/NotificationType').NotificationItemType[], Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.NOTIFICATIONS,
+      queryFn: async () => {
+        const { default: NotificationsService } = await import('../Features/Notifications/Services/NotificationsService');
+        return await NotificationsService.current.getNotifications(userId, role);
+      },
+      refetchInterval: 15000, // 15s auto-poll
+      ...options,
+    });
+  }
+
+  public useMarkNotificationAsReadMutation(
+    options?: Omit<UseMutationOptions<import('../Types/NotificationType').NotificationItemType, Error, { id: string; userId?: string }>, 'mutationFn'>
+  ): UseMutationResult<import('../Types/NotificationType').NotificationItemType, Error, { id: string; userId?: string }> {
+    return useMutation({
+      mutationFn: async ({ id, userId }: { id: string; userId?: string }) => {
+        const { default: NotificationsService } = await import('../Features/Notifications/Services/NotificationsService');
+        return await NotificationsService.current.markAsRead(id, userId);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.NOTIFICATIONS });
+      },
+      ...options,
+    });
+  }
+
+  public useMarkAllNotificationsAsReadMutation(
+    options?: Omit<UseMutationOptions<number, Error, { userId?: string; role?: string } | void>, 'mutationFn'>
+  ): UseMutationResult<number, Error, { userId?: string; role?: string } | void> {
+    return useMutation({
+      mutationFn: async (params?: { userId?: string; role?: string } | void) => {
+        const { default: NotificationsService } = await import('../Features/Notifications/Services/NotificationsService');
+        return await NotificationsService.current.markAllAsRead(params?.userId, params?.role);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.NOTIFICATIONS });
+      },
+      ...options,
+    });
+  }
+
+  public useCreateNotificationMutation(
+    options?: Omit<UseMutationOptions<import('../Types/NotificationType').NotificationItemType, Error, import('../Types/NotificationType').CreateNotificationRequest>, 'mutationFn'>
+  ): UseMutationResult<import('../Types/NotificationType').NotificationItemType, Error, import('../Types/NotificationType').CreateNotificationRequest> {
+    return useMutation({
+      mutationFn: async (request: import('../Types/NotificationType').CreateNotificationRequest) => {
+        const { default: NotificationsService } = await import('../Features/Notifications/Services/NotificationsService');
+        return await NotificationsService.current.createNotification(request);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.NOTIFICATIONS });
+      },
+      ...options,
+    });
+  }
+}
+
 export default class TanstackQueryClientService {
   public static current: TanstackQueryClientService = new TanstackQueryClientService();
 
@@ -560,4 +625,5 @@ export default class TanstackQueryClientService {
   public readonly assets: AssetQueryService = new AssetQueryService(() => this.client);
   public readonly employees: EmployeeQueryService = new EmployeeQueryService(() => this.client);
   public readonly configuration: ConfigurationQueryService = new ConfigurationQueryService(() => this.client);
+  public readonly notifications: NotificationQueryService = new NotificationQueryService(() => this.client);
 }

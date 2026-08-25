@@ -1,0 +1,13 @@
+namespace AssetsphereOrchestratorServiceLayerMSC.Models.Types;
+
+public enum NotificationType
+{
+    NEW_USER_ACCOUNT_CREATION_REQUEST,
+    USER_ACCOUNT_APPROVED,
+    USER_ACCOUNT_REJECTED,
+    SYSTEM_BROADCAST,
+    ASSET_ASSIGNED,
+    WARRANTY_EXPIRING,
+    COMPLIANCE_ALERT,
+    MAINTENANCE_DUE
+}

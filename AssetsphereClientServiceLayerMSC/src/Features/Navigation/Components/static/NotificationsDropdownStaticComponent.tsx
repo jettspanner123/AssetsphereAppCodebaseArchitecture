@@ -10,109 +10,81 @@ import {
   AlertTriangle,
   Clock,
   Check,
+  UserPlus,
+  UserCheck,
+  UserX,
+  Laptop,
 } from 'lucide-react';
-import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
 import { TabType } from '../../../../Types/NavigationType';
-
-export interface NotificationItem {
-  id: string;
-  type: 'security' | 'maintenance' | 'procurement' | 'warranty' | 'audit';
-  severity: 'critical' | 'high' | 'medium' | 'info';
-  title: string;
-  subtitle: string;
-  assetTag?: string;
-  timestamp: string;
-  targetTab: TabType;
-  isRead: boolean;
-}
+import { NotificationItemType } from '../../../../Types/NotificationType';
+import TanstackQueryClientService from '../../../../Services/TanstackQueryClientService';
+import useAuthenticationStateStore from '../../../../Store/AuthenticationStateStore';
 
 export interface NotificationsDropdownStaticComponentProps {
   isOpen: boolean;
   onClose: () => void;
-  nonCompliantCount: number;
-  openTicketCount: number;
+  nonCompliantCount?: number;
+  openTicketCount?: number;
   onNavigateTab?: (tab: TabType) => void;
+}
+
+function formatRelativeTime(dateString: string): string {
+  try {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffSeconds < 60) return 'Just now';
+    const diffMinutes = Math.floor(diffSeconds / 60);
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString();
+  } catch {
+    return 'Recently';
+  }
 }
 
 export default function NotificationsDropdownStaticComponent({
   isOpen,
   onClose,
-  nonCompliantCount,
-  openTicketCount,
   onNavigateTab,
 }: NotificationsDropdownStaticComponentProps): React.JSX.Element | null {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
-  // Real operational enterprise notification feed items
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'notif-1',
-      type: 'security',
-      severity: 'critical',
-      title: 'ISO 27001 Security Policy Violation',
-      subtitle: 'Unencrypted backup volume pool #2 detected on Storage SAN/NAS array.',
-      assetTag: 'AST-1008',
-      timestamp: '12m ago',
-      targetTab: 'compliance',
-      isRead: false,
-    },
-    {
-      id: 'notif-2',
-      type: 'maintenance',
-      severity: 'high',
-      title: 'Thermal Throttling & Battery Warning',
-      subtitle: 'Elena Rostova (Finance) reported rapid battery drain & overheating under load.',
-      assetTag: 'AST-1006',
-      timestamp: '45m ago',
-      targetTab: 'servicedesk',
-      isRead: false,
-    },
-    {
-      id: 'notif-3',
-      type: 'procurement',
-      severity: 'info',
-      title: 'Purchase Order PO-2024-0041 Approved',
-      subtitle: '5x Dell UltraSharp 32" 4K Hub Monitors ($14,500) cleared by Finance.',
-      assetTag: 'PO-2024-0041',
-      timestamp: '3h ago',
-      targetTab: 'procurement',
-      isRead: true,
-    },
-    {
-      id: 'notif-4',
-      type: 'warranty',
-      severity: 'medium',
-      title: 'AppleCare+ Coverage Expiring Soon',
-      subtitle: 'Executive Studio Display 27" warranty expires in 14 days.',
-      assetTag: 'AST-1005',
-      timestamp: 'Yesterday',
-      targetTab: 'inventory',
-      isRead: true,
-    },
-    {
-      id: 'notif-5',
-      type: 'audit',
-      severity: 'info',
-      title: 'Q1 Physical Asset Barcode Audit',
-      subtitle: '112 of 148 assets verified. 3 physical location discrepancies flagged.',
-      assetTag: 'CMP-2024-Q1',
-      timestamp: '2d ago',
-      targetTab: 'verification',
-      isRead: true,
-    },
-  ]);
+  const currentUser = useAuthenticationStateStore((state) => state.user);
+
+  // Fetch live notifications with 15s auto-poll
+  const { data: notifications = [] } =
+    TanstackQueryClientService.current.notifications.useNotificationsQuery(
+      currentUser?.id,
+      currentUser?.role
+    );
+
+  // Mutations
+  const markAsReadMutation =
+    TanstackQueryClientService.current.notifications.useMarkNotificationAsReadMutation();
+  const markAllAsReadMutation =
+    TanstackQueryClientService.current.notifications.useMarkAllNotificationsAsReadMutation();
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const handleMarkAllAsRead = () => {
+    markAllAsReadMutation.mutate({
+      userId: currentUser?.id,
+      role: currentUser?.role,
+    });
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
-    );
+  const handleMarkAsRead = (id: string) => {
+    markAsReadMutation.mutate({
+      id,
+      userId: currentUser?.id,
+    });
   };
 
   // Click-Outside Dismissal Listener
@@ -137,48 +109,59 @@ export default function NotificationsDropdownStaticComponent({
     };
   }, [isOpen, onClose]);
 
-  const filteredItems = notifications.filter((item) => {
-    if (filter === 'unread') return !item.isRead;
-    return true;
-  });
-
-  const getSeverityBadge = (severity: NotificationItem['severity']) => {
-    switch (severity) {
-      case 'critical':
+  const getPriorityBadge = (priority: NotificationItemType['priorityLevel']) => {
+    switch (priority) {
+      case 'HIGH':
         return 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20';
-      case 'high':
+      case 'MID':
         return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20';
-      case 'medium':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
+      case 'LOW':
       default:
-        return 'bg-slate-500/10 text-slate-600 dark:text-zinc-400 border-slate-500/20';
+        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
     }
   };
 
-  const getTypeIcon = (type: NotificationItem['type']) => {
-    switch (type) {
+  const getTypeIcon = (iconName: string) => {
+    switch (iconName?.toLowerCase()) {
+      case 'userplus':
+        return <UserPlus className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case 'usercheck':
+        return <UserCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
+      case 'userx':
+        return <UserX className="w-3.5 h-3.5 text-rose-500 shrink-0" />;
+      case 'shieldalert':
       case 'security':
         return <ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" />;
+      case 'wrench':
       case 'maintenance':
         return <Wrench className="w-3.5 h-3.5 text-amber-500 shrink-0" />;
+      case 'checkcircle2':
       case 'procurement':
         return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />;
-      case 'warranty':
-        return <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case 'laptop':
+      case 'asset':
+        return <Laptop className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case 'filecheck2':
       case 'audit':
         return <FileCheck2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />;
+      case 'clock':
+        return <Clock className="w-3.5 h-3.5 text-blue-500 shrink-0" />;
+      case 'alerttriangle':
+        return <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />;
       default:
-        return <AlertTriangle className="w-3.5 h-3.5 text-slate-400 shrink-0" />;
+        return <Bell className="w-3.5 h-3.5 text-indigo-500 shrink-0" />;
     }
   };
 
   const unreadNotifications = notifications.filter((item) => !item.isRead);
   const readNotifications = notifications.filter((item) => item.isRead);
 
-  const renderNotificationCard = (item: NotificationItem) => (
+  const renderNotificationCard = (item: NotificationItemType) => (
     <div
       key={item.id}
-      onClick={() => markAsRead(item.id)}
+      onClick={() => {
+        if (!item.isRead) handleMarkAsRead(item.id);
+      }}
       className={`p-3 rounded-xl border transition-all cursor-pointer relative space-y-1.5 ${
         !item.isRead
           ? 'bg-slate-50/90 dark:bg-zinc-900/80 border-slate-200 dark:border-zinc-700/80 shadow-xs'
@@ -188,15 +171,15 @@ export default function NotificationsDropdownStaticComponent({
       {/* Header Row */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          {getTypeIcon(item.type)}
+          {getTypeIcon(item.icon)}
           <h4 className="font-semibold text-slate-900 dark:text-white text-xs truncate leading-snug">
-            {item.title}
+            {item.heading}
           </h4>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
           <span className="text-[10px] text-slate-400 dark:text-zinc-500 font-mono">
-            {item.timestamp}
+            {formatRelativeTime(item.createdAt)}
           </span>
           {!item.isRead && (
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
@@ -204,31 +187,33 @@ export default function NotificationsDropdownStaticComponent({
         </div>
       </div>
 
-      {/* Subtitle Body */}
-      <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed font-sans pl-5">
-        {item.subtitle}
+      {/* Description Body */}
+      <p className="text-[11px] text-slate-600 dark:text-zinc-300 leading-relaxed font-sans pl-5.5">
+        {item.description}
       </p>
 
       {/* Footer Tag & Action Button */}
-      <div className="flex items-center justify-between pt-1 pl-5">
-        {item.assetTag && (
-          <span className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${getSeverityBadge(item.severity)}`}>
-            {item.assetTag}
-          </span>
-        )}
+      <div className="flex items-center justify-between pt-1 pl-5.5">
+        <span
+          className={`text-[9px] font-mono px-1.5 py-0.5 rounded border uppercase tracking-wider ${getPriorityBadge(
+            item.priorityLevel
+          )}`}
+        >
+          {item.priorityLevel} Priority
+        </span>
 
-        {onNavigateTab && (
+        {item.action?.direction && onNavigateTab && (
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
-              markAsRead(item.id);
+              if (!item.isRead) handleMarkAsRead(item.id);
               onClose();
-              onNavigateTab(item.targetTab);
+              onNavigateTab(item.action.direction as TabType);
             }}
             className="flex items-center gap-1 text-[11px] font-mono font-semibold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer ml-auto"
           >
-            <span>Action</span>
+            <span>Open</span>
             <ArrowRight className="w-3 h-3" />
           </button>
         )}
@@ -258,21 +243,21 @@ export default function NotificationsDropdownStaticComponent({
                   Activity & Operational Alerts
                 </h3>
                 <p className="text-[10px] text-slate-400 dark:text-zinc-500 mt-0.5 font-mono">
-                  Enterprise Infrastructure Activity
+                  Enterprise Infrastructure Feed
                 </p>
               </div>
             </div>
 
             <button
               type="button"
-              onClick={markAllAsRead}
-              disabled={unreadCount === 0}
+              onClick={handleMarkAllAsRead}
+              disabled={unreadCount === 0 || markAllAsReadMutation.isPending}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-mono font-semibold text-[11px] border transition-all cursor-pointer shadow-2xs ${
                 unreadCount > 0
                   ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 border-indigo-200/80 dark:border-indigo-800/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60'
                   : 'bg-slate-100 dark:bg-zinc-800/40 text-slate-400 dark:text-zinc-600 border-slate-200/50 dark:border-zinc-800/40 opacity-60 cursor-not-allowed'
               }`}
-              title={unreadCount > 0 ? "Mark all unread notifications as read" : "All notifications already cleared"}
+              title={unreadCount > 0 ? 'Mark all unread notifications as read' : 'All notifications already cleared'}
             >
               <Check className="w-3.5 h-3.5 text-indigo-500 shrink-0 font-bold" />
               <span>Clear All</span>
@@ -307,7 +292,7 @@ export default function NotificationsDropdownStaticComponent({
             </div>
 
             <span className="text-[10px] font-mono text-slate-400 dark:text-zinc-500">
-              {nonCompliantCount + openTicketCount} Action Needed
+              {unreadCount} Unread
             </span>
           </div>
 
@@ -356,3 +341,4 @@ export default function NotificationsDropdownStaticComponent({
     </AnimatePresence>
   );
 }
+

@@ -16,3 +16,9 @@ public sealed class ConfigurationConstantUpsertDTO
     public string ConfigurationValue { get; set; } = string.Empty;
     public string? Notes { get; set; }
 }
+
+public sealed class AddDesignationRequestDTO
+{
+    public string Department { get; set; } = string.Empty;
+    public string Designation { get; set; } = string.Empty;
+}

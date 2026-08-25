@@ -69,4 +69,54 @@ export default class ConfigurationConstantService {
     }
     return ['Pune, Maharastra'];
   }
+
+  public async getDesignations(): Promise<Record<string, string[]>> {
+    try {
+      const dto = await this.getConstantByKey('EMPLOYEE_DESIGNATIONS');
+      if (dto && dto.configurationValue) {
+        const parsed = JSON.parse(dto.configurationValue);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as Record<string, string[]>;
+        }
+      }
+    } catch {
+      // Fallback if parsing fails or offline
+    }
+    return {
+      'Engineering': ['Software Engineer'],
+      'Product Design': ['Product Designer'],
+      'Operations': ['Operations Manager'],
+    };
+  }
+
+  public async addDesignation(department: string, designation: string): Promise<Record<string, string[]>> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.configurationConstant.addDesignation, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({
+        department: department.trim(),
+        designation: designation.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to add designation (HTTP ${response.status})`);
+    }
+
+    const json = await response.json();
+    const dto: ConfigurationConstantDTO = json.data;
+    if (dto && dto.configurationValue) {
+      try {
+        const parsed = JSON.parse(dto.configurationValue);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as Record<string, string[]>;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return await this.getDesignations();
+  }
 }

@@ -9,6 +9,12 @@ export interface SelectOption {
   icon?: React.ReactNode;
 }
 
+export interface SelectFooterAction {
+  label: string;
+  icon?: React.ReactNode;
+  onClick: () => void;
+}
+
 export interface CustomSelectSharedComponentProps {
   label?: string;
   value: string;
@@ -21,6 +27,7 @@ export interface CustomSelectSharedComponentProps {
   size?: 'sm' | 'md';
   searchable?: boolean;
   searchPlaceholder?: string;
+  footerAction?: SelectFooterAction;
 }
 
 export default function CustomSelectSharedComponent({
@@ -35,6 +42,7 @@ export default function CustomSelectSharedComponent({
   size = 'md',
   searchable = false,
   searchPlaceholder = 'Search options...',
+  footerAction,
 }: CustomSelectSharedComponentProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -178,6 +186,24 @@ export default function CustomSelectSharedComponent({
                   </button>
                 );
               })
+            )}
+
+            {/* Optional Dropdown Footer Action */}
+            {footerAction && (
+              <div className="pt-1 mt-1 border-t border-slate-100 dark:border-zinc-800/80">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsOpen(false);
+                    footerAction.onClick();
+                  }}
+                  className="w-full flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[#0C2086] dark:text-sky-400 hover:bg-blue-50 dark:hover:bg-sky-950/40 transition-colors cursor-pointer text-left"
+                >
+                  {footerAction.icon}
+                  <span className="truncate">{footerAction.label}</span>
+                </button>
+              </div>
             )}
           </motion.div>
         )}

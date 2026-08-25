@@ -52,6 +52,13 @@ This document tracks all features, permission adjustments, architectural refacto
 11. **Top Coloured Bar Gradient Treatment & Status Color Legend on User Requests**:
     - Replaced card status chips with top ambient gradient lines (`amber` for pending, `emerald` for approved, `rose` for rejected) modeled after `/dashboard/cloud-resources`.
     - Added a dedicated 3-state Status Color Legend indicator to the toolbar card in [`UserRequestsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/UserRequests/UserRequestsScreenController.tsx).
+12. **Settings Tab Route Permission Resolution**:
+    - Fixed an omission in `canAccessTab` in [`ApplicationPermissionService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationPermissionService.ts) where `case 'settings': return this.canAccessSettings();` was missing, causing access denied redirects on `/dashboard/settings` even for `ADMIN` and `DEVELOPER` accounts.
+13. **Dynamic Database-Backed Employee Designations with Searchable Dropdown**:
+    - Stored `EMPLOYEE_DESIGNATIONS = ["Software Engineer", "Product Designer", "Operations Manager"]` in `AS_ConfigurationConstantTBL` and seeded via [`DatabaseSeederUtility.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Utilities/DatabaseSeederUtility.cs).
+    - Added `getDesignations()` in [`ConfigurationConstantService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ConfigurationConstantService.ts) and `useDesignationsQuery()` in [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts).
+    - Added `footerAction` prop support to [`CustomSelectSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/CustomSelectSharedComponent.tsx).
+    - Upgraded the text input in [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx) into a searchable dropdown connected to live database data with a `+ Create New Department / Designation` footer button.
 
 ---
 
@@ -176,3 +183,44 @@ This document tracks all features, permission adjustments, architectural refacto
   - Added the top status ambient gradient bar to the cards (amber for pending, emerald for approved, rose for rejected).
   - Added the 3-state status color legend indicator below the toolbar, exactly matching the design pattern in `/dashboard/cloud-resources`.
 - **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors.
+
+### 12. Settings Tab Route Permission Resolution
+- **Files**:
+  - [`ApplicationPermissionService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ApplicationPermissionService.ts)
+- **Changes**:
+  - Added `case 'settings': return this.canAccessSettings();` in `canAccessTab(tabId)`.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors.
+
+### 13. Dynamic Database-Backed Employee Designations with Searchable Dropdown
+- **Files**:
+  - [`AS_ConfigurationConstantTBL`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Constants/DatabaseCON.cs) (Supabase table key `EMPLOYEE_DESIGNATIONS`)
+  - [`DatabaseSeederUtility.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Utilities/DatabaseSeederUtility.cs)
+  - [`ConfigurationConstantService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ConfigurationConstantService.ts)
+  - [`TanstackQueryKeysCON.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Constants/TanstackQueryKeysCON.ts)
+  - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts)
+  - [`CustomSelectSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/CustomSelectSharedComponent.tsx)
+  - [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx)
+- **Changes**:
+  - Stored `EMPLOYEE_DESIGNATIONS` in the database.
+  - Implemented client service and TanStack Query hook with caching and offline fallbacks.
+  - Enhanced `CustomSelectSharedComponent` with `footerAction` button support.
+  - Replaced plain text input in the employee modal with searchable designation dropdown.
+- **Verification**: `dotnet build` succeeded; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 14. Nested Create Designation Modal & Department-Mapped Cascading Dropdown
+- **Files**:
+  - [`CreateDesignationModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDesignationModalController.tsx) [NEW]
+  - [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx)
+  - [`ConfigurationConstantController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/ConfigurationConstantController.cs)
+  - [`ConfigurationConstantService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/Services/ConfigurationConstantService.cs)
+  - [`ConfigurationConstantDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/ConfigurationConstantDTOs.cs)
+  - [`ConfigurationConstantService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ConfigurationConstantService.ts)
+  - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts)
+  - [`ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts)
+- **Changes**:
+  - Refactored `EMPLOYEE_DESIGNATIONS` storage from a flat array into a structured JSON dictionary mapping department names to arrays of designations (seeded with minimal defaults: Engineering, Product Design, Operations).
+  - Added backend `POST /Api/V1/ConfigurationConstant/AddDesignation` endpoint to atomically add new designations per department.
+  - Added `useAddDesignationMutation` with optimistic TanStack cache updates and cache invalidation.
+  - Built [`CreateDesignationModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDesignationModalController.tsx) with layered `zIndex={60}` to open smoothly on top of the Employee modal.
+  - Filtered employee form designations specifically by the currently selected department, automatically auto-selecting newly created titles.
+- **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.

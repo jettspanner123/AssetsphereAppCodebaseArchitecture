@@ -29,6 +29,21 @@ public static class DatabaseSeederUtility
                 });
                 await context.SaveChangesAsync();
             }
+
+            var designationsConfig = await context.ConfigurationConstants.FirstOrDefaultAsync(c => c.ConfigurationKey == "EMPLOYEE_DESIGNATIONS");
+            if (designationsConfig == null)
+            {
+                await context.ConfigurationConstants.AddAsync(new ConfigurationConstantEntityClass
+                {
+                    Id = Guid.NewGuid(),
+                    ConfigurationKey = "EMPLOYEE_DESIGNATIONS",
+                    ConfigurationValue = "{\"Engineering\": [\"Software Engineer\"], \"Product Design\": [\"Product Designer\"], \"Operations\": [\"Operations Manager\"]}",
+                    Notes = "Enterprise employee organizational designations mapped by department",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "seeder"
+                });
+                await context.SaveChangesAsync();
+            }
         }
         catch
         {

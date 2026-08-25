@@ -26,6 +26,7 @@ export interface NetworkAPIEndpoints {
     base: string;
     getAll: string;
     getByKey: (key: string) => string;
+    addDesignation: string;
   };
 }
 
@@ -78,6 +79,7 @@ export default class ApplicationNetworkAPIConfiguration {
           base: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
           getAll: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
           getByKey: (key: string) => `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/${key}`,
+          addDesignation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDesignation`,
         },
       },
     };

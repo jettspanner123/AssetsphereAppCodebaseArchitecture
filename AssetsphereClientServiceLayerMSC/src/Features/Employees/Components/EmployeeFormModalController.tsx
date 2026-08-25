@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Mail, Building, Briefcase, MapPin, Phone, UserCheck, Plus, Sparkles } from 'lucide-react';
+import { User, Mail, Briefcase, MapPin, Plus } from 'lucide-react';
 import ModalSharedComponent from '../../../Shared/Components/ModalSharedComponent';
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';
 import CustomSelectSharedComponent, { SelectOption } from '../../../Shared/Components/CustomSelectSharedComponent';
 import { Employee } from '../../../Types/EmployeeType';
 import EmployeesCON from '../Constants/EmployeesCON';
+import TanstackQueryClientService from '../../../Services/TanstackQueryClientService';
+import CreateDesignationModalController from './CreateDesignationModalController';
 
 export interface EmployeeFormModalControllerProps {
   isOpen: boolean;
@@ -24,8 +26,6 @@ export interface EmployeeFormModalControllerProps {
   onClose: () => void;
 }
 
-import TanstackQueryClientService from '../../../Services/TanstackQueryClientService';
-
 const DEPARTMENT_OPTIONS: SelectOption[] = [
   { value: 'Engineering', label: 'Engineering' },
   { value: 'Security Operations', label: 'Security Operations' },
@@ -44,17 +44,6 @@ const EMPLOYMENT_TYPE_OPTIONS: SelectOption[] = [
   { value: 'Intern', label: 'Intern' },
 ];
 
-const DESIGNATION_PRESETS = [
-  'Software Engineer',
-  'Senior Backend Engineer',
-  'Frontend Specialist',
-  'DevOps Architect',
-  'Product Designer',
-  'Security Analyst',
-  'HR Operations Lead',
-  'Finance Analyst',
-];
-
 export default function EmployeeFormModalController({
   isOpen,
   initialEmployee,
@@ -62,8 +51,15 @@ export default function EmployeeFormModalController({
   onSave,
   onClose,
 }: EmployeeFormModalControllerProps): React.JSX.Element {
+  // Live Work Locations & Designations from ConfigurationConstants
   const { data: workLocations = ['Pune, Maharastra'] } =
     TanstackQueryClientService.current.configuration.useWorkLocationsQuery();
+
+  const { data: designationsMap = {
+    Engineering: ['Software Engineer'],
+    'Product Design': ['Product Designer'],
+    Operations: ['Operations Manager'],
+  } } = TanstackQueryClientService.current.configuration.useDesignationsQuery();
 
   const locationOptions: SelectOption[] = (workLocations.length > 0 ? workLocations : ['Pune, Maharastra']).map((loc) => ({
     value: loc,
@@ -79,10 +75,10 @@ export default function EmployeeFormModalController({
     initialEmployee?.department || 'Engineering'
   );
   const [designation, setDesignation] = useState(
-    initialEmployee?.designation || 'Software Engineer'
+    initialEmployee?.designation || (designationsMap['Engineering']?.[0] || 'Software Engineer')
   );
   const [location, setLocation] = useState(
-    initialEmployee?.officeLocation || workLocations[0] || 'Pune, Maharastra'
+    initialEmployee?.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra')
   );
   const [employmentType, setEmploymentType] = useState<string>(
     initialEmployee?.employmentType || 'Full-time'
@@ -90,6 +86,8 @@ export default function EmployeeFormModalController({
   const [contactPhone, setContactPhone] = useState(initialEmployee?.phone || '');
   const [managerName, setManagerName] = useState(initialEmployee?.managerName || '');
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
+  const [isCreateDesignationOpen, setIsCreateDesignationOpen] = useState(false);
+
   const lastEmployeeRef = useRef<Employee | null>(initialEmployee || null);
   if (initialEmployee) {
     lastEmployeeRef.current = initialEmployee;
@@ -97,27 +95,38 @@ export default function EmployeeFormModalController({
   const displayEmployee = initialEmployee || lastEmployeeRef.current;
   const prevIsOpenRef = useRef(isOpen);
 
+  // Filter available designations specifically for the currently selected department
+  const currentDepartmentDesignations = designationsMap[department] || [];
+  const designationOptions: SelectOption[] = currentDepartmentDesignations.map((des) => ({
+    value: des,
+    label: des,
+  }));
+
   useEffect(() => {
     if (isOpen) {
       if (!prevIsOpenRef.current) {
         setExitDirection('down');
       }
       if (displayEmployee) {
+        const empDept = displayEmployee.department || 'Engineering';
+        const empDesignations = designationsMap[empDept] || [];
         setFullName(displayEmployee.name || '');
         setEmail(displayEmployee.email || '');
         setEmployeeCode(displayEmployee.employeeCode || '');
-        setDepartment(displayEmployee.department || 'Engineering');
-        setDesignation(displayEmployee.designation || 'Software Engineer');
+        setDepartment(empDept);
+        setDesignation(displayEmployee.designation || (empDesignations.length > 0 ? empDesignations[0] : ''));
         setLocation(displayEmployee.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'));
         setEmploymentType(displayEmployee.employmentType || 'Full-time');
         setContactPhone(displayEmployee.phone || '');
         setManagerName(displayEmployee.managerName || '');
       } else {
+        const defaultDept = 'Engineering';
+        const defaultDesignations = designationsMap[defaultDept] || [];
         setFullName('');
         setEmail('');
         setEmployeeCode(`EMP-${Math.floor(1000 + Math.random() * 9000)}`);
-        setDepartment('Engineering');
-        setDesignation('Software Engineer');
+        setDepartment(defaultDept);
+        setDesignation(defaultDesignations.length > 0 ? defaultDesignations[0] : '');
         setLocation(workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra');
         setEmploymentType('Full-time');
         setContactPhone('');
@@ -125,7 +134,20 @@ export default function EmployeeFormModalController({
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, displayEmployee, workLocations]);
+  }, [isOpen, displayEmployee, workLocations, designationsMap]);
+
+  const handleDepartmentChange = (newDept: string) => {
+    setDepartment(newDept);
+    const available = designationsMap[newDept] || [];
+    if (!available.includes(designation)) {
+      setDesignation(available.length > 0 ? available[0] : '');
+    }
+  };
+
+  const handleDesignationCreated = (createdDept: string, createdDesignation: string) => {
+    setDepartment(createdDept);
+    setDesignation(createdDesignation);
+  };
 
   const handleCancel = () => {
     setExitDirection('up');
@@ -150,8 +172,8 @@ export default function EmployeeFormModalController({
       email: email.trim().toLowerCase(),
       employeeId: employeeCode.trim(),
       department: departmentIndex,
-      designation: designation.trim() || 'Software Engineer',
-      location: location || 'HQ Bangalore',
+      designation: designation.trim() || (currentDepartmentDesignations.length > 0 ? currentDepartmentDesignations[0] : 'General Staff'),
+      location: location || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'),
       status: 'Active',
       managerName: managerName.trim() || undefined,
       contactPhone: contactPhone.trim() || undefined,
@@ -159,219 +181,223 @@ export default function EmployeeFormModalController({
   };
 
   return (
-    <ModalSharedComponent
-      isOpen={isOpen}
-      onClose={onClose}
-      title={initialEmployee ? 'Edit Employee Profile' : 'Add Employee to Directory'}
-      subtitle={
-        initialEmployee
-          ? `Modify directory credentials for ${initialEmployee.name}`
-          : 'Provision a new team member into the enterprise ITAM organization directory'
-      }
-      maxWidth="2xl"
-      scrollMode="backdrop"
-      animationType="slide-up"
-      exitDirection={exitDirection}
-    >
-      <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full text-xs">
-        <div>
-          {/* Section 1: Basic Identity */}
-          <div className="space-y-4">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800">
-              <User className="w-3.5 h-3.5 text-blue-500" />
-              1. Employee Identity & Credentials
-            </h4>
+    <>
+      <ModalSharedComponent
+        isOpen={isOpen}
+        onClose={onClose}
+        title={initialEmployee ? 'Edit Employee Profile' : 'Add Employee to Directory'}
+        subtitle={
+          initialEmployee
+            ? `Modify directory credentials for ${initialEmployee.name}`
+            : 'Provision a new team member into the enterprise ITAM organization directory'
+        }
+        maxWidth="2xl"
+        scrollMode="backdrop"
+        animationType="slide-up"
+        exitDirection={exitDirection}
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col justify-between h-full text-xs">
+          <div>
+            {/* Section 1: Basic Identity */}
+            <div className="space-y-4">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800">
+                <User className="w-3.5 h-3.5 text-blue-500" />
+                1. Employee Identity & Credentials
+              </h4>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Full Name <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="e.g. Sarah Jenkins"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Full Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Sarah Jenkins"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Corporate Email <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="sarah.jenkins@enterprise.com"
+                      className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Corporate Email <span className="text-rose-500">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Employee ID / Code
+                  </label>
                   <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="sarah.jenkins@enterprise.com"
-                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                    type="text"
+                    value={employeeCode}
+                    onChange={(e) => setEmployeeCode(e.target.value)}
+                    placeholder="EMP-1001"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Employment Type
+                  </label>
+                  <CustomSelectSharedComponent
+                    value={employmentType}
+                    onChange={setEmploymentType}
+                    options={EMPLOYMENT_TYPE_OPTIONS}
+                    size="sm"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Employee ID / Code
-                </label>
-                <input
-                  type="text"
-                  value={employeeCode}
-                  onChange={(e) => setEmployeeCode(e.target.value)}
-                  placeholder="EMP-1001"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
-                />
+            {/* Section 2: Department & Designation */}
+            <div className="space-y-4 pt-8">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+                <Briefcase className="w-3.5 h-3.5 text-indigo-500" />
+                2. Organization & Job Role
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Assigned Department <span className="text-rose-500">*</span>
+                  </label>
+                  <CustomSelectSharedComponent
+                    value={department}
+                    onChange={handleDepartmentChange}
+                    options={DEPARTMENT_OPTIONS}
+                    size="sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Designation / Role Title <span className="text-rose-500">*</span>
+                  </label>
+                  <CustomSelectSharedComponent
+                    value={designation}
+                    onChange={setDesignation}
+                    options={designationOptions}
+                    placeholder={
+                      designationOptions.length === 0
+                        ? 'No roles yet — click below to add'
+                        : 'Select designation...'
+                    }
+                    searchable={true}
+                    searchPlaceholder="Search designations..."
+                    size="sm"
+                    footerAction={{
+                      label: '+ Create New Department / Designation',
+                      icon: <Plus className="w-3.5 h-3.5" />,
+                      onClick: () => {
+                        setIsCreateDesignationOpen(true);
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Section 3: Location & Management */}
+            <div className="space-y-4 pt-8">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+                <MapPin className="w-3.5 h-3.5 text-emerald-500" />
+                3. Work Location & Reporting Contact
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Primary Work Location
+                  </label>
+                  <CustomSelectSharedComponent
+                    value={location}
+                    onChange={setLocation}
+                    options={locationOptions}
+                    searchable={true}
+                    searchPlaceholder="Search work locations..."
+                    size="sm"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Reporting Manager Name
+                  </label>
+                  <input
+                    type="text"
+                    value={managerName}
+                    onChange={(e) => setManagerName(e.target.value)}
+                    placeholder="e.g. David Ross (CTO)"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Employment Type
-                </label>
-                <CustomSelectSharedComponent
-                  value={employmentType}
-                  onChange={setEmploymentType}
-                  options={EMPLOYMENT_TYPE_OPTIONS}
-                  size="sm"
-                />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
+                    Contact Phone Number
+                  </label>
+                  <input
+                    type="tel"
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    placeholder="+1 (555) 019-2834"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Department & Designation */}
-          <div className="space-y-4 pt-8">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
-              <Briefcase className="w-3.5 h-3.5 text-indigo-500" />
-              2. Organization & Job Role
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Assigned Department <span className="text-rose-500">*</span>
-                </label>
-                <CustomSelectSharedComponent
-                  value={department}
-                  onChange={setDepartment}
-                  options={DEPARTMENT_OPTIONS}
-                  size="sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Designation / Role Title <span className="text-rose-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={designation}
-                  onChange={(e) => setDesignation(e.target.value)}
-                  placeholder="e.g. Senior Backend Engineer"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
-                />
-              </div>
-            </div>
-
-            {/* Quick Designation Presets */}
-            <div className="space-y-1.5 pt-1">
-              <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Quick Role Suggestions:</span>
-              <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
-                {DESIGNATION_PRESETS.map((preset) => (
-                  <button
-                    key={preset}
-                    type="button"
-                    onClick={() => setDesignation(preset)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 transition-all ${
-                      designation === preset
-                        ? 'bg-indigo-600 text-white font-semibold shadow-xs'
-                        : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-200 dark:hover:bg-zinc-700'
-                    }`}
-                  >
-                    {preset}
-                  </button>
-                ))}
-              </div>
-            </div>
+          {/* Modal Action Buttons Footer */}
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6">
+            <ButtonSharedComponent
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
+              Cancel
+            </ButtonSharedComponent>
+            <ButtonSharedComponent
+              type="submit"
+              variant="primary"
+              size="sm"
+              isLoading={isLoading}
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+            >
+              {initialEmployee ? 'Save Profile Changes' : 'Provision Employee'}
+            </ButtonSharedComponent>
           </div>
+        </form>
+      </ModalSharedComponent>
 
-          {/* Section 3: Location & Management */}
-          <div className="space-y-4 pt-8">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
-              <MapPin className="w-3.5 h-3.5 text-emerald-500" />
-              3. Work Location & Reporting Contact
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Primary Work Location
-                </label>
-                <CustomSelectSharedComponent
-                  value={location}
-                  onChange={setLocation}
-                  options={locationOptions}
-                  size="sm"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                  Reporting Manager Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  value={managerName}
-                  onChange={(e) => setManagerName(e.target.value)}
-                  placeholder="e.g. David Vance (VP Engineering)"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300 mb-1">
-                Contact Phone Number (Optional)
-              </label>
-              <div className="relative">
-                <Phone className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="tel"
-                  value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="+1 (555) 019-2834"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Modal Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0">
-          <ButtonSharedComponent variant="outline" size="sm" onClick={handleCancel}>
-            Cancel
-          </ButtonSharedComponent>
-          <ButtonSharedComponent
-            type="submit"
-            variant="primary"
-            size="sm"
-            isLoading={isLoading}
-            loadingText={initialEmployee ? 'Saving Changes...' : 'Adding Employee...'}
-            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-            icon={<Plus className="w-3.5 h-3.5 !text-white" />}
-          >
-            <span className="!text-white font-medium">
-              {initialEmployee ? 'Save Profile' : 'Add Employee'}
-            </span>
-          </ButtonSharedComponent>
-        </div>
-      </form>
-    </ModalSharedComponent>
+      {/* Nested Create Designation Modal layered on top without dismissing employee form */}
+      <CreateDesignationModalController
+        isOpen={isCreateDesignationOpen}
+        initialDepartment={department}
+        onClose={() => setIsCreateDesignationOpen(false)}
+        onCreated={handleDesignationCreated}
+      />
+    </>
   );
 }

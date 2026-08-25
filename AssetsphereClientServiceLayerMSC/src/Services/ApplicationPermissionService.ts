@@ -108,6 +108,8 @@ export default class ApplicationPermissionService {
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_AI_ASSISTANT);
       case 'analytics':
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_ANALYTICS);
+      case 'settings':
+        return this.canAccessSettings();
       default:
         return false;
     }

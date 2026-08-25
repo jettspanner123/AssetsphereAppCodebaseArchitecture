@@ -457,6 +457,42 @@ export class ConfigurationQueryService {
   ): UseQueryResult<string[], Error> {
     return this.useWorkLocationsQuery(options);
   }
+
+  public useDesignationsQuery(
+    options?: Omit<UseQueryOptions<Record<string, string[]>, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Record<string, string[]>, Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.EMPLOYEE_DESIGNATIONS,
+      queryFn: async () => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.getDesignations();
+      },
+      staleTime: 1000 * 60 * 30, // 30 minutes
+      ...options,
+    });
+  }
+
+  public designationsQuery(
+    options?: Omit<UseQueryOptions<Record<string, string[]>, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<Record<string, string[]>, Error> {
+    return this.useDesignationsQuery(options);
+  }
+
+  public useAddDesignationMutation(
+    options?: Omit<UseMutationOptions<Record<string, string[]>, Error, { department: string; designation: string }>, 'mutationFn'>
+  ): UseMutationResult<Record<string, string[]>, Error, { department: string; designation: string }> {
+    return useMutation({
+      mutationFn: async ({ department, designation }: { department: string; designation: string }) => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.addDesignation(department, designation);
+      },
+      onSuccess: (data) => {
+        this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEE_DESIGNATIONS, data);
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEE_DESIGNATIONS });
+      },
+      ...options,
+    });
+  }
 }
 
 export default class TanstackQueryClientService {

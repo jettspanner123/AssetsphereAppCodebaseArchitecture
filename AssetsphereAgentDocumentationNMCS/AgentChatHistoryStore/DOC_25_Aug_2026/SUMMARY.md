@@ -327,3 +327,23 @@ This document tracks all features, permission adjustments, architectural refacto
   - When expanded: displays an amber badge with the live count of pending user registration requests.
   - When collapsed: displays a pulsing amber indicator dot on the top-right of the User Requests icon.
 - **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified live count displays accurately.
+
+### 24. User Request Approval & Employee Directory Setup Modal
+- **Files**:
+  - [`ApproveUserSetupModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/UserRequests/Components/ApproveUserSetupModalController.tsx)
+  - [`UserRequestsScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/UserRequests/UserRequestsScreenController.tsx)
+  - [`EmployeesDirectoryService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Services/EmployeesDirectoryService.ts)
+  - [`AuthType.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Types/AuthType.ts)
+  - [`EmployeeEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/EmployeeEntityClass.cs)
+  - [`EmployeeDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/EmployeeDTOs.cs)
+  - [`EmployeesService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Employees/Services/EmployeesService.cs)
+  - [`EmployeesController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Employees/EmployeesController.cs)
+  - [`DatabaseSeederUtility.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Utilities/DatabaseSeederUtility.cs)
+- **Changes**:
+  - Built a comprehensive approval setup wizard modal displaying the applicant's profile details and prompting for organizational assignment.
+  - Pre-filled auto-generated Employee ID (`EMP-XXXX`) with full manual edit support.
+  - Integrated live dynamic Department and Designation selectors with inline `+ Create New Department` and `+ Create New Designation` nested modals (`zIndex={60}`).
+  - Integrated live Work Location dropdown from `useWorkLocationsQuery()`.
+  - Executed two-step client pipeline: approves user account via `ApproveUser` API, then registers employee into `AS_EmployeesTBL` via Employee Creation API.
+  - Refactored backend `Department` typing from rigid enum to dynamic `string` across Entity and DTOs.
+- **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend daemon running on `http://localhost:5125`.

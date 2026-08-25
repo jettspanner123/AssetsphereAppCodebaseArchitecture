@@ -7,7 +7,7 @@ public sealed class EmployeeCreateDTO
     public string EmployeeId { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public DepartmentType Department { get; set; } = DepartmentType.Engineering;
+    public string Department { get; set; } = "Engineering";
     public string Designation { get; set; } = "Software Engineer";
     public string Location { get; set; } = "HQ Bangalore";
     public string Status { get; set; } = "Active";
@@ -20,7 +20,7 @@ public sealed class EmployeeUpdateDTO
 {
     public string? FullName { get; set; }
     public string? Email { get; set; }
-    public DepartmentType? Department { get; set; }
+    public string? Department { get; set; }
     public string? Designation { get; set; }
     public string? Location { get; set; }
     public string? Status { get; set; }
@@ -35,7 +35,7 @@ public sealed class EmployeeResponseDTO
     public string EmployeeId { get; set; } = string.Empty;
     public string FullName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public DepartmentType Department { get; set; }
+    public string Department { get; set; } = "Engineering";
     public string Designation { get; set; } = string.Empty;
     public string Location { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;

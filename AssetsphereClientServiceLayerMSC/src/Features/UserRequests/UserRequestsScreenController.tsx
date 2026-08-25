@@ -22,6 +22,8 @@ import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGu
 import ApplicationPermissionCON from '../../Constants/ApplicationPermissionCON';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 
+import ApproveUserSetupModalController from './Components/ApproveUserSetupModalController';
+
 const statusOptions: SelectOption[] = [
   { value: 'pending', label: 'Pending Requests', sublabel: 'Awaiting operator review' },
   { value: 'approved', label: 'Approved Users', sublabel: 'Verified active accounts' },
@@ -35,10 +37,14 @@ export default function UserRequestsScreenController(): React.JSX.Element {
   const [isSingleLineMode, setIsSingleLineMode] = useState<boolean>(true);
   const [statusFilter, setStatusFilter] = useState<string>('pending');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [pendingAction, setPendingAction] = useState<{
-    user: PendingUserType;
-    action: 'approve' | 'reject';
-  } | null>(null);
+
+  // Setup / Approval Modal State
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState<boolean>(false);
+  const [userToApprove, setUserToApprove] = useState<PendingUserType | null>(null);
+
+  // Rejection Modal State
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState<boolean>(false);
+  const [userToReject, setUserToReject] = useState<PendingUserType | null>(null);
 
   // Fetch live user requests from backend with status filter
   const {
@@ -47,27 +53,24 @@ export default function UserRequestsScreenController(): React.JSX.Element {
     isRefetching,
   } = TanstackQueryClientService.current.authentication.usePendingUsersQuery(statusFilter);
 
-  // Approve & Reject Mutations
-  const approveMutation = TanstackQueryClientService.current.authentication.useApproveUserMutation();
+  // Reject Mutation
   const rejectMutation = TanstackQueryClientService.current.authentication.useRejectUserMutation();
 
   const handleOpenApproveModal = (user: PendingUserType) => {
-    setPendingAction({ user, action: 'approve' });
+    setUserToApprove(user);
+    setIsApproveModalOpen(true);
   };
 
   const handleOpenRejectModal = (user: PendingUserType) => {
-    setPendingAction({ user, action: 'reject' });
+    setUserToReject(user);
+    setIsRejectModalOpen(true);
   };
 
-  const handleConfirmAction = async () => {
-    if (!pendingAction) return;
-
-    if (pendingAction.action === 'approve') {
-      await approveMutation.mutateAsync(pendingAction.user.id);
-    } else {
-      await rejectMutation.mutateAsync(pendingAction.user.id);
-    }
-    setPendingAction(null);
+  const handleConfirmReject = async () => {
+    if (!userToReject) return;
+    await rejectMutation.mutateAsync(userToReject.id);
+    setIsRejectModalOpen(false);
+    setUserToReject(null);
   };
 
   // Filter requests by search query
@@ -510,37 +513,42 @@ export default function UserRequestsScreenController(): React.JSX.Element {
         </CardSharedComponent>
       )}
 
-      {/* Confirmation Modal for Approve / Reject */}
+      {/* Setup & Approval Result Modal */}
+      <ApproveUserSetupModalController
+        isOpen={isApproveModalOpen}
+        user={userToApprove}
+        onClose={() => {
+          setIsApproveModalOpen(false);
+          setUserToApprove(null);
+        }}
+        onSuccess={() => {
+          setIsApproveModalOpen(false);
+          setUserToApprove(null);
+        }}
+      />
+
+      {/* Confirmation Modal for Reject Request */}
       <ConfirmationModalSharedComponent
-        isOpen={Boolean(pendingAction)}
-        onClose={() => setPendingAction(null)}
-        onConfirm={handleConfirmAction}
-        title={
-          pendingAction?.action === 'approve'
-            ? 'Approve User Registration'
-            : 'Reject Registration Request'
-        }
+        isOpen={isRejectModalOpen}
+        onClose={() => {
+          setIsRejectModalOpen(false);
+          setUserToReject(null);
+        }}
+        onConfirm={handleConfirmReject}
+        title="Reject Registration Request"
         subtitle={
-          pendingAction
-            ? `Applicant: ${pendingAction.user.fullName} (${pendingAction.user.email})`
+          userToReject
+            ? `Applicant: ${userToReject.fullName} (${userToReject.email})`
             : undefined
         }
         description={
-          pendingAction?.action === 'approve'
-            ? `Are you sure you want to approve "${pendingAction.user.fullName}"? This will activate their USER account and grant them access to the Assetsphere platform.`
-            : pendingAction
-            ? `Are you sure you want to reject the registration request for "${pendingAction.user.fullName}"? The applicant will not be allowed to log into the platform.`
+          userToReject
+            ? `Are you sure you want to reject the registration request for "${userToReject.fullName}"? The applicant will not be granted access to the platform.`
             : ''
         }
-        confirmText={
-          pendingAction?.action === 'approve' ? 'Approve User' : 'Reject Request'
-        }
-        variant={pendingAction?.action === 'approve' ? 'primary' : 'danger'}
-        isLoading={
-          pendingAction?.action === 'approve'
-            ? approveMutation.isPending
-            : rejectMutation.isPending
-        }
+        confirmText="Reject Request"
+        variant="danger"
+        isLoading={rejectMutation.isPending}
       />
     </div>
   );

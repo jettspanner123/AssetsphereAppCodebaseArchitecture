@@ -37,6 +37,7 @@ export interface PendingUserType {
   fullName: string;
   role: UserRoleType | string;
   department?: string | null;
+  avatarUrl?: string | null;
   createdAt: string;
   isVerified: boolean;
   isDeleted?: boolean;

@@ -23,7 +23,7 @@ public sealed class EmployeesController : ControllerBase
 
     [HttpGet(ApplicationRouteFactory.EmployeeRoutes.GetAll)]
     public async Task<ActionResult<ApiResponseClass<List<EmployeeResponseDTO>>>> GetAll(
-        [FromQuery] DepartmentType? department,
+        [FromQuery] string? department,
         [FromQuery] string? search)
     {
         List<EmployeeResponseDTO> employees = await _employeesService.GetAllEmployeesAsync(department, search);

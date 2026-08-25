@@ -23,7 +23,7 @@ export interface CreateEmployeeRequest {
   employeeId: string;
   fullName: string;
   email: string;
-  department: number;
+  department: string | number;
   designation: string;
   location: string;
   status?: string;

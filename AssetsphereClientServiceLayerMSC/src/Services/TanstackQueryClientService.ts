@@ -493,6 +493,22 @@ export class ConfigurationQueryService {
       ...options,
     });
   }
+
+  public useAddDepartmentMutation(
+    options?: Omit<UseMutationOptions<Record<string, string[]>, Error, { department: string }>, 'mutationFn'>
+  ): UseMutationResult<Record<string, string[]>, Error, { department: string }> {
+    return useMutation({
+      mutationFn: async ({ department }: { department: string }) => {
+        const { default: ConfigurationConstantService } = await import('./ConfigurationConstantService');
+        return await ConfigurationConstantService.current.addDepartment(department);
+      },
+      onSuccess: (data) => {
+        this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEE_DESIGNATIONS, data);
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEE_DESIGNATIONS });
+      },
+      ...options,
+    });
+  }
 }
 
 export default class TanstackQueryClientService {

@@ -224,3 +224,41 @@ This document tracks all features, permission adjustments, architectural refacto
   - Built [`CreateDesignationModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDesignationModalController.tsx) with layered `zIndex={60}` to open smoothly on top of the Employee modal.
   - Filtered employee form designations specifically by the currently selected department, automatically auto-selecting newly created titles.
 - **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 15. Dynamic Backend-Backed Enterprise Department Creation Modal
+- **Files**:
+  - [`CreateDepartmentModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDepartmentModalController.tsx) [NEW]
+  - [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx)
+  - [`CreateDesignationModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDesignationModalController.tsx)
+  - [`ConfigurationConstantController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/ConfigurationConstantController.cs)
+  - [`ConfigurationConstantService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/Configuration/Services/ConfigurationConstantService.cs)
+  - [`ConfigurationConstantDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/ConfigurationConstantDTOs.cs)
+  - [`ConfigurationConstantService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/ConfigurationConstantService.ts)
+  - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts)
+  - [`ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts)
+- **Changes**:
+  - Added backend `POST /Api/V1/ConfigurationConstant/AddDepartment` endpoint to register new department keys in the `EMPLOYEE_DESIGNATIONS` JSON dictionary in `AS_ConfigurationConstantTBL`.
+  - Added `addDepartment` service method and `useAddDepartmentMutation` TanStack Query hook with instant cache update and invalidation.
+  - Built [`CreateDepartmentModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDepartmentModalController.tsx) with a single focused text input and `zIndex={60}` stacking.
+  - Added `+ Create New Department` footer action button to the Department dropdown in [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx).
+  - Dynamically synced department dropdowns across both the Employee creation form and the Create Designation modal.
+- **Verification**: `dotnet build` succeeded with 0 errors; `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.
+
+### 16. Employee Form Modal Infinite Re-Render Loop Resolution
+- **Files**:
+  - [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx)
+- **Root Cause**:
+  - In [`EmployeeFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeFormModalController.tsx), `const departmentKeys = Object.keys(designationsMap);` created a new array reference on every render. Because `departmentKeys` was passed into `useEffect`'s dependency array and `useEffect` reset the form with a newly generated random `employeeCode` (`Math.random()`), every state update triggered a re-render which triggered `useEffect` endlessly.
+- **Changes**:
+  - Wrapped `departmentKeys`, `departmentOptions`, and `locationOptions` with `React.useMemo`.
+  - Guarded form initialization in `useEffect` with `if (isOpen && !prevIsOpenRef.current)` so form state only resets upon explicit modal opening transitions, preserving user input during typing.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; verified no infinite loops on modal opening and stable field inputs.
+
+### 17. Live Backend Integration for Create Asset Modal (Locations, Departments & Users)
+- **Files**:
+  - [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx)
+- **Changes**:
+  - Verified and confirmed that **Work Locations** (`useWorkLocationsQuery`) and **Users/Employees** (`useEmployeesQuery`) are fetched live from the PostgreSQL database via TanStack Query.
+  - Replaced static `DEPARTMENT_SELECT_OPTIONS` with dynamic `useDesignationsQuery()` departments list in [`AssetFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetForm/AssetFormModalController.tsx).
+  - Added `searchable={true}` and `+ Create New Department` footer action button to the Allocated Department dropdown, wiring up the nested [`CreateDepartmentModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/CreateDepartmentModalController.tsx) component.
+- **Verification**: `npm run lint` (`tsc --noEmit`) succeeded with 0 errors; backend running on `http://localhost:5125`.

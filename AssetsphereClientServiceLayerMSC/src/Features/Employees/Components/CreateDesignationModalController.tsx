@@ -12,23 +12,24 @@ export interface CreateDesignationModalControllerProps {
   onCreated?: (department: string, designation: string) => void;
 }
 
-const DEPARTMENT_OPTIONS: SelectOption[] = [
-  { value: 'Engineering', label: 'Engineering' },
-  { value: 'Security Operations', label: 'Security Operations' },
-  { value: 'Finance & Procurement', label: 'Finance & Procurement' },
-  { value: 'Product Design', label: 'Product Design' },
-  { value: 'IT & Infrastructure', label: 'IT & Infrastructure' },
-  { value: 'Human Resources', label: 'Human Resources' },
-  { value: 'Legal & Compliance', label: 'Legal & Compliance' },
-  { value: 'Operations', label: 'Operations' },
-];
-
 export default function CreateDesignationModalController({
   isOpen,
   initialDepartment = 'Engineering',
   onClose,
   onCreated,
 }: CreateDesignationModalControllerProps): React.JSX.Element {
+  const { data: designationsMap = {
+    Engineering: ['Software Engineer'],
+    'Product Design': ['Product Designer'],
+    Operations: ['Operations Manager'],
+  } } = TanstackQueryClientService.current.configuration.useDesignationsQuery();
+
+  const departmentKeys = Object.keys(designationsMap);
+  const departmentOptions: SelectOption[] = (departmentKeys.length > 0 ? departmentKeys : ['Engineering', 'Product Design', 'Operations']).map((dept) => ({
+    value: dept,
+    label: dept,
+  }));
+
   const [department, setDepartment] = useState<string>(initialDepartment);
   const [designationName, setDesignationName] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -37,11 +38,11 @@ export default function CreateDesignationModalController({
 
   useEffect(() => {
     if (isOpen) {
-      setDepartment(initialDepartment || 'Engineering');
+      setDepartment(initialDepartment || (departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering'));
       setDesignationName('');
       setErrorMessage(null);
     }
-  }, [isOpen, initialDepartment]);
+  }, [isOpen, initialDepartment, departmentKeys]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +101,9 @@ export default function CreateDesignationModalController({
           <CustomSelectSharedComponent
             value={department}
             onChange={setDepartment}
-            options={DEPARTMENT_OPTIONS}
+            options={departmentOptions}
+            searchable={true}
+            searchPlaceholder="Search departments..."
             size="sm"
           />
         </div>

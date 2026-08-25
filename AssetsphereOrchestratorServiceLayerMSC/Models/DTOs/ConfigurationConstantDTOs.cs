@@ -22,3 +22,8 @@ public sealed class AddDesignationRequestDTO
     public string Department { get; set; } = string.Empty;
     public string Designation { get; set; } = string.Empty;
 }
+
+public sealed class AddDepartmentRequestDTO
+{
+    public string Department { get; set; } = string.Empty;
+}

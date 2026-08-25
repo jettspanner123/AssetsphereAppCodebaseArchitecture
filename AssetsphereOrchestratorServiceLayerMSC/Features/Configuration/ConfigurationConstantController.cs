@@ -49,4 +49,16 @@ public sealed class ConfigurationConstantController : ControllerBase
         ConfigurationConstantResponseDTO result = await _configurationService.AddDesignationAsync(request.Department, request.Designation);
         return Ok(ApiResponseClass<ConfigurationConstantResponseDTO>.Succeeded(result, "Designation added successfully."));
     }
+
+    [HttpPost("AddDepartment")]
+    public async Task<ActionResult<ApiResponseClass<ConfigurationConstantResponseDTO>>> AddDepartment([FromBody] AddDepartmentRequestDTO request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Department))
+        {
+            return BadRequest(ApiResponseClass<ConfigurationConstantResponseDTO>.Failed("Department name is required.", null, 400));
+        }
+
+        ConfigurationConstantResponseDTO result = await _configurationService.AddDepartmentAsync(request.Department);
+        return Ok(ApiResponseClass<ConfigurationConstantResponseDTO>.Succeeded(result, "Department added successfully."));
+    }
 }

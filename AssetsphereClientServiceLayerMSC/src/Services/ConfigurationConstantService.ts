@@ -119,4 +119,34 @@ export default class ConfigurationConstantService {
 
     return await this.getDesignations();
   }
+
+  public async addDepartment(department: string): Promise<Record<string, string[]>> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.configurationConstant.addDepartment, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({
+        department: department.trim(),
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to add department (HTTP ${response.status})`);
+    }
+
+    const json = await response.json();
+    const dto: ConfigurationConstantDTO = json.data;
+    if (dto && dto.configurationValue) {
+      try {
+        const parsed = JSON.parse(dto.configurationValue);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          return parsed as Record<string, string[]>;
+        }
+      } catch {
+        // Fallback
+      }
+    }
+
+    return await this.getDesignations();
+  }
 }

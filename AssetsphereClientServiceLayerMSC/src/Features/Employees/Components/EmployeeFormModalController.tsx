@@ -7,6 +7,7 @@ import { Employee } from '../../../Types/EmployeeType';
 import EmployeesCON from '../Constants/EmployeesCON';
 import TanstackQueryClientService from '../../../Services/TanstackQueryClientService';
 import CreateDesignationModalController from './CreateDesignationModalController';
+import CreateDepartmentModalController from './CreateDepartmentModalController';
 
 export interface EmployeeFormModalControllerProps {
   isOpen: boolean;
@@ -25,17 +26,6 @@ export interface EmployeeFormModalControllerProps {
   }) => void;
   onClose: () => void;
 }
-
-const DEPARTMENT_OPTIONS: SelectOption[] = [
-  { value: 'Engineering', label: 'Engineering' },
-  { value: 'Security Operations', label: 'Security Operations' },
-  { value: 'Finance & Procurement', label: 'Finance & Procurement' },
-  { value: 'Product Design', label: 'Product Design' },
-  { value: 'IT & Infrastructure', label: 'IT & Infrastructure' },
-  { value: 'Human Resources', label: 'Human Resources' },
-  { value: 'Legal & Compliance', label: 'Legal & Compliance' },
-  { value: 'Operations', label: 'Operations' },
-];
 
 const EMPLOYMENT_TYPE_OPTIONS: SelectOption[] = [
   { value: 'Full-time', label: 'Full-time' },
@@ -61,10 +51,25 @@ export default function EmployeeFormModalController({
     Operations: ['Operations Manager'],
   } } = TanstackQueryClientService.current.configuration.useDesignationsQuery();
 
-  const locationOptions: SelectOption[] = (workLocations.length > 0 ? workLocations : ['Pune, Maharastra']).map((loc) => ({
-    value: loc,
-    label: loc,
-  }));
+  const departmentKeys = React.useMemo(() => Object.keys(designationsMap), [designationsMap]);
+
+  const departmentOptions: SelectOption[] = React.useMemo(
+    () =>
+      (departmentKeys.length > 0 ? departmentKeys : ['Engineering', 'Product Design', 'Operations']).map((dept) => ({
+        value: dept,
+        label: dept,
+      })),
+    [departmentKeys]
+  );
+
+  const locationOptions: SelectOption[] = React.useMemo(
+    () =>
+      (workLocations.length > 0 ? workLocations : ['Pune, Maharastra']).map((loc) => ({
+        value: loc,
+        label: loc,
+      })),
+    [workLocations]
+  );
 
   const [fullName, setFullName] = useState(initialEmployee?.name || '');
   const [email, setEmail] = useState(initialEmployee?.email || '');
@@ -72,10 +77,10 @@ export default function EmployeeFormModalController({
     initialEmployee?.employeeCode || `EMP-${Math.floor(1000 + Math.random() * 9000)}`
   );
   const [department, setDepartment] = useState<string>(
-    initialEmployee?.department || 'Engineering'
+    initialEmployee?.department || (departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering')
   );
   const [designation, setDesignation] = useState(
-    initialEmployee?.designation || (designationsMap['Engineering']?.[0] || 'Software Engineer')
+    initialEmployee?.designation || (designationsMap[departmentKeys[0] || 'Engineering']?.[0] || 'Software Engineer')
   );
   const [location, setLocation] = useState(
     initialEmployee?.officeLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra')
@@ -87,6 +92,7 @@ export default function EmployeeFormModalController({
   const [managerName, setManagerName] = useState(initialEmployee?.managerName || '');
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
   const [isCreateDesignationOpen, setIsCreateDesignationOpen] = useState(false);
+  const [isCreateDepartmentOpen, setIsCreateDepartmentOpen] = useState(false);
 
   const lastEmployeeRef = useRef<Employee | null>(initialEmployee || null);
   if (initialEmployee) {
@@ -103,12 +109,10 @@ export default function EmployeeFormModalController({
   }));
 
   useEffect(() => {
-    if (isOpen) {
-      if (!prevIsOpenRef.current) {
-        setExitDirection('down');
-      }
+    if (isOpen && !prevIsOpenRef.current) {
+      setExitDirection('down');
       if (displayEmployee) {
-        const empDept = displayEmployee.department || 'Engineering';
+        const empDept = displayEmployee.department || (departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering');
         const empDesignations = designationsMap[empDept] || [];
         setFullName(displayEmployee.name || '');
         setEmail(displayEmployee.email || '');
@@ -120,7 +124,7 @@ export default function EmployeeFormModalController({
         setContactPhone(displayEmployee.phone || '');
         setManagerName(displayEmployee.managerName || '');
       } else {
-        const defaultDept = 'Engineering';
+        const defaultDept = departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering';
         const defaultDesignations = designationsMap[defaultDept] || [];
         setFullName('');
         setEmail('');
@@ -134,7 +138,7 @@ export default function EmployeeFormModalController({
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, displayEmployee, workLocations, designationsMap]);
+  }, [isOpen, displayEmployee, workLocations, designationsMap, departmentKeys]);
 
   const handleDepartmentChange = (newDept: string) => {
     setDepartment(newDept);
@@ -142,6 +146,11 @@ export default function EmployeeFormModalController({
     if (!available.includes(designation)) {
       setDesignation(available.length > 0 ? available[0] : '');
     }
+  };
+
+  const handleDepartmentCreated = (newDept: string) => {
+    setDepartment(newDept);
+    setDesignation('');
   };
 
   const handleDesignationCreated = (createdDept: string, createdDesignation: string) => {
@@ -281,8 +290,17 @@ export default function EmployeeFormModalController({
                   <CustomSelectSharedComponent
                     value={department}
                     onChange={handleDepartmentChange}
-                    options={DEPARTMENT_OPTIONS}
+                    options={departmentOptions}
+                    searchable={true}
+                    searchPlaceholder="Search departments..."
                     size="sm"
+                    footerAction={{
+                      label: '+ Create New Department',
+                      icon: <Plus className="w-3.5 h-3.5" />,
+                      onClick: () => {
+                        setIsCreateDepartmentOpen(true);
+                      },
+                    }}
                   />
                 </div>
 
@@ -303,7 +321,7 @@ export default function EmployeeFormModalController({
                     searchPlaceholder="Search designations..."
                     size="sm"
                     footerAction={{
-                      label: '+ Create New Department / Designation',
+                      label: '+ Create New Designation',
                       icon: <Plus className="w-3.5 h-3.5" />,
                       onClick: () => {
                         setIsCreateDesignationOpen(true);
@@ -390,6 +408,13 @@ export default function EmployeeFormModalController({
           </div>
         </form>
       </ModalSharedComponent>
+
+      {/* Nested Create Department Modal layered on top without dismissing employee form */}
+      <CreateDepartmentModalController
+        isOpen={isCreateDepartmentOpen}
+        onClose={() => setIsCreateDepartmentOpen(false)}
+        onCreated={handleDepartmentCreated}
+      />
 
       {/* Nested Create Designation Modal layered on top without dismissing employee form */}
       <CreateDesignationModalController

@@ -36,17 +36,7 @@ const DRIVE_TYPE_OPTIONS: SelectOption[] = [
   { value: 'Other', label: 'Other Storage Array' },
 ];
 
-const DEPARTMENT_SELECT_OPTIONS: SelectOption[] = [
-  { value: 'Engineering', label: 'Engineering' },
-  { value: 'Product & Design', label: 'Product & Design' },
-  { value: 'Information Technology', label: 'Information Technology' },
-  { value: 'Cybersecurity', label: 'Cybersecurity' },
-  { value: 'Human Resources', label: 'Human Resources' },
-  { value: 'Finance & Accounts', label: 'Finance & Accounts' },
-  { value: 'Sales & Marketing', label: 'Sales & Marketing' },
-  { value: 'Legal & Compliance', label: 'Legal & Compliance' },
-  { value: 'Operations', label: 'Operations' },
-];
+import CreateDepartmentModalController from '../Employees/Components/CreateDepartmentModalController';
 
 const PROCESSOR_PRESETS = [
   'Apple M3 Max',
@@ -104,11 +94,26 @@ export default function AssetFormModalController({
   onSave,
   onClose,
 }: AssetFormModalControllerProps): React.JSX.Element {
-  // Query active employees and registered work locations
+  // Query active employees, registered work locations, and enterprise departments
   const { data: employees = [] } =
     TanstackQueryClientService.current.employees.useEmployeesQuery();
   const { data: workLocations = ['Pune, Maharastra'] } =
     TanstackQueryClientService.current.configuration.useWorkLocationsQuery();
+  const { data: designationsMap = {
+    Engineering: ['Software Engineer'],
+    'Product Design': ['Product Designer'],
+    Operations: ['Operations Manager'],
+  } } = TanstackQueryClientService.current.configuration.useDesignationsQuery();
+
+  const departmentKeys = React.useMemo(() => Object.keys(designationsMap), [designationsMap]);
+  const departmentOptions: SelectOption[] = React.useMemo(
+    () =>
+      (departmentKeys.length > 0 ? departmentKeys : ['Engineering', 'Product Design', 'Operations']).map((dept) => ({
+        value: dept,
+        label: dept,
+      })),
+    [departmentKeys]
+  );
 
   const [deviceName, setDeviceName] = useState(initialAsset?.deviceName || '');
   const [assetNumber] = useState(
@@ -152,14 +157,16 @@ export default function AssetFormModalController({
     initialAsset?.assignedToEmployeeId || 'UNASSIGNED'
   );
   const [assignedDepartment, setAssignedDepartment] = useState<string>(
-    initialAsset?.department || 'Engineering'
+    initialAsset?.department || (departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering')
   );
   const [assignedLocation, setAssignedLocation] = useState<string>(
-    initialAsset?.currentLocation || workLocations[0] || 'Pune, Maharastra'
+    initialAsset?.currentLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra')
   );
 
   const [notes, setNotes] = useState(initialAsset?.aiNotes || '');
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
+  const [isCreateDepartmentOpen, setIsCreateDepartmentOpen] = useState(false);
+
   const lastAssetRef = React.useRef<Asset | null>(initialAsset || null);
   if (initialAsset) {
     lastAssetRef.current = initialAsset;
@@ -168,10 +175,8 @@ export default function AssetFormModalController({
   const prevIsOpenRef = React.useRef(isOpen);
 
   React.useEffect(() => {
-    if (isOpen) {
-      if (!prevIsOpenRef.current) {
-        setExitDirection('down');
-      }
+    if (isOpen && !prevIsOpenRef.current) {
+      setExitDirection('down');
       if (displayAsset) {
         setDeviceName(displayAsset.deviceName || '');
         setCategory(displayAsset.category || 'Computing');
@@ -199,8 +204,8 @@ export default function AssetFormModalController({
         }
         setScreenSize(displayAsset.hardwareSpecs?.screenSize || '16.0"');
         setAssignedEmployeeId(displayAsset.assignedToEmployeeId || 'UNASSIGNED');
-        setAssignedDepartment(displayAsset.department || 'Engineering');
-        setAssignedLocation(displayAsset.currentLocation || workLocations[0] || 'Pune, Maharastra');
+        setAssignedDepartment(displayAsset.department || (departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering'));
+        setAssignedLocation(displayAsset.currentLocation || (workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra'));
         setNotes(displayAsset.aiNotes || '');
       } else {
         setDeviceName('');
@@ -214,13 +219,13 @@ export default function AssetFormModalController({
         setStorageDrives([{ id: 'drive-1', sizeNumber: 512, unit: 'GB', type: 'NVMe SSD' }]);
         setScreenSize('16.0"');
         setAssignedEmployeeId('UNASSIGNED');
-        setAssignedDepartment('Engineering');
-        setAssignedLocation(workLocations[0] || 'Pune, Maharastra');
+        setAssignedDepartment(departmentKeys.length > 0 ? departmentKeys[0] : 'Engineering');
+        setAssignedLocation(workLocations.length > 0 ? workLocations[0] : 'Pune, Maharastra');
         setNotes('');
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, displayAsset, workLocations]);
+  }, [isOpen, displayAsset, workLocations, departmentKeys]);
 
   // Employee Select Options for Searchable Dropdown
   const employeeSelectOptions: SelectOption[] = React.useMemo(() => {
@@ -416,8 +421,9 @@ export default function AssetFormModalController({
   };
 
   return (
-    <ModalSharedComponent
-      isOpen={isOpen}
+    <>
+      <ModalSharedComponent
+        isOpen={isOpen}
       onClose={onClose}
       zIndex={zIndex}
       title={initialAsset ? `Edit ${initialAsset.deviceName}` : 'Register New Enterprise IT Asset'}
@@ -738,9 +744,18 @@ export default function AssetFormModalController({
                 </label>
                 <CustomSelectSharedComponent
                   value={assignedDepartment}
-                  options={DEPARTMENT_SELECT_OPTIONS}
+                  options={departmentOptions}
                   onChange={setAssignedDepartment}
+                  searchable={true}
+                  searchPlaceholder="Search departments..."
                   size="sm"
+                  footerAction={{
+                    label: '+ Create New Department',
+                    icon: <Plus className="w-3.5 h-3.5" />,
+                    onClick: () => {
+                      setIsCreateDepartmentOpen(true);
+                    },
+                  }}
                 />
               </div>
             </div>
@@ -787,5 +802,13 @@ export default function AssetFormModalController({
         </div>
       </form>
     </ModalSharedComponent>
+
+    {/* Nested Create Department Modal */}
+    <CreateDepartmentModalController
+      isOpen={isCreateDepartmentOpen}
+      onClose={() => setIsCreateDepartmentOpen(false)}
+      onCreated={(dept) => setAssignedDepartment(dept)}
+    />
+    </>
   );
 }

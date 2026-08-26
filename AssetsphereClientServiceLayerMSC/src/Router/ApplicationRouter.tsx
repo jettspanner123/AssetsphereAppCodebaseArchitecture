@@ -40,6 +40,7 @@ import SoftwareLicensesScreenRoute from '../Routes/SoftwareLicensesScreenRoute';
 import CloudInfrastructureScreenRoute from '../Routes/CloudInfrastructureScreenRoute';
 import ProcurementScreenRoute from '../Routes/ProcurementScreenRoute';
 import ServiceDeskScreenRoute from '../Routes/ServiceDeskScreenRoute';
+import DeviceServiceRequestScreenRoute from '../Routes/DeviceServiceRequestScreenRoute';
 import VendorsScreenRoute from '../Routes/VendorsScreenRoute';
 import ComplianceScreenRoute from '../Routes/ComplianceScreenRoute';
 import VerificationCampaignScreenRoute from '../Routes/VerificationCampaignScreenRoute';
@@ -235,6 +236,7 @@ export function DashboardShell(): React.JSX.Element {
   else if (pathname.includes('software-licenses')) activeTab = 'licenses';
   else if (pathname.includes('cloud-resources')) activeTab = 'cloud';
   else if (pathname.includes('procurement')) activeTab = 'procurement';
+  else if (pathname.includes('device-service-requests')) activeTab = 'device_service_requests';
   else if (pathname.includes('service-desk')) activeTab = 'servicedesk';
   else if (pathname.includes('vendors')) activeTab = 'vendors';
   else if (pathname.includes('user-requests')) activeTab = 'user_requests';
@@ -262,6 +264,7 @@ export function DashboardShell(): React.JSX.Element {
       cloud: ApplicationRouteCON.DASHBOARD_CLOUD,
       procurement: ApplicationRouteCON.DASHBOARD_PROCUREMENT,
       servicedesk: ApplicationRouteCON.DASHBOARD_SERVICEDESK,
+      device_service_requests: ApplicationRouteCON.DASHBOARD_DEVICE_SERVICE_REQUESTS,
       vendors: ApplicationRouteCON.DASHBOARD_VENDORS,
       compliance: ApplicationRouteCON.DASHBOARD_COMPLIANCE,
       verification: ApplicationRouteCON.DASHBOARD_VERIFICATION,
@@ -1103,6 +1106,15 @@ const serviceDeskRoute = createRoute({
   },
 });
 
+// Device Service Requests Route
+const deviceServiceRequestsRoute = createRoute({
+  getParentRoute: () => dashboardLayoutRoute,
+  path: 'device-service-requests',
+  component: function DeviceServiceRequestsComponent() {
+    return <DeviceServiceRequestScreenRoute />;
+  },
+});
+
 // Vendors Route
 const vendorsRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
@@ -1266,6 +1278,7 @@ const routeTree = rootRoute.addChildren([
     cloudInfrastructureRoute,
     procurementRoute,
     serviceDeskRoute,
+    deviceServiceRequestsRoute,
     vendorsRoute,
     complianceRoute,
     verificationCampaignRoute,

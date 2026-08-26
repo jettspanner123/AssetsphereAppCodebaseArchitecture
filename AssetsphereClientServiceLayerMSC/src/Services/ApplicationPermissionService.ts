@@ -100,6 +100,8 @@ export default class ApplicationPermissionService {
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_USER_REQUESTS);
       case 'servicedesk':
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_SERVICEDESK);
+      case 'device_service_requests':
+        return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_DEVICE_SERVICE_REQUESTS);
       case 'compliance':
         return this.hasPermission(ApplicationPermissionCON.CAN_VIEW_TAB_COMPLIANCE);
       case 'verification':

@@ -608,6 +608,111 @@ export class NotificationQueryService {
   }
 }
 
+export class DeviceServiceRequestsQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useDeviceServiceRequestsQuery(
+    status?: string,
+    userId?: string,
+    options?: Omit<
+      UseQueryOptions<
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[],
+        Error,
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[],
+        readonly unknown[]
+      >,
+      'queryKey' | 'queryFn'
+    >
+  ): UseQueryResult<import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[], Error> {
+    return useQuery({
+      queryKey: status || userId ? [...TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS, { status, userId }] : TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS,
+      queryFn: async () => {
+        const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
+        return await DeviceServiceRequestsService.current.getAllRequests(status, userId);
+      },
+      refetchInterval: 15000, // 15s auto-poll for status updates
+      ...options,
+    });
+  }
+
+  public useMyDeviceServiceRequestsQuery(
+    userId?: string,
+    options?: Omit<
+      UseQueryOptions<
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[],
+        Error,
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[],
+        readonly unknown[]
+      >,
+      'queryKey' | 'queryFn'
+    >
+  ): UseQueryResult<import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[], Error> {
+    return useQuery({
+      queryKey: [...TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS, userId || 'current'],
+      queryFn: async () => {
+        const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
+        return await DeviceServiceRequestsService.current.getMyRequests(userId);
+      },
+      refetchInterval: 15000,
+      ...options,
+    });
+  }
+
+  public useCreateDeviceServiceRequestMutation(
+    options?: Omit<
+      UseMutationOptions<
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+        Error,
+        import('../Types/DeviceServiceRequestType').CreateDeviceServiceRequestInput
+      >,
+      'mutationFn'
+    >
+  ): UseMutationResult<
+    import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+    Error,
+    import('../Types/DeviceServiceRequestType').CreateDeviceServiceRequestInput
+  > {
+    return useMutation({
+      mutationFn: async (input: import('../Types/DeviceServiceRequestType').CreateDeviceServiceRequestInput) => {
+        const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
+        return await DeviceServiceRequestsService.current.createRequest(input);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      },
+      ...options,
+    });
+  }
+
+  public useUpdateDeviceServiceRequestStatusMutation(
+    options?: Omit<
+      UseMutationOptions<
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+        Error,
+        { id: string; input: import('../Types/DeviceServiceRequestType').UpdateDeviceServiceRequestStatusInput }
+      >,
+      'mutationFn'
+    >
+  ): UseMutationResult<
+    import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+    Error,
+    { id: string; input: import('../Types/DeviceServiceRequestType').UpdateDeviceServiceRequestStatusInput }
+  > {
+    return useMutation({
+      mutationFn: async ({ id, input }) => {
+        const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
+        return await DeviceServiceRequestsService.current.updateRequestStatus(id, input);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      },
+      ...options,
+    });
+  }
+}
+
 export default class TanstackQueryClientService {
   public static current: TanstackQueryClientService = new TanstackQueryClientService();
 
@@ -626,4 +731,5 @@ export default class TanstackQueryClientService {
   public readonly employees: EmployeeQueryService = new EmployeeQueryService(() => this.client);
   public readonly configuration: ConfigurationQueryService = new ConfigurationQueryService(() => this.client);
   public readonly notifications: NotificationQueryService = new NotificationQueryService(() => this.client);
+  public readonly deviceServiceRequests: DeviceServiceRequestsQueryService = new DeviceServiceRequestsQueryService(() => this.client);
 }

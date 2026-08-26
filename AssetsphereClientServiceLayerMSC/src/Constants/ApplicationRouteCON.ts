@@ -13,6 +13,7 @@ export default class ApplicationRouteCON {
   public static readonly DASHBOARD_CLOUD: string = '/dashboard/cloud-resources';
   public static readonly DASHBOARD_PROCUREMENT: string = '/dashboard/procurement';
   public static readonly DASHBOARD_SERVICEDESK: string = '/dashboard/service-desk';
+  public static readonly DASHBOARD_DEVICE_SERVICE_REQUESTS: string = '/dashboard/device-service-requests';
   public static readonly DASHBOARD_VENDORS: string = '/dashboard/vendors';
   public static readonly DASHBOARD_USER_REQUESTS: string = '/dashboard/user-requests';
   public static readonly DASHBOARD_COMPLIANCE: string = '/dashboard/compliance';

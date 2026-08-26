@@ -12,6 +12,7 @@ import {
   Cloud,
   QrCode,
   Layers,
+  Wrench,
 } from 'lucide-react';
 import { TabType } from '../../../Types/NavigationType';
 
@@ -29,6 +30,7 @@ export default class NavigationCON {
     { id: 'procurement' as TabType, label: 'Procurement & POs', icon: Building2, category: 'Organization' },
     { id: 'vendors' as TabType, label: 'Vendors & SLAs', icon: Layers, category: 'Organization' },
     { id: 'servicedesk' as TabType, label: 'Service Desk & Tickets', icon: HelpCircle, category: 'Operations' },
+    { id: 'device_service_requests' as TabType, label: 'Device Service Request', icon: Wrench, category: 'Operations' },
     { id: 'compliance' as TabType, label: 'Security & Compliance', icon: ShieldCheck, category: 'Operations' },
     { id: 'verification' as TabType, label: 'Physical Audit Campaign', icon: QrCode, category: 'Operations' },
     { id: 'ai_assistant' as TabType, label: 'AI Enterprise Copilot', icon: Bot, category: 'Intelligence', badge: 'Gemini' },

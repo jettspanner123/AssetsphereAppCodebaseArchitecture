@@ -71,6 +71,8 @@ builder.Services.AddScoped<DashboardService>();
 builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.Configuration.Services.ConfigurationConstantService>();
 builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.Notifications.Services.INotificationsService, AssetsphereOrchestratorServiceLayerMSC.Features.Notifications.Services.NotificationsService>();
 builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.Notifications.Services.NotificationsService>();
+builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.DeviceServiceRequests.Services.IDeviceServiceRequestsService, AssetsphereOrchestratorServiceLayerMSC.Features.DeviceServiceRequests.Services.DeviceServiceRequestsService>();
+builder.Services.AddScoped<AssetsphereOrchestratorServiceLayerMSC.Features.DeviceServiceRequests.Services.DeviceServiceRequestsService>();
 
 // 4. JWT Authentication Configuration
 byte[] secretBytes = Encoding.UTF8.GetBytes(jwtSecret);

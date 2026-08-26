@@ -38,6 +38,14 @@ export interface NetworkAPIEndpoints {
     markAllAsRead: string;
     create: string;
   };
+  deviceServiceRequests: {
+    base: string;
+    getAll: string;
+    getMyRequests: string;
+    getById: (id: string) => string;
+    create: string;
+    updateStatus: (id: string) => string;
+  };
 }
 
 export interface ApplicationNetworkAPIConfigurationDetails {
@@ -100,6 +108,14 @@ export default class ApplicationNetworkAPIConfiguration {
           markAsRead: (id: string) => `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAsRead/${id}`,
           markAllAsRead: `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAllAsRead`,
           create: `${this.defaultBaseUrl}/Api/V1/Notifications`,
+        },
+        deviceServiceRequests: {
+          base: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
+          getAll: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
+          getMyRequests: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/MyRequests`,
+          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
+          create: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
+          updateStatus: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}/Status`,
         },
       },
     };

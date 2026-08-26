@@ -6,6 +6,7 @@ export type TabType =
   | 'cloud'
   | 'procurement'
   | 'servicedesk'
+  | 'device_service_requests'
   | 'vendors'
   | 'user_requests'
   | 'compliance'

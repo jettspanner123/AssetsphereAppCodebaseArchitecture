@@ -25,6 +25,7 @@ public class AssetsphereDbContext : DbContext
     public DbSet<AuditLogEntityClass> AuditLogs => Set<AuditLogEntityClass>();
     public DbSet<ConfigurationConstantEntityClass> ConfigurationConstants => Set<ConfigurationConstantEntityClass>();
     public DbSet<NotificationEntityClass> Notifications => Set<NotificationEntityClass>();
+    public DbSet<DeviceServiceRequestEntityClass> DeviceServiceRequests => Set<DeviceServiceRequestEntityClass>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -45,6 +46,7 @@ public class AssetsphereDbContext : DbContext
         modelBuilder.Entity<AuditLogEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ConfigurationConstantEntityClass>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<NotificationEntityClass>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<DeviceServiceRequestEntityClass>().HasQueryFilter(e => !e.IsDeleted);
 
         // Table Mapping & Indexes
         modelBuilder.Entity<UserEntityClass>(entity =>
@@ -154,6 +156,13 @@ public class AssetsphereDbContext : DbContext
                 b.Property(a => a.Kind).HasJsonPropertyName("kind");
                 b.Property(a => a.Direction).HasJsonPropertyName("direction");
             });
+        });
+
+        modelBuilder.Entity<DeviceServiceRequestEntityClass>(entity =>
+        {
+            entity.ToTable(DatabaseCON.DeviceServiceRequestsTable);
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.RequestNumber).IsUnique();
         });
 
         // Map all entity properties to snake_case column names for PostgreSQL/Supabase compatibility

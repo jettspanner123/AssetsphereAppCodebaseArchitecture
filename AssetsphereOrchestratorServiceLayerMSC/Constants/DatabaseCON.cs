@@ -20,4 +20,5 @@ public static class DatabaseCON
     public const string AuditLogsTable = "AS_AuditLogsTBL";
     public const string ConfigurationConstantsTable = "AS_ConfigurationConstantTBL";
     public const string NotificationsTable = "AS_NotificationTBL";
+    public const string DeviceServiceRequestsTable = "AS_DeviceServiceRequestsTBL";
 }

@@ -39,6 +39,8 @@ export default class ApplicationPermissionCON {
 
   public static readonly CAN_VIEW_TAB_SERVICEDESK: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
+  public static readonly CAN_VIEW_TAB_DEVICE_SERVICE_REQUESTS: Set<UserRoleType> =
+    ApplicationPermissionPreset.current.allRoles();
   public static readonly CAN_VIEW_TAB_COMPLIANCE: Set<UserRoleType> =
     ApplicationPermissionPreset.current.managementRoles();
   public static readonly CAN_VIEW_TAB_VERIFICATION: Set<UserRoleType> =

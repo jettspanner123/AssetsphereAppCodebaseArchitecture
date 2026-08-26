@@ -33,6 +33,10 @@ export default class UserPreferencesUtility {
   private serviceDeskGridColumnsKey = 'assetsphere_servicedesk_grid_columns';
   private serviceDeskSingleLineKey = 'assetsphere_servicedesk_single_line';
 
+  private deviceServiceRequestsViewModeKey = 'assetsphere_deviceservicerequests_view_mode';
+  private deviceServiceRequestsGridColumnsKey = 'assetsphere_deviceservicerequests_grid_columns';
+  private deviceServiceRequestsSingleLineKey = 'assetsphere_deviceservicerequests_single_line';
+
   private complianceViewModeKey = 'assetsphere_compliance_view_mode';
   private complianceGridColumnsKey = 'assetsphere_compliance_grid_columns';
   private complianceSingleLineKey = 'assetsphere_compliance_single_line';
@@ -339,6 +343,39 @@ export default class UserPreferencesUtility {
 
   public setComplianceSingleLine(val: boolean): void {
     this.setStorageItem(this.complianceSingleLineKey, val.toString());
+  }
+
+  // Device Service Requests View Mode - Default: table
+  public getDeviceServiceRequestsViewMode(defaultMode: 'table' | 'grid' = 'table'): 'table' | 'grid' {
+    const saved = this.getStorageItem(this.deviceServiceRequestsViewModeKey);
+    return saved === 'table' || saved === 'grid' ? saved : defaultMode;
+  }
+
+  public setDeviceServiceRequestsViewMode(mode: 'table' | 'grid'): void {
+    this.setStorageItem(this.deviceServiceRequestsViewModeKey, mode);
+  }
+
+  // Device Service Requests Grid Columns (2 vs 3) - Default: 2
+  public getDeviceServiceRequestsGridColumns(defaultCols: 2 | 3 = 2): 2 | 3 {
+    const saved = this.getStorageItem(this.deviceServiceRequestsGridColumnsKey);
+    if (saved === '2') return 2;
+    if (saved === '3') return 3;
+    return defaultCols;
+  }
+
+  public setDeviceServiceRequestsGridColumns(cols: 2 | 3): void {
+    this.setStorageItem(this.deviceServiceRequestsGridColumnsKey, cols.toString());
+  }
+
+  // Device Service Requests Single-Line Mode - Default: true
+  public getDeviceServiceRequestsSingleLine(defaultVal: boolean = true): boolean {
+    const saved = this.getStorageItem(this.deviceServiceRequestsSingleLineKey);
+    if (saved !== null) return saved === 'true';
+    return defaultVal;
+  }
+
+  public setDeviceServiceRequestsSingleLine(val: boolean): void {
+    this.setStorageItem(this.deviceServiceRequestsSingleLineKey, val.toString());
   }
 
   // Development Tools: Show Mock Data Preference

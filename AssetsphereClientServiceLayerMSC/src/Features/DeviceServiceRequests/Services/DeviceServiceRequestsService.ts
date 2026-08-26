@@ -124,4 +124,28 @@ export default class DeviceServiceRequestsService {
     const json: ApiResponse<DeviceServiceRequestItemType> = await res.json();
     return json.data;
   }
+
+  /**
+   * Full admin & developer update with audit history logging
+   */
+  public async adminUpdateRequest(
+    id: string,
+    input: import('../../../Types/DeviceServiceRequestType').AdminUpdateDeviceServiceRequestInput
+  ): Promise<DeviceServiceRequestItemType> {
+    const endpoint = ApplicationNetworkAPIConfiguration.current.getConfiguration().endpoints.deviceServiceRequests.update(id);
+
+    const res = await fetch(endpoint, {
+      method: 'PUT',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(input),
+    });
+
+    if (!res.ok) {
+      const errorJson = await res.json().catch(() => null);
+      throw new Error(errorJson?.message || `Failed to update service request: ${res.statusText}`);
+    }
+
+    const json: ApiResponse<DeviceServiceRequestItemType> = await res.json();
+    return json.data;
+  }
 }

@@ -19,4 +19,12 @@ public interface IDeviceServiceRequestsService
         UpdateDeviceServiceRequestStatusDTO dto,
         string updatedBy
     );
+    Task<DeviceServiceRequestResponseDTO?> AdminUpdateRequestAsync(
+        Guid id,
+        AdminUpdateDeviceServiceRequestDTO dto,
+        string editorUserId,
+        string editorName,
+        string editorEmail,
+        string editorRole
+    );
 }

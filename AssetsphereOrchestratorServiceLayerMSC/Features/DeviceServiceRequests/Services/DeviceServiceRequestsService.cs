@@ -197,6 +197,160 @@ public sealed class DeviceServiceRequestsService : IDeviceServiceRequestsService
         return MapToDTO(entity);
     }
 
+    public async Task<DeviceServiceRequestResponseDTO?> AdminUpdateRequestAsync(
+        Guid id,
+        AdminUpdateDeviceServiceRequestDTO dto,
+        string editorUserId,
+        string editorName,
+        string editorEmail,
+        string editorRole)
+    {
+        DeviceServiceRequestEntityClass? entity = await _context.DeviceServiceRequests
+            .FirstOrDefaultAsync(r => r.Id == id && !r.IsDeleted);
+
+        if (entity == null)
+            return null;
+
+        // 1. Preserve original baseline snapshot if this is the first edit
+        if (string.IsNullOrWhiteSpace(entity.OriginalData))
+        {
+            var originalSnapshot = new
+            {
+                targetUserId = entity.TargetUserId,
+                targetUserName = entity.TargetUserName,
+                targetUserEmail = entity.TargetUserEmail,
+                assetId = entity.AssetId,
+                assetTag = entity.AssetTag,
+                assetName = entity.AssetName,
+                serviceCategory = entity.ServiceCategory,
+                componentSubtype = entity.ComponentSubtype,
+                usabilityState = entity.UsabilityState,
+                serviceChannel = entity.ServiceChannel,
+                urgency = entity.Urgency,
+                workLocation = entity.WorkLocation,
+                descriptionRichText = entity.DescriptionRichText,
+                status = entity.Status,
+                resolutionNotes = entity.ResolutionNotes,
+                capturedAt = entity.CreatedAt
+            };
+            entity.OriginalData = System.Text.Json.JsonSerializer.Serialize(originalSnapshot);
+        }
+
+        // 2. Track Field Diffs
+        var diffs = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(dto.TargetUserName) && dto.TargetUserName != entity.TargetUserName)
+        {
+            diffs.Add($"Beneficiary: '{entity.TargetUserName}' -> '{dto.TargetUserName}'");
+            entity.TargetUserName = dto.TargetUserName;
+            if (!string.IsNullOrWhiteSpace(dto.TargetUserId)) entity.TargetUserId = dto.TargetUserId;
+            if (!string.IsNullOrWhiteSpace(dto.TargetUserEmail)) entity.TargetUserEmail = dto.TargetUserEmail;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.AssetTag) && dto.AssetTag != entity.AssetTag)
+        {
+            diffs.Add($"Asset Tag: '{entity.AssetTag}' -> '{dto.AssetTag}'");
+            entity.AssetTag = dto.AssetTag;
+            entity.AssetId = dto.AssetId;
+            if (!string.IsNullOrWhiteSpace(dto.AssetName)) entity.AssetName = dto.AssetName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ServiceCategory) && dto.ServiceCategory != entity.ServiceCategory)
+        {
+            diffs.Add($"Category: '{entity.ServiceCategory}' -> '{dto.ServiceCategory}'");
+            entity.ServiceCategory = dto.ServiceCategory;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ComponentSubtype) && dto.ComponentSubtype != entity.ComponentSubtype)
+        {
+            diffs.Add($"Subtype: '{entity.ComponentSubtype}' -> '{dto.ComponentSubtype}'");
+            entity.ComponentSubtype = dto.ComponentSubtype;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.UsabilityState) && dto.UsabilityState != entity.UsabilityState)
+        {
+            diffs.Add($"Usability: '{entity.UsabilityState}' -> '{dto.UsabilityState}'");
+            entity.UsabilityState = dto.UsabilityState;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.ServiceChannel) && dto.ServiceChannel != entity.ServiceChannel)
+        {
+            diffs.Add($"Channel: '{entity.ServiceChannel}' -> '{dto.ServiceChannel}'");
+            entity.ServiceChannel = dto.ServiceChannel;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Urgency) && dto.Urgency.ToUpper() != entity.Urgency.ToUpper())
+        {
+            diffs.Add($"Urgency: '{entity.Urgency}' -> '{dto.Urgency.ToUpper()}'");
+            entity.Urgency = dto.Urgency.ToUpper();
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.WorkLocation) && dto.WorkLocation != entity.WorkLocation)
+        {
+            diffs.Add($"Work Location: '{entity.WorkLocation}' -> '{dto.WorkLocation}'");
+            entity.WorkLocation = dto.WorkLocation;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.DescriptionRichText) && dto.DescriptionRichText != entity.DescriptionRichText)
+        {
+            diffs.Add("Problem Description updated");
+            entity.DescriptionRichText = dto.DescriptionRichText;
+        }
+
+        if (!string.IsNullOrWhiteSpace(dto.Status) && dto.Status.ToUpper() != entity.Status.ToUpper())
+        {
+            diffs.Add($"Status: '{entity.Status}' -> '{dto.Status.ToUpper()}'");
+            entity.Status = dto.Status.ToUpper();
+        }
+
+        if (dto.ResolutionNotes != null && dto.ResolutionNotes != entity.ResolutionNotes)
+        {
+            diffs.Add("Resolution Notes updated");
+            entity.ResolutionNotes = dto.ResolutionNotes;
+        }
+
+        // 3. Append to Edit History
+        var editHistoryList = new List<object>();
+        if (!string.IsNullOrWhiteSpace(entity.EditHistory))
+        {
+            try
+            {
+                var existing = System.Text.Json.JsonSerializer.Deserialize<List<object>>(entity.EditHistory);
+                if (existing != null)
+                {
+                    editHistoryList.AddRange(existing);
+                }
+            }
+            catch
+            {
+                // Reset if corrupt
+            }
+        }
+
+        var newAuditEntry = new
+        {
+            editId = Guid.NewGuid().ToString(),
+            editorUserId = editorUserId,
+            editorName = editorName,
+            editorEmail = editorEmail,
+            editorRole = editorRole,
+            editedAt = DateTime.UtcNow,
+            changesSummary = diffs.Count > 0 ? string.Join("; ", diffs) : "Record details verified / updated",
+            diffsCount = diffs.Count
+        };
+
+        editHistoryList.Add(newAuditEntry);
+        entity.EditHistory = System.Text.Json.JsonSerializer.Serialize(editHistoryList);
+
+        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedBy = editorName;
+        entity.UpdatedByUserId = editorUserId;
+
+        await _context.SaveChangesAsync();
+
+        return MapToDTO(entity);
+    }
+
     private static DeviceServiceRequestResponseDTO MapToDTO(DeviceServiceRequestEntityClass entity)
     {
         return new DeviceServiceRequestResponseDTO
@@ -225,7 +379,10 @@ public sealed class DeviceServiceRequestsService : IDeviceServiceRequestsService
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt,
             CreatedBy = entity.CreatedBy,
-            UpdatedBy = entity.UpdatedBy
+            UpdatedBy = entity.UpdatedBy,
+            UpdatedByUserId = entity.UpdatedByUserId,
+            EditHistory = entity.EditHistory,
+            OriginalData = entity.OriginalData
         };
     }
 }

@@ -124,4 +124,35 @@ public sealed class DeviceServiceRequestsController : ControllerBase
             $"Request {result.RequestNumber} status updated to {result.Status}."
         ));
     }
+
+    [HttpPut("{id:guid}")]
+    [Authorize(Roles = "ADMIN,DEVELOPER")]
+    public async Task<ActionResult<ApiResponseClass<DeviceServiceRequestResponseDTO>>> AdminUpdate(
+        [FromRoute] Guid id,
+        [FromBody] AdminUpdateDeviceServiceRequestDTO request)
+    {
+        string editorUserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "admin_user";
+        string editorName = User.FindFirstValue(ClaimTypes.Name) ?? "System Administrator";
+        string editorEmail = User.FindFirstValue(ClaimTypes.Email) ?? "admin@assetsphere.internal";
+        string editorRole = User.FindFirstValue(ClaimTypes.Role) ?? "ADMIN";
+
+        DeviceServiceRequestResponseDTO? result = await _serviceRequestsService.AdminUpdateRequestAsync(
+            id,
+            request,
+            editorUserId,
+            editorName,
+            editorEmail,
+            editorRole
+        );
+
+        if (result == null)
+        {
+            return NotFound(ApiResponseClass<DeviceServiceRequestResponseDTO>.Failed($"Device service request '{id}' not found.", null, 404));
+        }
+
+        return Ok(ApiResponseClass<DeviceServiceRequestResponseDTO>.Succeeded(
+            result,
+            $"Service request {result.RequestNumber} updated by {editorName} and logged to audit trail."
+        ));
+    }
 }

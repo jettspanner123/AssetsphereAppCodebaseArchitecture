@@ -711,6 +711,33 @@ export class DeviceServiceRequestsQueryService {
       ...options,
     });
   }
+
+  public useAdminUpdateDeviceServiceRequestMutation(
+    options?: Omit<
+      UseMutationOptions<
+        import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+        Error,
+        { id: string; input: import('../Types/DeviceServiceRequestType').AdminUpdateDeviceServiceRequestInput }
+      >,
+      'mutationFn'
+    >
+  ): UseMutationResult<
+    import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType,
+    Error,
+    { id: string; input: import('../Types/DeviceServiceRequestType').AdminUpdateDeviceServiceRequestInput }
+  > {
+    return useMutation({
+      mutationFn: async ({ id, input }) => {
+        const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
+        return await DeviceServiceRequestsService.current.adminUpdateRequest(id, input);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      },
+      ...options,
+    });
+  }
 }
 
 export default class TanstackQueryClientService {

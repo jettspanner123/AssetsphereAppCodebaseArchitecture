@@ -34,4 +34,9 @@ public sealed class DeviceServiceRequestEntityClass : BaseEntityClass
     // Lifecycle Status: PENDING, IN_REVIEW, IN_PROGRESS, RESOLVED, REJECTED
     public string Status { get; set; } = "PENDING";
     public string? ResolutionNotes { get; set; }
+
+    // Admin & Developer Audit Trail & Original Baseline
+    public string? UpdatedByUserId { get; set; }
+    public string? EditHistory { get; set; } = "[]";
+    public string? OriginalData { get; set; }
 }

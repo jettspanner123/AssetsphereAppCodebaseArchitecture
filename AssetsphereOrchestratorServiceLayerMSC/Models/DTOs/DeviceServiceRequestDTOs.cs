@@ -30,6 +30,28 @@ public class UpdateDeviceServiceRequestStatusDTO
     public string? ResolutionNotes { get; set; }
 }
 
+public class AdminUpdateDeviceServiceRequestDTO
+{
+    public string? TargetUserId { get; set; }
+    public string? TargetUserName { get; set; }
+    public string? TargetUserEmail { get; set; }
+
+    public string? AssetId { get; set; }
+    public string? AssetTag { get; set; }
+    public string? AssetName { get; set; }
+
+    public string? ServiceCategory { get; set; }
+    public string? ComponentSubtype { get; set; }
+    public string? UsabilityState { get; set; }
+    public string? ServiceChannel { get; set; }
+    public string? Urgency { get; set; }
+    public string? WorkLocation { get; set; }
+
+    public string? DescriptionRichText { get; set; }
+    public string? Status { get; set; }
+    public string? ResolutionNotes { get; set; }
+}
+
 public class DeviceServiceRequestResponseDTO
 {
     public Guid Id { get; set; }
@@ -63,4 +85,8 @@ public class DeviceServiceRequestResponseDTO
     public DateTime? UpdatedAt { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public string? UpdatedBy { get; set; }
+    public string? UpdatedByUserId { get; set; }
+
+    public string? EditHistory { get; set; }
+    public string? OriginalData { get; set; }
 }

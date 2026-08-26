@@ -147,6 +147,82 @@
   - Footer **"Dismiss"** & **"Resolve Ticket"** dismiss **up** (`exitDirection="up"`).
 - **Verification**: `npm run lint` (`tsc --noEmit`) passed with `0 errors`.
 
+## 12. Admin & Developer Full Edit Privilege & Audit History Tracking
+- **Files Modified/Created**:
+  - Backend:
+    - [`DeviceServiceRequestEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/DeviceServiceRequestEntityClass.cs)
+    - [`DeviceServiceRequestDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/DeviceServiceRequestDTOs.cs)
+    - [`IDeviceServiceRequestsService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/DeviceServiceRequests/Services/IDeviceServiceRequestsService.cs)
+    - [`DeviceServiceRequestsService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/DeviceServiceRequests/Services/DeviceServiceRequestsService.cs)
+    - [`DeviceServiceRequestsController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/DeviceServiceRequests/DeviceServiceRequestsController.cs)
+    - Supabase PostgreSQL: Added `edit_history JSONB`, `updated_by_user_id TEXT`, and `original_data JSONB` columns to `AS_DeviceServiceRequestsTBL`.
+  - Frontend:
+    - [`DeviceServiceRequestType.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Types/DeviceServiceRequestType.ts)
+    - [`ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts)
+    - [`DeviceServiceRequestsService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/Services/DeviceServiceRequestsService.ts)
+    - [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts)
+    - [`DeviceServiceRequestDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/Components/DeviceServiceRequestDetailModalController.tsx)
+    - [`DeviceServiceRequestScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/DeviceServiceRequestScreenController.tsx)
+- **Key Capabilities Delivered**:
+  1. **Role Gating**:
+     - `ADMIN` & `DEVELOPER`: Dedicated `"Edit Details"` mode allowing full edit of Beneficiary, Asset Tag, Device Name, Category, Subtype, Usability State, Channel, Urgency, Work Location, Rich Problem Description, Status, and Resolution Notes.
+     - `OPERATOR`: Permitted to execute lifecycle status actions (`IN_REVIEW`, `IN_PROGRESS`, `RESOLVED`, `REJECTED`) and append technician notes.
+     - `USER`: Read-only inspection of their own requests.
+  2. **Audit History & Baseline Snapshot Isolation**:
+     - On first edit, the original user submission state is captured in `original_data` JSONB.
+     - Every edit logs editor's User ID, Name, Email, Role, timestamp, and field change diffs into `edit_history` JSONB.
+     - Section 5 of the modal displays the revision history trail with editor role chips.
+     - An "Original Baseline" banner is toggleable in the modal.
+- **Verification**: `dotnet build` passed with `0 errors`; `npm run lint` passed with `0 errors`; backend daemon running on `http://localhost:5125`.
+
+## 13. Work Location Dropdown Backend Integration & Search/Custom Address Removal
+- **Files Modified**:
+  - [`CreatableCustomSelectSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/CreatableCustomSelectSharedComponent.tsx)
+  - [`DeviceServiceRequestScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/DeviceServiceRequestScreenController.tsx)
+  - [`DeviceServiceRequestDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/Components/DeviceServiceRequestDetailModalController.tsx)
+- **Changes**:
+  1. **Backend Integration**:
+     - Work locations are fetched live from the backend API via `TanstackQueryClientService.current.configuration.useWorkLocationsQuery()`.
+  2. **Strict Select Mode**:
+     - Added `enableSearch?: boolean` and `enableCustomCreation?: boolean` props to `CreatableCustomSelectSharedComponent`.
+     - Configured `Current Work Location` with `enableSearch={false}` and `enableCustomCreation={false}` in both the **Create Request Form** and the **Admin/Developer Edit Modal**.
+     - Users can only select from official backend-configured locations without any search bar or custom address write-in input.
+- **Verification**: `npm run lint` (`tsc --noEmit`) passed with `0 errors`.
+
+## 14. Enterprise Service Requests History Table & Grid View Modes with Sub-Options
+- **Files Modified**:
+  - [`UserPreferencesUtility.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Utilities/UserPreferencesUtility.ts)
+  - [`DeviceServiceRequestScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/DeviceServiceRequestScreenController.tsx)
+- **Features Delivered**:
+  1. **Dual View Modes (Table vs Grid)**:
+     - Implemented uniform segmented view mode switchers matching the **Asset Inventory Management** page.
+     - Persisted across sessions via `UserPreferencesUtility`.
+  2. **Table Mode & Sub-Options**:
+     - Single-Line toggle (`Maximize2`) vs Wrap Text toggle (`WrapText`).
+     - Responsive tabular display of Ticket #, Beneficiary, Device & Asset, Category, Urgency, Status, Submission Date, and Inspect button.
+  3. **Grid Mode & Sub-Options**:
+     - Grid Density toggle (`2 Per Row` vs `3 Per Row`).
+     - Rich cards displaying Ticket # header with Urgency & Status badges, Device title with Asset Tag chip, Beneficiary user and Facility location rows, Problem description snippet, and Inspect action.
+- **Verification**: `npm run lint` (`tsc --noEmit`) passed with `0 errors`; backend daemon running on `http://localhost:5125`.
+
+## 15. History Toolbar Reorganization & Dropdown Filters
+- **Files Modified**:
+  - [`DeviceServiceRequestScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/DeviceServiceRequestScreenController.tsx)
+- **Changes**:
+  1. **Line 1 (Single Line Layout)**:
+     - Left: Real-time ticket search bar (`Search` input).
+     - Right: Grid Density (`2 Per Row` / `3 Per Row`), Table Density (`Single-Line` / `Wrap Text`), and View Mode (`Table` / `Grid`) switchers.
+  2. **Line 2 (Secondary Dropdown Filters)**:
+     - Replaced pill button filters with dedicated `CustomSelectSharedComponent` dropdowns for:
+       - **Status Filter**: `All Statuses`, `Pending Review`, `In Review`, `In Progress`, `Resolved`, `Rejected`.
+       - **Urgency Filter**: `All Urgencies`, `Low Priority`, `Medium Priority`, `High Priority`, `Critical / Emergency`.
+     - Added quick "Reset Filters" action button when filters/search are active.
+- **Verification**: `npm run lint` (`tsc --noEmit`) passed with `0 errors`.
+
+
+
+
+
 
 
 

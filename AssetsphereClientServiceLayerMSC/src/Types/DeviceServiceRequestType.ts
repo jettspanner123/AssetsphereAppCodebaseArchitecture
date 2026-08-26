@@ -39,6 +39,21 @@ export interface DeviceServiceRequestItemType {
   updatedAt?: string | null;
   createdBy: string;
   updatedBy?: string | null;
+  updatedByUserId?: string | null;
+
+  editHistory?: string | null;
+  originalData?: string | null;
+}
+
+export interface DeviceServiceRequestAuditItemType {
+  editId: string;
+  editorUserId: string;
+  editorName: string;
+  editorEmail: string;
+  editorRole: string;
+  editedAt: string;
+  changesSummary: string;
+  diffsCount: number;
 }
 
 export interface CreateDeviceServiceRequestInput {
@@ -62,5 +77,26 @@ export interface CreateDeviceServiceRequestInput {
 
 export interface UpdateDeviceServiceRequestStatusInput {
   status: ServiceRequestStatusType | string;
+  resolutionNotes?: string;
+}
+
+export interface AdminUpdateDeviceServiceRequestInput {
+  targetUserId?: string;
+  targetUserName?: string;
+  targetUserEmail?: string;
+
+  assetId?: string;
+  assetTag?: string;
+  assetName?: string;
+
+  serviceCategory?: string;
+  componentSubtype?: string;
+  usabilityState?: string;
+  serviceChannel?: string;
+  urgency?: string;
+  workLocation?: string;
+
+  descriptionRichText?: string;
+  status?: ServiceRequestStatusType | string;
   resolutionNotes?: string;
 }

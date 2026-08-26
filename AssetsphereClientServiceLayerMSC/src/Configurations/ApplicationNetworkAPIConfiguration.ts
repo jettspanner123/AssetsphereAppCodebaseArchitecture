@@ -44,6 +44,7 @@ export interface NetworkAPIEndpoints {
     getMyRequests: string;
     getById: (id: string) => string;
     create: string;
+    update: (id: string) => string;
     updateStatus: (id: string) => string;
   };
 }
@@ -115,6 +116,7 @@ export default class ApplicationNetworkAPIConfiguration {
           getMyRequests: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/MyRequests`,
           getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
           create: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
+          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
           updateStatus: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}/Status`,
         },
       },

@@ -20,6 +20,8 @@ export interface CreatableCustomSelectSharedComponentProps {
   dropdownClassName?: string;
   size?: 'sm' | 'md';
   searchPlaceholder?: string;
+  enableSearch?: boolean;
+  enableCustomCreation?: boolean;
   required?: boolean;
   disabled?: boolean;
   helperText?: string;
@@ -36,6 +38,8 @@ export default function CreatableCustomSelectSharedComponent({
   dropdownClassName,
   size = 'md',
   searchPlaceholder = 'Search options or type custom value...',
+  enableSearch = true,
+  enableCustomCreation = true,
   required = false,
   disabled = false,
   helperText,
@@ -114,7 +118,7 @@ export default function CreatableCustomSelectSharedComponent({
           <span>
             {label} {required && <span className="text-rose-500 font-bold">*</span>}
           </span>
-          {value && !selectedOption && (
+          {enableCustomCreation && value && !selectedOption && (
             <span className="text-[10px] font-mono text-[#0C2086] dark:text-blue-400 flex items-center gap-1 font-semibold">
               <Sparkles className="w-2.5 h-2.5" />
               Custom Value
@@ -164,34 +168,36 @@ export default function CreatableCustomSelectSharedComponent({
             }`}
           >
             {/* Search / Custom Input Header */}
-            <div className="p-1 border-b border-slate-100 dark:border-zinc-800/80 mb-1">
-              <div className="relative flex items-center">
-                <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 absolute left-2.5" />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault();
-                      if (filteredOptions.length === 1) {
-                        handleSelectOption(filteredOptions[0].value);
-                      } else if (searchTerm.trim()) {
-                        handleApplyCustomValue();
+            {enableSearch && (
+              <div className="p-1 border-b border-slate-100 dark:border-zinc-800/80 mb-1">
+                <div className="relative flex items-center">
+                  <Search className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 absolute left-2.5" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (filteredOptions.length === 1) {
+                          handleSelectOption(filteredOptions[0].value);
+                        } else if (enableCustomCreation && searchTerm.trim()) {
+                          handleApplyCustomValue();
+                        }
                       }
-                    }
-                  }}
-                  placeholder={searchPlaceholder}
-                  className="w-full h-8 pl-8 pr-2.5 text-xs bg-slate-50 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
-                />
+                    }}
+                    placeholder={searchPlaceholder}
+                    className="w-full h-8 pl-8 pr-2.5 text-xs bg-slate-50 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Options List */}
-            <div className="overflow-y-auto space-y-0.5 max-h-52 pr-0.5">
+            <div className={`overflow-y-auto space-y-0.5 ${enableSearch ? 'max-h-52' : 'max-h-60'} pr-0.5`}>
               {/* Custom Write-In Option Banner if typed and no exact match */}
-              {searchTerm.trim().length > 0 && !exactMatchExists && (
+              {enableCustomCreation && searchTerm.trim().length > 0 && !exactMatchExists && (
                 <button
                   type="button"
                   onClick={handleApplyCustomValue}

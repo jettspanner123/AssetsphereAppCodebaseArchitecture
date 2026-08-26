@@ -36,6 +36,7 @@ import CreatableCustomSelectSharedComponent, {
 } from '../../Shared/Components/CreatableCustomSelectSharedComponent';
 import RichTextEditorSharedComponent from '../../Shared/Components/RichTextEditorSharedComponent';
 import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryActionButtonSharedComponent';
+import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
 import DeviceServiceRequestDetailModalController from './Components/DeviceServiceRequestDetailModalController';
 import {
   DeviceServiceRequestItemType,
@@ -438,6 +439,20 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
     }
   };
 
+  const getUrgencyGradient = (urgencyVal: string) => {
+    switch (urgencyVal?.toUpperCase()) {
+      case 'CRITICAL':
+        return 'from-rose-500 via-red-500 to-rose-600';
+      case 'HIGH':
+        return 'from-orange-500 via-amber-500 to-orange-500';
+      case 'MEDIUM':
+        return 'from-blue-500 via-indigo-500 to-blue-600';
+      case 'LOW':
+      default:
+        return 'from-emerald-500 via-teal-400 to-emerald-500';
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner (Structured identically to Employees & People page) */}
@@ -808,6 +823,29 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
               </button>
             )}
           </div>
+
+          {/* Urgency Color Legend Indicator (Matching User Registration Requests Page) */}
+          <div className="pt-3 mt-3 border-t border-slate-100 dark:border-zinc-800/80 flex flex-wrap items-center gap-5 text-xs font-mono">
+            <span className="text-[11px] uppercase tracking-wider text-slate-400 dark:text-zinc-500 font-semibold">
+              Urgency Legend:
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 shadow-xs" />
+              <span className="text-slate-700 dark:text-zinc-300 font-medium font-sans">Low Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-600 shadow-xs" />
+              <span className="text-slate-700 dark:text-zinc-300 font-medium font-sans">Medium Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-500 shadow-xs" />
+              <span className="text-slate-700 dark:text-zinc-300 font-medium font-sans">High Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-3.5 h-1.5 rounded-full bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 shadow-xs" />
+              <span className="text-slate-700 dark:text-zinc-300 font-medium font-sans">Critical Emergency</span>
+            </div>
+          </div>
         </div>
 
         {/* Content Body: Table or Grid */}
@@ -818,11 +856,19 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
               <p>Loading service requests...</p>
             </div>
           ) : filteredRequests.length === 0 ? (
-            <div className="p-12 text-center text-xs text-slate-400 dark:text-zinc-500 border border-dashed border-slate-200 dark:border-zinc-800 rounded-xl space-y-2">
-              <Wrench className="w-6 h-6 mx-auto text-slate-300 dark:text-zinc-600" />
-              <p className="font-medium text-slate-600 dark:text-zinc-400">No service requests found</p>
-              <p className="text-[11px]">Submit your first service ticket using the form above.</p>
-            </div>
+            <EmptyStateSharedComponent
+              icon={<Wrench className="w-6 h-6 text-slate-400 dark:text-zinc-500" />}
+              title={
+                historySearchTerm || historyStatusFilter !== 'ALL' || historyUrgencyFilter !== 'ALL'
+                  ? 'No Matching Service Requests'
+                  : 'No Service Requests in Registry'
+              }
+              description={
+                historySearchTerm || historyStatusFilter !== 'ALL' || historyUrgencyFilter !== 'ALL'
+                  ? 'No service tickets matched your active search query or filter parameters. Try clearing search filters or changing parameters.'
+                  : 'Your enterprise hardware maintenance queue is currently empty. Submit your first service ticket using the form above.'
+              }
+            />
           ) : viewMode === 'table' ? (
             /* ========================================================================= */
             /* TABLE VIEW MODE                                                          */
@@ -904,7 +950,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             </div>
           ) : (
             /* ========================================================================= */
-            /* GRID VIEW MODE (Matching Asset Inventory Management Card Elegance)        */
+            /* GRID VIEW MODE (Matching User Registration Requests Top Accent Elegance)   */
             /* ========================================================================= */
             <div
               className={`grid grid-cols-1 ${
@@ -916,15 +962,19 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                   key={req.id}
                   hoverable
                   onClick={() => setInspectingRequest(req)}
-                  className="p-5 flex flex-col justify-between space-y-4 cursor-pointer"
+                  className="p-5 flex flex-col justify-between space-y-4 cursor-pointer relative overflow-hidden border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all shadow-xs"
                 >
-                  {/* 1. Header: Ticket #, Status & Urgency Badges */}
-                  <div className="flex items-center justify-between gap-2">
+                  {/* Top Urgency Ambient Gradient Bar */}
+                  <div
+                    className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${getUrgencyGradient(req.urgency)}`}
+                  />
+
+                  {/* 1. Header: Ticket # & Status Badge */}
+                  <div className="flex items-center justify-between gap-2 pt-0.5">
                     <span className="font-mono font-bold text-sm text-[#0C2086] dark:text-blue-400">
                       {req.requestNumber}
                     </span>
-                    <div className="flex items-center gap-1.5 shrink-0">
-                      {getUrgencyBadge(req.urgency)}
+                    <div>
                       {getStatusBadge(req.status)}
                     </div>
                   </div>

@@ -86,32 +86,46 @@ export default function UserRequestsScreenController(): React.JSX.Element {
   });
 
   return (
-    <div className="space-y-4">
-      {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-1">
+    <div className="space-y-6">
+      {/* Page Title & Hero Summary Banner */}
+      <div
+        data-header-summary="true"
+        className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800"
+      >
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-zinc-100 font-serif-headline">
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             User Registration Requests
           </h1>
-          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
             Operator Access Approval & Directory Verification
           </p>
         </div>
 
-        {/* Counter Summary with Executive Card Background */}
-        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80 shadow-xs">
+        {/* Executive Typographic Metric Counters */}
+        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               {isLoading ? '...' : filteredUsers.length}
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
               {statusFilter === 'pending'
-                ? 'Pending Requests'
+                ? 'Pending Review'
                 : statusFilter === 'approved'
                 ? 'Approved Users'
                 : statusFilter === 'rejected'
                 ? 'Rejected Requests'
-                : 'Total Requests'}
+                : 'Filtered Total'}
+            </span>
+          </div>
+
+          <div className="h-6 w-px bg-slate-200 dark:bg-zinc-800" />
+
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+              {isLoading ? '...' : pendingUsers.length}
+            </span>
+            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+              Active Queue
             </span>
           </div>
         </div>

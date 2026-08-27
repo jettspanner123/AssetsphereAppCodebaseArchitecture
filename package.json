@@ -22,7 +22,9 @@
     "client install": "bun install --cwd AssetsphereClientServiceLayerMSC",
     "server:dev": "turbo dev --filter=@assetsphere/server",
     "server:build": "turbo build --filter=@assetsphere/server",
-    "server:lint": "turbo lint --filter=@assetsphere/server"
+    "server:lint": "turbo lint --filter=@assetsphere/server",
+    "list:cmd": "python AssetsphereRunnerScripts/CommandList.py",
+    "list cmd": "python AssetsphereRunnerScripts/CommandList.py"
   },
   "devDependencies": {
     "@types/bun": "latest",

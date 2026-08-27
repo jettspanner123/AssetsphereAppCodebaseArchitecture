@@ -45,4 +45,38 @@
   - `bun run client:build` succeeded in 28.2s.
   - `bun run server:build` succeeded in 1.8s.
 
+## 3. Class-Based CLI Command Center (`AssetsphereRunnerScripts/CommandList.py`)
+- **Files Created / Modified**:
+  - [`AssetsphereRunnerScripts/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Fully PascalCase, class-based CLI table renderer.
+  - [`package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/package.json): Added `"list:cmd"` and `"list cmd"` scripts executing `python AssetsphereRunnerScripts/CommandList.py`.
+- **Architecture & Highlights**:
+  1. **Strict PascalCase & Class-Based Architecture**:
+     - `TerminalThemeClass`: ANSI brand palette (#0C2086 Primary Blue, Cyan, Emerald, Amber, Rose, Slate).
+     - `ScriptItemClass`: Data container for command metadata.
+     - `CommandParserClass`: Multi-workspace parser (`ParseAllScripts()`, `GetScriptDescription()`).
+     - `CommandList`: Singleton manager with `CommandList.Current.ShowList()`.
+  2. **Multi-Workspace Command Introspection**:
+     - Automatically scans root `package.json` and all workspace packages (`@assetsphere/client` and `@assetsphere/server`).
+     - Categorizes commands into prioritized groups:
+       - Unified Full-Stack Orchestration
+       - Client Frontend (`@assetsphere/client`)
+       - Backend Server (`@assetsphere/server`)
+       - Developer Tooling & Scripts
+       - Client & Server Workspace Direct Scripts
+  3. **Windows UTF-8 & Console Support**:
+     - Configures `sys.stdout.reconfigure(encoding="utf-8")` and enables ANSI VT100 console sequences on Windows.
+- **Verification**:
+  - Executed `bun run list:cmd` (succeeded with exit code 0).
+  - Executed `bun run "list cmd"` (succeeded with exit code 0).
+
+## 4. Learned Rule: CLI Terminal Table & Command Center Design Rule
+- **Rule Created**: [`.agents/rules/cli-terminal-table-style.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/.agents/rules/cli-terminal-table-style.md)
+- **Design Invariants Established**:
+  1. **Strict PascalCase & Class-Based Standard**: Classes (`TerminalThemeClass`, `ScriptItemClass`, `CommandParserClass`, `CommandList`) with singleton `Current` pattern.
+  2. **Visual Styling**: AssetSphere ANSI color palette with Unicode rounded box drawing glyphs (`╭ ╮ ╰ ╯ ─ │ ┼ ├ ┤ ┬ ┴ ◆ ➜`).
+  3. **Windows UTF-8 & Console Support**: Automatic initialization of `sys.stdout.reconfigure(encoding="utf-8")` and ANSI virtual terminal processing.
+  4. **Dynamic Auto-Fitting**: Dynamic column auto-fitting without text truncation across varying terminal widths.
+
+
+
 

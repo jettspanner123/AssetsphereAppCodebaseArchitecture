@@ -62,7 +62,7 @@ export interface ApplicationNetworkAPIConfigurationDetails {
 export default class ApplicationNetworkAPIConfiguration {
   public static current: ApplicationNetworkAPIConfiguration = new ApplicationNetworkAPIConfiguration();
 
-  private readonly defaultTimeoutMs: number = 10000;
+  private readonly defaultTimeoutMs: number = 30000;
 
   public getBaseUrl(): string {
     const envUrl =

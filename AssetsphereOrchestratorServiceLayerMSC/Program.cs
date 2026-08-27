@@ -26,7 +26,10 @@ string dbConnectionString = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_D
 string jwtSecret = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_JWT_SECRET", "AssetsphereSuperSecretKey2026SecureLongJwtTokenSigningKey!");
 string jwtIssuer = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_JWT_ISSUER", "AssetsphereOrchestrator");
 string jwtAudience = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_JWT_AUDIENCE", "AssetsphereClient");
-string allowedOriginsString = ENValidator.Current.GetValueOrDefault("ASSETSPHERE_ALLOWED_ORIGINS", "http://localhost:5173,http://localhost:3000,http://localhost:5000");
+string allowedOriginsString = ENValidator.Current.GetValueOrDefault(
+    "ASSETSPHERE_ALLOWED_ORIGINS",
+    "http://localhost:5173,http://localhost:3000,http://localhost:5000,https://assetsphere-weplm.vercel.app"
+);
 
 string[] allowedOrigins = allowedOriginsString.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
@@ -107,7 +110,23 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AssetsphereCorsPolicy", policy =>
     {
-        policy.WithOrigins(allowedOrigins)
+        policy.SetIsOriginAllowed(origin =>
+              {
+                  if (string.IsNullOrWhiteSpace(origin)) return false;
+                  try
+                  {
+                      Uri uri = new Uri(origin);
+                      return uri.Host == "localhost" ||
+                             uri.Host == "127.0.0.1" ||
+                             uri.Host.EndsWith("vercel.app", StringComparison.OrdinalIgnoreCase) ||
+                             uri.Host.EndsWith("onrender.com", StringComparison.OrdinalIgnoreCase) ||
+                             allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase);
+                  }
+                  catch
+                  {
+                      return false;
+                  }
+              })
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();

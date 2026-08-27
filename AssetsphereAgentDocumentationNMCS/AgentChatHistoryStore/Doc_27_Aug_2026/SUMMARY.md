@@ -116,13 +116,16 @@
   - `bun run backend:status` rendered aligned diagnostic cards.
   - `bun run client:lint` and `bun run start:lint` passed with 0 errors.
 
-## 8. Vercel MCP Integration & Production Fallback Safeguard
-- **Vercel MCP Connected**:
-  - Authenticated `vercel` MCP server with API token (`team_rpMgJMF6SOydhX5wZcqfmiOi`).
-  - Successfully queried projects (`prj_ZposcrJs1whiwwpfmml8sYL6ciP8` / `assetsphere-weplm`) and confirmed latest deployment status (`READY`).
-- **Production Fallback Safeguard**:
-  - Enhanced [`AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts) with `import.meta.env?.PROD` fallback to Render (`https://assetsphereappcodebasearchitecture.onrender.com`).
-  - Verified `bun run client:build` and `bun run client:lint` (passed with 0 errors).
+## 9. Cross-Origin (CORS) & Network Timeout Resolution
+- **Issue Identified**:
+  - Browser on `https://assetsphere-weplm.vercel.app` was blocked by CORS preflight when calling `https://assetsphereappcodebasearchitecture.onrender.com` because `Program.cs` only had localhost in `allowedOrigins`.
+  - Client timeout (10s) caused immediate network drop before Render free-tier cold-start instances finished waking up.
+- **Fixes Applied**:
+  - [`AssetsphereOrchestratorServiceLayerMSC/Program.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Program.cs): Updated `AssetsphereCorsPolicy` with `SetIsOriginAllowed(...)` supporting `localhost`, `*.vercel.app`, `*.onrender.com`, and custom `ASSETSPHERE_ALLOWED_ORIGINS`.
+  - [`AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts): Increased network timeout from `10000ms` to `30000ms` (30s) to handle Render cold-start latency.
+- **Verification**:
+  - `bun run start:build` and `bun run start:lint` succeeded across both client and server monorepo workspaces.
+
 
 
 

@@ -98,6 +98,7 @@ export interface DashboardContextType {
   onSaveAsset: (asset: Partial<Asset>) => void;
   onDeleteAsset: (asset: Asset) => void;
   onOpenEditAsset?: (asset: Asset) => void;
+  onOpenAddAsset?: (templateAsset?: Asset | Partial<Asset>) => void;
   onSaveEmployee?: (employee: any) => void;
 }
 
@@ -133,6 +134,7 @@ export function useDashboard(): DashboardContextType {
       onImportAssets: () => {},
       onSaveAsset: () => {},
       onDeleteAsset: () => {},
+      onOpenAddAsset: () => {},
       onSaveEmployee: () => {},
     };
   }
@@ -188,6 +190,7 @@ export function DashboardShell(): React.JSX.Element {
   // Notification states
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
+  const [templateAssetDraft, setTemplateAssetDraft] = useState<Partial<Asset> | null>(null);
 
   // Live Database Assets Query via TanStack Query
   const {
@@ -321,7 +324,12 @@ export function DashboardShell(): React.JSX.Element {
     });
   };
 
-  const handleOpenAddAsset = () => {
+  const handleOpenAddAsset = (templateAsset?: Asset | Partial<Asset>) => {
+    if (templateAsset) {
+      setTemplateAssetDraft(templateAsset);
+    } else {
+      setTemplateAssetDraft(null);
+    }
     navigate({
       to: '.',
       search: (prev: any) => ({
@@ -344,6 +352,7 @@ export function DashboardShell(): React.JSX.Element {
   };
 
   const handleCloseAddAsset = () => {
+    setTemplateAssetDraft(null);
     navigate({
       to: '.',
       search: (prev: any) => ({
@@ -632,6 +641,7 @@ export function DashboardShell(): React.JSX.Element {
         onSaveAsset: handleSaveAsset,
         onDeleteAsset: handleDeleteAsset,
         onOpenEditAsset: handleOpenEditAsset,
+        onOpenAddAsset: handleOpenAddAsset,
         onSaveEmployee: handleSaveEmployee,
       }}
     >
@@ -688,7 +698,7 @@ export function DashboardShell(): React.JSX.Element {
           isLoading={createAssetMutation.isPending || updateAssetMutation.isPending}
           onClose={handleCloseAddAsset}
           onSave={handleSaveAsset}
-          initialAsset={editingAsset}
+          initialAsset={editingAsset || (templateAssetDraft as Asset) || null}
           zIndex={60}
         />
 
@@ -967,7 +977,7 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets, refetchAssets } = useDashboard();
+    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets, refetchAssets, onOpenAddAsset } = useDashboard();
 
     return (
       <AssetInventoryScreenRoute
@@ -985,15 +995,7 @@ const assetInventoryRoute = createRoute({
             }),
           })
         }
-        onOpenAddModal={() =>
-          navigate({
-            to: '.',
-            search: (prev: any) => ({
-              ...prev,
-              newAsset: true,
-            }),
-          })
-        }
+        onOpenAddModal={(tmpl) => onOpenAddAsset?.(tmpl)}
         onOpenQRBadgeModal={(asset) =>
           navigate({
             to: '.',

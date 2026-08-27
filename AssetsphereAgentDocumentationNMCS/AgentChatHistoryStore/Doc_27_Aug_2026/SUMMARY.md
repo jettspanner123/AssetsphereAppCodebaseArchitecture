@@ -138,6 +138,71 @@
 - **Verification**:
   - `bun run client:lint` and `bun run client:build` compiled with 0 errors.
 
+## 11. Test Pending Action Items Documentation
+- **File Created**:
+  - [`AssetsphereAgentDocumentationNMCS/ActionItems/TestPending/TP_27_Aug_2026.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAgentDocumentationNMCS/ActionItems/TestPending/TP_27_Aug_2026.md): Added complete test case checklist, architecture mapping, step-by-step verification flows (Modal trigger, URL copy, In-browser preview, Smartphone camera scan, Physical audit stamp, Service request trigger), and troubleshooting context for testing.
+
+## 12. Register Device Custom Dropdown Menu
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx):
+    - Converted "Register Device" button icon to `ChevronDown` (animated rotation).
+    - Added custom 2-option animated dropdown anchored to button with outside-click dismissal.
+    - **Option 1**: "Create From Scratch" (`FilePlus2`, muted icon, title, description, triggers blank registration modal).
+    - **Option 2**: "Create From Template" (`LayoutTemplate`, muted icon, title, description).
+## 13. Register Device from Template Modal Shell
+- **Files Created / Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx): Created standard modal shell with header (`Register Device from Template`), subtitle, dismiss button, and empty body container.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx): Connected "Create From Template" dropdown item to open the template modal with `isTemplateModalOpen` state.
+
+## 14. Full-Width Segmented Tab Switcher in Template Modal
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx):
+    - Added full-width segmented tab switcher matching dark/light mode switcher styling (`h-10`, rounded-xl pill container, elevated active state with `shadow-xs`).
+    - Tab 1: **"Choose Standard Template"** (`LayoutTemplate` icon).
+    - Tab 2: **"Choose from Existing Assets"** (`Copy` icon).
+    - Added conditional sub-view containers ready for template catalog elements.
+
+## 15. Choose from Existing Assets Template Catalog
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx):
+    - Connected live backend querying via `TanstackQueryClientService.current.assets.useAssetsQuery()` with mock data fallback.
+    - Added real-time search input bar filtering by device name, manufacturer, model, category, CPU, RAM, and storage.
+    - Rendered compact full-width hardware cards (1 per row) showing Device Name, Manufacturer, Category/Subtype badge, and inline badges for CPU, RAM, Storage, and GPU.
+    - Handled empty search states strictly via `EmptyStateSharedComponent`.
+    - Added `onSelectTemplate` handler to pre-fill registration blueprints while keeping unique serial/tag IDs clean.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx):
+    - Wired `onSelectTemplate` to `onOpenAddModal(template)`.
+  - [`AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx):
+    - Added `templateAssetDraft` state and provided `onOpenAddAsset` in `useDashboard` context to open `AssetFormModalController` pre-filled with the selected template.
+## 16. Comprehensive Hardware Attributes on Template Cards
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx):
+    - Extracted and displayed comprehensive hardware fields from `AS_AssetsTBL` / `HardwareSpecs`:
+      - **Tier 1**: Processor / CPU (`processor`, `cpu`, `generation`), RAM (`ram`, `ramGbs`), Storage configuration (`storage`, `storageGbs`, `storageDrives`), GPU (`gpu`, `graphics`).
+      - **Tier 2**: Display & Resolution (`screenSize`, `resolution`, `touchSupport`), Battery Health % (`batteryHealthPct`), Wi-Fi standard (`wifiStandard`), Bluetooth (`bluetoothVersion`), Security Module (`tpmVersion`), Biometrics (`fingerprintReader`), Product Family & Model Generation.
+    - Updated search query evaluator to index all hardware dimensions.
+- **Verification**:
+  - `bun run client:lint` and `bun run client:build` compiled with 0 errors.
+
+## 17. Structured 3-Column Key-Value Spec Datasheet Card Redesign
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx):
+    - Completely replaced loose chip/tag cloud with a clean, structured 3-column enterprise datasheet layout:
+      - **Header**: Device Name (bold), Model, Manufacturer, Product Family, Generation, Category/Subtype pill, and "Use Template →" hover action hint.
+      - **Column 1 (Compute & Memory)**: `PROCESSOR / CPU` & `MEMORY (RAM)`
+      - **Column 2 (Storage & Graphics)**: `STORAGE CONFIGURATION` & `GRAPHICS (GPU)`
+      - **Column 3 (Display & Features)**: `DISPLAY / SCREEN` & `HARDWARE FEATURES` (Battery, Wi-Fi, TPM, Biometrics)
+    - Hairline dividers, uppercase mono field labels, high-density structured layout with zero AI visual fluff.
+- **Verification**:
+  - `bun run client:lint` and `bun run client:build` compiled with 0 errors.
+
+
+
+
+
+
+
+
 
 
 

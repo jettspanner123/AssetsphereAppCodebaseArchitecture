@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Asset } from '../../Types/AssetType';
 import {
   Search,
@@ -22,6 +23,9 @@ import {
   RotateCw,
   Settings,
   Laptop,
+  ChevronDown,
+  FilePlus2,
+  LayoutTemplate,
 } from 'lucide-react';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
@@ -32,6 +36,7 @@ import ConfirmationModalSharedComponent from '../../Shared/Components/Confirmati
 import AssetInventoryCON from './Constants/AssetInventoryCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import AssetImportModalController from './Components/AssetImportModalController';
+import AssetTemplateSelectionModalController from './Components/AssetTemplateSelectionModalController';
 import { ImportExecutionSummary } from './Services/AssetImportProcessorService';
 import CustomSelectSharedComponent, { SelectOption } from '../../Shared/Components/CustomSelectSharedComponent';
 import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
@@ -47,7 +52,7 @@ export interface AssetInventoryScreenControllerProps {
   isLoading?: boolean;
   onRefresh?: () => void;
   onSelectAsset: (asset: Asset) => void;
-  onOpenAddModal: () => void;
+  onOpenAddModal: (templateAsset?: Asset) => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
   onImportAssets?: (importedAssets: Asset[]) => void;
@@ -108,6 +113,27 @@ export default function AssetInventoryScreenController({
       ? overrideSingleLine
       : UserPreferencesUtility.current.getInventorySingleLine(true)
   );
+
+  const [isRegisterDropdownOpen, setIsRegisterDropdownOpen] = useState<boolean>(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState<boolean>(false);
+  const registerDropdownRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        registerDropdownRef.current &&
+        !registerDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsRegisterDropdownOpen(false);
+      }
+    }
+    if (isRegisterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isRegisterDropdownOpen]);
 
   const setViewMode = (mode: 'table' | 'grid') => {
     setViewModeState(mode);
@@ -413,10 +439,73 @@ export default function AssetInventoryScreenController({
             </ButtonSharedComponent>
 
             <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
-              <PrimaryActionButtonSharedComponent
-                label="Register Device"
-                onClick={onOpenAddModal}
-              />
+              <div className="relative" ref={registerDropdownRef}>
+                <PrimaryActionButtonSharedComponent
+                  label="Register Device"
+                  onClick={() => setIsRegisterDropdownOpen((prev) => !prev)}
+                  icon={<ChevronDown className={`w-3.5 h-3.5 !text-white transition-transform duration-200 ${isRegisterDropdownOpen ? 'rotate-180' : ''}`} />}
+                />
+
+                <AnimatePresence>
+                  {isRegisterDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 6, scale: 0.96 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 6, scale: 0.96 }}
+                      transition={{ duration: 0.15, ease: 'easeOut' }}
+                      className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 p-1.5 space-y-1 divide-y divide-slate-100 dark:divide-zinc-800/60 font-sans"
+                    >
+                      <div className="p-1 space-y-1">
+                        {/* Option 1: Create From Scratch */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsRegisterDropdownOpen(false);
+                            onOpenAddModal();
+                          }}
+                          className="w-full flex items-start gap-3 p-2.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group cursor-pointer"
+                        >
+                          <div className="p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
+                            <FilePlus2 className="w-4 h-4" />
+                          </div>
+                          <div className="space-y-0.5 min-w-0 flex-1">
+                            <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
+                              Create From Scratch
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
+                              Start with an empty registration form to manually configure all specifications.
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+
+                      <div className="p-1 pt-1.5 space-y-1">
+                        {/* Option 2: Create From Template */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsRegisterDropdownOpen(false);
+                            setIsTemplateModalOpen(true);
+                          }}
+                          className="w-full flex items-start gap-3 p-2.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group cursor-pointer"
+                        >
+                          <div className="p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
+                            <LayoutTemplate className="w-4 h-4" />
+                          </div>
+                          <div className="space-y-0.5 min-w-0 flex-1">
+                            <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
+                              Create From Template
+                            </div>
+                            <div className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
+                              Pre-fill specifications using enterprise hardware presets and configurations.
+                            </div>
+                          </div>
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </PermissionGuardSharedComponent>
           </div>
         </div>
@@ -838,6 +927,16 @@ export default function AssetInventoryScreenController({
         onClose={() => setIsImportModalOpen(false)}
         existingAssets={activeAssets}
         onImportComplete={handleImportComplete}
+      />
+
+      {/* Register Device from Template Modal Shell */}
+      <AssetTemplateSelectionModalController
+        isOpen={isTemplateModalOpen}
+        onClose={() => setIsTemplateModalOpen(false)}
+        onSelectTemplate={(template) => {
+          setIsTemplateModalOpen(false);
+          onOpenAddModal(template as Asset);
+        }}
       />
     </div>
   );

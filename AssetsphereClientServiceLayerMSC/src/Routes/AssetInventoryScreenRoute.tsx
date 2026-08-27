@@ -7,7 +7,7 @@ export interface AssetInventoryScreenRouteProps {
   isLoading?: boolean;
   onRefresh?: () => void;
   onSelectAsset: (asset: Asset) => void;
-  onOpenAddModal: () => void;
+  onOpenAddModal: (templateAsset?: Asset) => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
   onImportAssets?: (importedAssets: Asset[]) => void;

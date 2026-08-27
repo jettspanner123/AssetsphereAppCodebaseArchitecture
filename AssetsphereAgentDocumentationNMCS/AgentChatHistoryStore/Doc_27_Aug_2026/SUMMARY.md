@@ -77,6 +77,19 @@
   3. **Windows UTF-8 & Console Support**: Automatic initialization of `sys.stdout.reconfigure(encoding="utf-8")` and ANSI virtual terminal processing.
   4. **Dynamic Auto-Fitting**: Dynamic column auto-fitting without text truncation across varying terminal widths.
 
+## 5. Backend Health Check Controller & Diagnostics Subsystem
+- **Files Created / Modified**:
+  - [`Factories/ApplicationRouteFactory.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Factories/ApplicationRouteFactory.cs): Added `HealthCheck` property and `HealthCheckRoutes` (`ControllerURL = "Api/V1/HealthCheck"`, `Status = ""`).
+  - [`Models/DTOs/HealthCheckDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/HealthCheckDTOs.cs): `HealthStatusType`, `ComponentHealthDTO`, `RuntimeHealthDTO`, `HealthCheckResponseDTO`.
+  - [`Features/HealthCheck/Assertion/HealthCheckAssertion.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/Assertion/HealthCheckAssertion.cs): Singleton assertion class `HealthCheckAssertion.Current`.
+  - [`Features/HealthCheck/Services/IHealthCheckService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/Services/IHealthCheckService.cs) & [`HealthCheckService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/Services/HealthCheckService.cs): Diagnostic health check service with database roundtrip timing, process metrics, and DI subsystem validation.
+  - [`Features/HealthCheck/HealthCheckController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/HealthCheckController.cs): REST controller with `[AllowAnonymous]` at `GET /Api/V1/HealthCheck`.
+  - [`Program.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Program.cs): Registered `IHealthCheckService` and `HealthCheckService` in DI.
+- **Verification**:
+  - `bun run server:build` compiled with `0 errors`.
+  - Live probe `GET http://localhost:5125/Api/V1/HealthCheck` returned `HTTP 200 OK` with database latency (31ms), uptime metrics, and 6/6 healthy subsystem statuses.
+
+
 
 
 

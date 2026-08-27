@@ -126,6 +126,19 @@
 - **Verification**:
   - `bun run start:build` and `bun run start:lint` succeeded across both client and server monorepo workspaces.
 
+## 10. Dynamic Vector QR Code Badge & Public Asset Digital Passport
+- **Files Created / Modified**:
+  - [`AssetsphereClientServiceLayerMSC/package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/package.json): Installed `qrcode.react@4.2.0`.
+  - [`AssetsphereClientServiceLayerMSC/src/Constants/ApplicationRouteCON.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Constants/ApplicationRouteCON.ts): Added `ASSET_PASSPORT = '/asset-passport'` and `PARAM_PASSPORT_ID = 'id'`.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/QRScanner/QRBadgeModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/QRScanner/QRBadgeModalController.tsx): Replaced static Lucide icon with dynamic `QRCodeSVG` linking to `${origin}/asset-passport?id=...`, added "Copy Link", "Open Passport", and Print Badge controls.
+  - [`AssetsphereClientServiceLayerMSC/src/Components/QRBadgeModal.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Components/QRBadgeModal.tsx): Replaced static SVG with dynamic `QRCodeSVG`.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetPassport/AssetPassportScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetPassport/AssetPassportScreenController.tsx): Created mobile-optimized, high-contrast, clean enterprise Asset Passport screen (Hardware specs, Custody & Location, Procurement & Warranty, Security & Compliance, Physical Audit verification stamp, and Service Request trigger).
+  - [`AssetsphereClientServiceLayerMSC/src/Routes/AssetPassportScreenRoute.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Routes/AssetPassportScreenRoute.tsx): Route handler for `/asset-passport`.
+  - [`AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx): Registered `assetPassportRoute` in routeTree.
+- **Verification**:
+  - `bun run client:lint` and `bun run client:build` compiled with 0 errors.
+
+
 
 
 

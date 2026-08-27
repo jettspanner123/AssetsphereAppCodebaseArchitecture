@@ -49,6 +49,7 @@ import AnalyticsScreenRoute from '../Routes/AnalyticsScreenRoute';
 import SettingsScreenRoute from '../Routes/SettingsScreenRoute';
 import DevDashboardScreenRoute from '../Routes/DevDashboardScreenRoute';
 import UserRequestsScreenController from '../Features/UserRequests/UserRequestsScreenController';
+import AssetPassportScreenRoute from '../Routes/AssetPassportScreenRoute';
 
 // Modals
 import NavigationController from '../Features/Navigation/NavigationController';
@@ -1260,6 +1261,15 @@ const userRequestsRoute = createRoute({
   },
 });
 
+// Public Standalone Asset Digital Passport Route (/asset-passport)
+const assetPassportRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'asset-passport',
+  component: function AssetPassportComponent() {
+    return <AssetPassportScreenRoute />;
+  },
+});
+
 // ==========================================
 // 4. Construct Router Tree
 // ==========================================
@@ -1269,6 +1279,7 @@ const routeTree = rootRoute.addChildren([
   signupRoute,
   forgotPasswordRoute,
   devDashboardRoute,
+  assetPassportRoute,
   dashboardLayoutRoute.addChildren([
     dashboardOverviewRoute,
     assetInventoryRoute,

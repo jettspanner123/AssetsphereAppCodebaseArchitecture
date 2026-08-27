@@ -25,8 +25,12 @@ export default class ApplicationRouteCON {
   // Developer Dashboard Route
   public static readonly DEV_DASHBOARD: string = '/dev/dashboard';
 
+  // Public Asset Digital Passport Route
+  public static readonly ASSET_PASSPORT: string = '/asset-passport';
+
   // Query Parameter Keys
   public static readonly PARAM_SEARCH: string = 'search';
+  public static readonly PARAM_PASSPORT_ID: string = 'id';
   public static readonly PARAM_SELECTED_ASSET_ID: string = 'selectedAssetId';
   public static readonly PARAM_ASSET_TAB: string = 'assetTab';
   public static readonly PARAM_NEW_ASSET: string = 'newAsset';

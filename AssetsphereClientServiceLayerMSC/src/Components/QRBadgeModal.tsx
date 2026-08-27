@@ -1,6 +1,7 @@
 import React from 'react';
 import { Asset } from '../Types/AssetType';
 import { X, Printer, ShieldCheck } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 
 interface QRBadgeModalProps {
   asset: Asset;
@@ -11,6 +12,13 @@ export const QRBadgeModal: React.FC<QRBadgeModalProps> = ({ asset, onClose }) =>
   const handlePrint = () => {
     window.print();
   };
+
+  const origin =
+    typeof window !== 'undefined' && window.location.origin
+      ? window.location.origin
+      : 'https://assetsphere-weplm.vercel.app';
+
+  const passportUrl = `${origin}/asset-passport?id=${encodeURIComponent(asset.id || asset.assetNumber)}`;
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/60 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
@@ -39,16 +47,14 @@ export const QRBadgeModal: React.FC<QRBadgeModalProps> = ({ asset, onClose }) =>
             </div>
 
             <div className="flex items-center gap-4 py-1">
-              {/* SVG QR Code Simulation */}
-              <div className="w-28 h-28 bg-slate-900 rounded-lg p-2 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 100 100" className="w-full h-full fill-white">
-                  <path d="M0,0 h30 v30 h-30 z M10,10 h10 v10 h-10 z" />
-                  <path d="M70,0 h30 v30 h-30 z M80,10 h10 v10 h-10 z" />
-                  <path d="M0,70 h30 v30 h-30 z M10,80 h10 v10 h-10 z" />
-                  <path d="M40,10 h10 v10 h-10 z M55,5 h10 v10 h-10 z" />
-                  <path d="M35,40 h15 v15 h-15 z M60,40 h10 v10 h-10 z M80,50 h15 v15 h-15 z" />
-                  <path d="M40,75 h10 v10 h-10 z M60,70 h20 v10 h-20 z M50,85 h15 v10 h-15 z" />
-                </svg>
+              {/* Dynamic Vector SVG QR Code */}
+              <div className="w-28 h-28 bg-white border border-slate-200 rounded-lg p-2 flex items-center justify-center shrink-0 shadow-sm">
+                <QRCodeSVG
+                  value={passportUrl}
+                  size={96}
+                  level="H"
+                  includeMargin={false}
+                />
               </div>
 
               <div className="space-y-1 font-mono text-[11px] text-slate-800">

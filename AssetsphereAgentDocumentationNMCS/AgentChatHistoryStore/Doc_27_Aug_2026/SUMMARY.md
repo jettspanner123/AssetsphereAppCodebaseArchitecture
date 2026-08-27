@@ -89,6 +89,19 @@
   - `bun run server:build` compiled with `0 errors`.
   - Live probe `GET http://localhost:5125/Api/V1/HealthCheck` returned `HTTP 200 OK` with database latency (31ms), uptime metrics, and 6/6 healthy subsystem statuses.
 
+## 6. Render Deployment Dockerfile & .dockerignore Configuration
+- **Files Created**:
+  - [`AssetsphereOrchestratorServiceLayerMSC/Dockerfile`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Dockerfile): Multi-stage .NET 10 production build image.
+  - [`AssetsphereOrchestratorServiceLayerMSC/.dockerignore`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/.dockerignore): Fast-transfer exclusion rules (`bin/`, `obj/`, `.git/`, `.env`, `node_modules/`).
+- **Features Delivered**:
+  1. **Multi-Stage Architecture**:
+     - **Stage 1 (Build)**: `mcr.microsoft.com/dotnet/sdk:10.0-preview` compiles and publishes Release artifacts with layer-cached project restore.
+     - **Stage 2 (Runtime)**: `mcr.microsoft.com/dotnet/aspnet:10.0-preview` lightweight runtime image containing only production binaries.
+  2. **Render Cloud Compatibility**:
+     - Configured `ENV ASPNETCORE_HTTP_PORTS=10000`, `ENV ASPNETCORE_URLS=http://+:10000`, and `EXPOSE 10000` (Render's default port).
+     - Health check path aligned to `/Api/V1/HealthCheck`.
+
+
 
 
 

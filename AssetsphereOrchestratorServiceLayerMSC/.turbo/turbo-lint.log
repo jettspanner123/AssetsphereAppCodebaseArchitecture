@@ -1,0 +1,12 @@
+$ dotnet build -v q /nologo
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+
+Build succeeded.
+
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+    2 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.31

@@ -1,0 +1,11 @@
+{
+  "name": "@assetsphere/server",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "dotnet run",
+    "build": "dotnet build",
+    "lint": "dotnet build -v q /nologo",
+    "clean": "dotnet clean"
+  }
+}

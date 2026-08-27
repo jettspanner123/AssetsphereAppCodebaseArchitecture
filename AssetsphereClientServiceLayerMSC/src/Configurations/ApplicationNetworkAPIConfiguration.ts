@@ -75,7 +75,17 @@ export default class ApplicationNetworkAPIConfiguration {
         ? (process.env.VITE_BACKEND_API_BASE_URL as string | undefined)
         : undefined;
 
-    return (envUrl || processEnvUrl || 'http://localhost:5125').replace(/\/+$/, '');
+    const configuredUrl = envUrl || processEnvUrl;
+    if (configuredUrl) {
+      return configuredUrl.replace(/\/+$/, '');
+    }
+
+    // When built for production (such as on Vercel), default to live Render Cloud API
+    if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) {
+      return 'https://assetsphereappcodebasearchitecture.onrender.com';
+    }
+
+    return 'http://localhost:5125';
   }
 
   public getConfiguration(): ApplicationNetworkAPIConfigurationDetails {

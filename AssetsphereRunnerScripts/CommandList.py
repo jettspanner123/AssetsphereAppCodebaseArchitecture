@@ -132,6 +132,21 @@ class CommandParserClass:
                     "Backend Server (@assetsphere/server)",
                     "Executes silent .NET build checks for compiler warnings and errors",
                 )
+            if "backend:live" in name_lower or "backend live" in name_lower:
+                return (
+                    "Environment & Cloud Management",
+                    "Switches frontend target to live Render cloud API (https://assetsphereappcodebasearchitecture.onrender.com)",
+                )
+            if "backend:local" in name_lower or "backend local" in name_lower:
+                return (
+                    "Environment & Cloud Management",
+                    "Switches frontend target to localhost ASP.NET Core daemon (http://localhost:5125)",
+                )
+            if "backend:status" in name_lower or "backend status" in name_lower:
+                return (
+                    "Environment & Cloud Management",
+                    "Displays current active backend gateway and runs live health check diagnostic probe",
+                )
             if "list:cmd" in name_lower or "list cmd" in name_lower:
                 return (
                     "Developer Tooling & Scripts",
@@ -323,6 +338,7 @@ class CommandList:
         # Print each category in prioritized order
         category_order = [
             "Unified Full-Stack Orchestration",
+            "Environment & Cloud Management",
             "Client Frontend (@assetsphere/client)",
             "Backend Server (@assetsphere/server)",
             "Developer Tooling & Scripts",

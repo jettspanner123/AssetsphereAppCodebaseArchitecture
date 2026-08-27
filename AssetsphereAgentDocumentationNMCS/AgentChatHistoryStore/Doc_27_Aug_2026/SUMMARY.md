@@ -101,6 +101,22 @@
      - Configured `ENV ASPNETCORE_HTTP_PORTS=10000`, `ENV ASPNETCORE_URLS=http://+:10000`, and `EXPOSE 10000` (Render's default port).
      - Health check path aligned to `/Api/V1/HealthCheck`.
 
+## 7. Dynamic Backend Target Switcher (`backend:live`, `backend:local`, `backend:status`)
+- **Files Created / Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts): Updated `getBaseUrl()` to dynamically consume `import.meta.env.VITE_BACKEND_API_BASE_URL` with clean fallback to `http://localhost:5125` and registered `healthCheck` endpoint.
+  - [`AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py): Created class-based, PascalCase CLI runner with ANSI brand theme and live health check diagnostic ping.
+  - [`package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/package.json): Added `backend:live`, `backend:local`, `backend:status` aliases.
+  - [`AssetsphereRunnerScripts/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Added "Environment & Cloud Management" category to the Command Center table.
+- **Commands Available**:
+  - `bun run backend:live`: Configures `VITE_BACKEND_API_BASE_URL=https://assetsphereappcodebasearchitecture.onrender.com` and executes live health check probe.
+  - `bun run backend:local`: Configures `VITE_BACKEND_API_BASE_URL=http://localhost:5125`.
+  - `bun run backend:status`: Displays current active target and runs real-time diagnostic ping against both environments.
+- **Verification**:
+  - `bun run backend:live` switched target and confirmed live Render health ping (HTTP 200, 551ms).
+  - `bun run backend:status` rendered aligned diagnostic cards.
+  - `bun run client:lint` and `bun run start:lint` passed with 0 errors.
+
+
 
 
 

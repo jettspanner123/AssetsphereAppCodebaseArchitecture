@@ -1,4 +1,7 @@
 export interface NetworkAPIEndpoints {
+  healthCheck: {
+    status: string;
+  };
   authentication: {
     login: string;
     register: string;
@@ -59,65 +62,83 @@ export interface ApplicationNetworkAPIConfigurationDetails {
 export default class ApplicationNetworkAPIConfiguration {
   public static current: ApplicationNetworkAPIConfiguration = new ApplicationNetworkAPIConfiguration();
 
-  private readonly defaultBaseUrl: string = 'http://localhost:5125';
   private readonly defaultTimeoutMs: number = 10000;
 
+  public getBaseUrl(): string {
+    const envUrl =
+      typeof import.meta !== 'undefined' && import.meta.env
+        ? (import.meta.env.VITE_BACKEND_API_BASE_URL as string | undefined)
+        : undefined;
+
+    const processEnvUrl =
+      typeof process !== 'undefined' && process.env
+        ? (process.env.VITE_BACKEND_API_BASE_URL as string | undefined)
+        : undefined;
+
+    return (envUrl || processEnvUrl || 'http://localhost:5125').replace(/\/+$/, '');
+  }
+
   public getConfiguration(): ApplicationNetworkAPIConfigurationDetails {
+    const activeBaseUrl = this.getBaseUrl();
+
     return {
-      baseUrl: this.defaultBaseUrl,
+      baseUrl: activeBaseUrl,
       timeoutMs: this.defaultTimeoutMs,
       headers: {
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
       endpoints: {
+        healthCheck: {
+          status: `${activeBaseUrl}/Api/V1/HealthCheck`,
+        },
         authentication: {
-          login: `${this.defaultBaseUrl}/Api/V1/Authentication/Login`,
-          register: `${this.defaultBaseUrl}/Api/V1/Authentication/Register`,
-          me: `${this.defaultBaseUrl}/Api/V1/Authentication/Me`,
-          refreshToken: `${this.defaultBaseUrl}/Api/V1/Authentication/RefreshToken`,
+          login: `${activeBaseUrl}/Api/V1/Authentication/Login`,
+          register: `${activeBaseUrl}/Api/V1/Authentication/Register`,
+          me: `${activeBaseUrl}/Api/V1/Authentication/Me`,
+          refreshToken: `${activeBaseUrl}/Api/V1/Authentication/RefreshToken`,
         },
         assetInventory: {
-          base: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
-          getAll: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
-          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
-          create: `${this.defaultBaseUrl}/Api/V1/AssetInventory`,
-          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
-          delete: (id: string) => `${this.defaultBaseUrl}/Api/V1/AssetInventory/${id}`,
+          base: `${activeBaseUrl}/Api/V1/AssetInventory`,
+          getAll: `${activeBaseUrl}/Api/V1/AssetInventory`,
+          getById: (id: string) => `${activeBaseUrl}/Api/V1/AssetInventory/${id}`,
+          create: `${activeBaseUrl}/Api/V1/AssetInventory`,
+          update: (id: string) => `${activeBaseUrl}/Api/V1/AssetInventory/${id}`,
+          delete: (id: string) => `${activeBaseUrl}/Api/V1/AssetInventory/${id}`,
         },
         employees: {
-          base: `${this.defaultBaseUrl}/Api/V1/Employees`,
-          getAll: `${this.defaultBaseUrl}/Api/V1/Employees`,
-          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
-          create: `${this.defaultBaseUrl}/Api/V1/Employees`,
-          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
-          delete: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}`,
-          assignedAssets: (id: string) => `${this.defaultBaseUrl}/Api/V1/Employees/${id}/Assets`,
+          base: `${activeBaseUrl}/Api/V1/Employees`,
+          getAll: `${activeBaseUrl}/Api/V1/Employees`,
+          getById: (id: string) => `${activeBaseUrl}/Api/V1/Employees/${id}`,
+          create: `${activeBaseUrl}/Api/V1/Employees`,
+          update: (id: string) => `${activeBaseUrl}/Api/V1/Employees/${id}`,
+          delete: (id: string) => `${activeBaseUrl}/Api/V1/Employees/${id}`,
+          assignedAssets: (id: string) => `${activeBaseUrl}/Api/V1/Employees/${id}/Assets`,
         },
         configurationConstant: {
-          base: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
-          getAll: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant`,
-          getByKey: (key: string) => `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/${key}`,
-          addDesignation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDesignation`,
-          addDepartment: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddDepartment`,
-          addWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/AddWorkLocation`,
-          deleteWorkLocation: `${this.defaultBaseUrl}/Api/V1/ConfigurationConstant/DeleteWorkLocation`,
+          base: `${activeBaseUrl}/Api/V1/ConfigurationConstant`,
+          getAll: `${activeBaseUrl}/Api/V1/ConfigurationConstant`,
+          getByKey: (key: string) => `${activeBaseUrl}/Api/V1/ConfigurationConstant/${key}`,
+          addDesignation: `${activeBaseUrl}/Api/V1/ConfigurationConstant/AddDesignation`,
+          addDepartment: `${activeBaseUrl}/Api/V1/ConfigurationConstant/AddDepartment`,
+          addWorkLocation: `${activeBaseUrl}/Api/V1/ConfigurationConstant/AddWorkLocation`,
+          deleteWorkLocation: `${activeBaseUrl}/Api/V1/ConfigurationConstant/DeleteWorkLocation`,
         },
         notifications: {
-          base: `${this.defaultBaseUrl}/Api/V1/Notifications`,
-          getAll: `${this.defaultBaseUrl}/Api/V1/Notifications`,
-          markAsRead: (id: string) => `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAsRead/${id}`,
-          markAllAsRead: `${this.defaultBaseUrl}/Api/V1/Notifications/MarkAllAsRead`,
-          create: `${this.defaultBaseUrl}/Api/V1/Notifications`,
+          base: `${activeBaseUrl}/Api/V1/Notifications`,
+          getAll: `${activeBaseUrl}/Api/V1/Notifications`,
+          markAsRead: (id: string) => `${activeBaseUrl}/Api/V1/Notifications/MarkAsRead/${id}`,
+          markAllAsRead: `${activeBaseUrl}/Api/V1/Notifications/MarkAllAsRead`,
+          create: `${activeBaseUrl}/Api/V1/Notifications`,
         },
         deviceServiceRequests: {
-          base: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
-          getAll: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
-          getMyRequests: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/MyRequests`,
-          getById: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
-          create: `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests`,
-          update: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
-          updateStatus: (id: string) => `${this.defaultBaseUrl}/Api/V1/DeviceServiceRequests/${id}/Status`,
+          base: `${activeBaseUrl}/Api/V1/DeviceServiceRequests`,
+          getAll: `${activeBaseUrl}/Api/V1/DeviceServiceRequests`,
+          getMyRequests: `${activeBaseUrl}/Api/V1/DeviceServiceRequests/MyRequests`,
+          getById: (id: string) => `${activeBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
+          create: `${activeBaseUrl}/Api/V1/DeviceServiceRequests`,
+          update: (id: string) => `${activeBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
+          updateStatus: (id: string) => `${activeBaseUrl}/Api/V1/DeviceServiceRequests/${id}/Status`,
         },
       },
     };

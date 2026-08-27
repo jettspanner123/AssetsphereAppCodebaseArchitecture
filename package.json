@@ -23,6 +23,12 @@
     "server:dev": "turbo dev --filter=@assetsphere/server",
     "server:build": "turbo build --filter=@assetsphere/server",
     "server:lint": "turbo lint --filter=@assetsphere/server",
+    "backend:live": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=live",
+    "backend live": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=live",
+    "backend:local": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=local",
+    "backend local": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=local",
+    "backend:status": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=status",
+    "backend status": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=status",
     "list:cmd": "python AssetsphereRunnerScripts/CommandList.py",
     "list cmd": "python AssetsphereRunnerScripts/CommandList.py"
   },

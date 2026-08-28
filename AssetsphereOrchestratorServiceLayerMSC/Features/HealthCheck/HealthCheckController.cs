@@ -63,4 +63,14 @@ public sealed class HealthCheckController : ControllerBase
             ));
         }
     }
+
+    [HttpGet(ApplicationRouteFactory.HealthCheckRoutes.Ping)]
+    public ActionResult<ApiResponseClass<object>> Ping()
+    {
+        return Ok(ApiResponseClass<object>.Succeeded(
+            new { Status = "PONG", Timestamp = DateTime.UtcNow },
+            "Liveness probe succeeded.",
+            200
+        ));
+    }
 }

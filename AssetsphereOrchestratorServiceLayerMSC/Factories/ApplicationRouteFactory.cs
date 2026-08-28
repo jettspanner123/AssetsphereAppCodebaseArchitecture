@@ -23,11 +23,20 @@ public sealed class ApplicationRouteFactory
     public DashboardRoutes Dashboard { get; } = new();
     public ConfigurationConstantRoutes ConfigurationConstant { get; } = new();
     public HealthCheckRoutes HealthCheck { get; } = new();
+    public DocumentationRoutes Documentation { get; } = new();
+
+    public sealed class DocumentationRoutes
+    {
+        public const string ControllerURL = "Api/V1/Documentation";
+        public const string OpenApiSpec = "/openapi/v1.json";
+        public const string OpenApiCustomSpec = "/Api/V1/Documentation/OpenApi.json";
+    }
 
     public sealed class HealthCheckRoutes
     {
         public const string ControllerURL = "Api/V1/HealthCheck";
         public const string Status = "";
+        public const string Ping = "Ping";
     }
 
     public sealed class AuthenticationRoutes

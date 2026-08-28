@@ -287,6 +287,26 @@
   - [`.agents/rules/project-architecture-and-stack.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/.agents/rules/project-architecture-and-stack.md):
     - Added Section 8 documenting `AI Service Architecture (NestJS TypeScript - MSC)`.
 
+## 20. Scalar API Reference Integration in .NET Orchestration Layer
+- **Objective**: Add Scalar API Reference interactive documentation and OpenAPI spec generation to `AssetsphereOrchestratorServiceLayerMSC` (.NET 10 Web API) mounted at `/Api/V1/Documentation`.
+- **Files Modified**:
+  - [`AssetsphereOrchestratorServiceLayerMSC/AssetsphereOrchestratorServiceLayerMSC.csproj`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/AssetsphereOrchestratorServiceLayerMSC.csproj):
+    - Added `Scalar.AspNetCore` (v2.17.1).
+  - [`AssetsphereOrchestratorServiceLayerMSC/Factories/ApplicationRouteFactory.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Factories/ApplicationRouteFactory.cs):
+    - Added `DocumentationRoutes` with `ControllerURL = "Api/V1/Documentation"`, `OpenApiSpec = "/openapi/v1.json"`.
+    - Added `Ping = "Ping"` to `HealthCheckRoutes`.
+  - [`AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/HealthCheckController.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/HealthCheck/HealthCheckController.cs):
+    - Added `[HttpGet(ApplicationRouteFactory.HealthCheckRoutes.Ping)]` endpoint returning `{ Status = "PONG", Timestamp = ... }`.
+  - [`AssetsphereOrchestratorServiceLayerMSC/Program.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Program.cs):
+    - Configured `builder.Services.AddOpenApi("v1", options => ...)` with title, metadata, and JWT Bearer security scheme definition (`Microsoft.OpenApi.OpenApiSecurityScheme`).
+    - Added `app.MapOpenApi()` and `app.MapScalarApiReference("/Api/V1/Documentation", ...)` enabling interactive API documentation in all environments.
+- **Verification**:
+  - `GET http://localhost:5125/Api/V1/HealthCheck/Ping` -> Returns `200 OK` (`{ success: true, data: { status: "PONG" } }`).
+  - `GET http://localhost:5125/openapi/v1.json` -> Returns `200 OK` (Comprehensive OpenAPI 3.0 document containing all 16 controllers, models, tags, and JWT scheme).
+  - `GET http://localhost:5125/Api/V1/Documentation` -> Returns `200 OK` (Interactive Scalar API Reference UI).
+  - Monorepo-wide `bun run lint` and `bun run build` completed with 0 errors.
+
+
 
 
 

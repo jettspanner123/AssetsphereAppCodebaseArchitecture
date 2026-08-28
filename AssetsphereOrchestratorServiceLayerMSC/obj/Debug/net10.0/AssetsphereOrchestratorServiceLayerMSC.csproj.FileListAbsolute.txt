@@ -169,3 +169,4 @@ C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\Assetspher
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\obj\Debug\net10.0\AssetsphereOrchestratorServiceLayerMSC.genruntimeconfig.cache
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\obj\Debug\net10.0\ref\AssetsphereOrchestratorServiceLayerMSC.dll
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\bin\Debug\net10.0\package.json
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\bin\Debug\net10.0\Scalar.AspNetCore.dll

@@ -18,6 +18,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Utilities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -143,7 +144,34 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.WriteIndented = true;
     });
 
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi("v1", options =>
+{
+    options.AddDocumentTransformer((document, context, cancellationToken) =>
+    {
+        document.Info = new Microsoft.OpenApi.OpenApiInfo
+        {
+            Title = "Assetsphere Enterprise Orchestrator API",
+            Version = "v1.0",
+            Description = "Comprehensive enterprise asset lifecycle, procurement, infrastructure, and inventory orchestration API."
+        };
+
+        var securityScheme = new Microsoft.OpenApi.OpenApiSecurityScheme
+        {
+            Name = "Authorization",
+            Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+            Scheme = "bearer",
+            BearerFormat = "JWT",
+            In = Microsoft.OpenApi.ParameterLocation.Header,
+            Description = "Enter your JWT Bearer token: Bearer {token}"
+        };
+
+        document.Components ??= new Microsoft.OpenApi.OpenApiComponents();
+        document.Components.SecuritySchemes ??= new Dictionary<string, Microsoft.OpenApi.IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes["Bearer"] = securityScheme;
+
+        return Task.CompletedTask;
+    });
+});
 
 WebApplication app = builder.Build();
 
@@ -151,10 +179,13 @@ WebApplication app = builder.Build();
 app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 
-if (app.Environment.IsDevelopment())
+// OpenAPI Spec & Scalar API Reference Documentation (Mapped on /Api/V1/Documentation)
+app.MapOpenApi();
+app.MapScalarApiReference("/Api/V1/Documentation", options =>
 {
-    app.MapOpenApi();
-}
+    options.WithTitle("Assetsphere Enterprise Orchestrator API");
+    options.WithTheme(ScalarTheme.Default);
+});
 
 app.UseCors("AssetsphereCorsPolicy");
 app.UseAuthentication();

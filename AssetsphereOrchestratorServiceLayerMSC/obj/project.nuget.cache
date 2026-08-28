@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "T1+0OWv3LU0=",
+  "dgSpecHash": "yc6FtEAFD+8=",
   "success": true,
   "projectFilePath": "C:\\Users\\UddeshyaSingh\\Development\\AssetsphereAppCodebaseArchitecture\\AssetsphereOrchestratorServiceLayerMSC\\AssetsphereOrchestratorServiceLayerMSC.csproj",
   "expectedPackageFiles": [
@@ -36,6 +36,7 @@
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\newtonsoft.json\\13.0.4\\newtonsoft.json.13.0.4.nupkg.sha512",
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\npgsql\\10.0.3\\npgsql.10.0.3.nupkg.sha512",
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\npgsql.entityframeworkcore.postgresql\\10.0.3\\npgsql.entityframeworkcore.postgresql.10.0.3.nupkg.sha512",
+    "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\scalar.aspnetcore\\2.17.1\\scalar.aspnetcore.2.17.1.nupkg.sha512",
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\superpower\\3.0.0\\superpower.3.0.0.nupkg.sha512",
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\UddeshyaSingh\\.nuget\\packages\\system.composition\\9.0.0\\system.composition.9.0.0.nupkg.sha512",

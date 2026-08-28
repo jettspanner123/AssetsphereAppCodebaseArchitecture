@@ -98,4 +98,11 @@ public sealed class AssetInventoryController : ControllerBase
         int affected = await _assetService.BulkActionAsync(request, username);
         return Ok(ApiResponseClass<int>.Succeeded(affected, $"Bulk action completed on {affected} assets."));
     }
+
+    [HttpPost(ApplicationRouteFactory.AssetInventoryRoutes.ValuationSummary)]
+    public async Task<ActionResult<ApiResponseClass<AssetValuationSummaryResponseDTO>>> GetValuationSummary([FromBody] AssetValuationSummaryRequestDTO? request)
+    {
+        AssetValuationSummaryResponseDTO summary = await _assetService.GetValuationSummaryAsync(request);
+        return Ok(ApiResponseClass<AssetValuationSummaryResponseDTO>.Succeeded(summary));
+    }
 }

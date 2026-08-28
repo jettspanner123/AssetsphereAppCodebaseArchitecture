@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Asset } from '../../Types/AssetType';
 import {
@@ -43,6 +43,8 @@ import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGu
 import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryActionButtonSharedComponent';
 import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
+import useAuthenticationStateStore from '../../Store/AuthenticationStateStore';
+import CurrencyFormatterUtility from '../../Utilities/CurrencyFormatterUtility';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 import TanstackQueryKeysCON from '../../Constants/TanstackQueryKeysCON';
 import { toast } from 'sonner';
@@ -53,6 +55,7 @@ export interface AssetInventoryScreenControllerProps {
   onRefresh?: () => void;
   onSelectAsset: (asset: Asset) => void;
   onOpenAddModal: (templateAsset?: Asset) => void;
+  onOpenEditModal?: (asset: Asset) => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
   onImportAssets?: (importedAssets: Asset[]) => void;
@@ -73,6 +76,7 @@ export default function AssetInventoryScreenController({
   onRefresh,
   onSelectAsset,
   onOpenAddModal,
+  onOpenEditModal,
   onOpenQRBadgeModal,
   onExportCSV,
   onImportAssets,
@@ -87,7 +91,71 @@ export default function AssetInventoryScreenController({
   onSingleLineChange,
 }: AssetInventoryScreenControllerProps): React.JSX.Element {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const activeAssets = assets;
+
+  const user = useAuthenticationStateStore((state) => state.user);
+  const isStandardUser = user?.role?.toUpperCase() === 'USER';
+
+  // Live Database Employees Query for dynamic user profile reconciliation
+  const { data: dbEmployees = [] } =
+    TanstackQueryClientService.current.employees.useEmployeesQuery();
+
+  const userMatchedEmployee = useMemo(() => {
+    if (!user) return null;
+    return dbEmployees.find(
+      (emp) =>
+        (user.email && emp.email?.toLowerCase().trim() === user.email.toLowerCase().trim()) ||
+        (user.id && emp.id === user.id) ||
+        (user.id && emp.employeeCode === user.id)
+    );
+  }, [user, dbEmployees]);
+
+  const activeAssets = useMemo(() => {
+    if (!isStandardUser) return assets;
+    if (!user) return [];
+
+    const targetUserIds = new Set<string>();
+    if (user.id) targetUserIds.add(user.id);
+    if (userMatchedEmployee?.id) targetUserIds.add(userMatchedEmployee.id);
+    if (userMatchedEmployee?.employeeCode) targetUserIds.add(userMatchedEmployee.employeeCode);
+
+    const targetUserNames = new Set<string>();
+    if (user.fullName && user.fullName !== 'Enterprise User' && user.fullName.trim()) {
+      targetUserNames.add(user.fullName.toLowerCase().trim());
+    }
+    if (userMatchedEmployee?.name && userMatchedEmployee.name.trim()) {
+      targetUserNames.add(userMatchedEmployee.name.toLowerCase().trim());
+    }
+
+    const targetUserEmails = new Set<string>();
+    if (user.email && user.email.trim()) targetUserEmails.add(user.email.toLowerCase().trim());
+    if (userMatchedEmployee?.email && userMatchedEmployee.email.trim()) {
+      targetUserEmails.add(userMatchedEmployee.email.toLowerCase().trim());
+    }
+
+    return assets.filter((ast) => {
+      // 1. Match by verified employee ID
+      if (ast.assignedToEmployeeId && targetUserIds.has(ast.assignedToEmployeeId)) {
+        return true;
+      }
+      // 2. Match by verified employee full name
+      if (
+        ast.assignedToEmployeeName &&
+        ast.assignedToEmployeeName.trim() &&
+        ast.assignedToEmployeeName.toLowerCase() !== 'unassigned' &&
+        targetUserNames.has(ast.assignedToEmployeeName.toLowerCase().trim())
+      ) {
+        return true;
+      }
+      // 3. Match by verified employee email if present on asset
+      if (
+        (ast as any).assignedEmployeeEmail &&
+        targetUserEmails.has(String((ast as any).assignedEmployeeEmail).toLowerCase().trim())
+      ) {
+        return true;
+      }
+      return false;
+    });
+  }, [assets, isStandardUser, user, userMatchedEmployee]);
 
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [selectedLifecycle, setSelectedLifecycle] = useState<string>('ALL');
@@ -262,7 +330,13 @@ export default function AssetInventoryScreenController({
                 label: 'Edit',
                 icon: <Edit3 className="w-3.5 h-3.5" />,
                 onClick: () => {
-                  // UI placeholder action
+                  if (contextMenu.asset) {
+                    if (onOpenEditModal) {
+                      onOpenEditModal(contextMenu.asset);
+                    } else {
+                      onOpenAddModal(contextMenu.asset);
+                    }
+                  }
                 },
               },
               {
@@ -342,9 +416,21 @@ export default function AssetInventoryScreenController({
     return true;
   });
 
+  const filteredAssetIds = React.useMemo(() => {
+    return filteredAssets.map((a) => a.id);
+  }, [filteredAssets]);
+
+  const { data: valuationSummary } = TanstackQueryClientService.current.assets.useAssetValuationSummaryQuery(
+    filteredAssetIds
+  );
+
   const totalValuation = filteredAssets.reduce(
     (acc, a) => acc + (a.currentValue || 0),
     0
+  );
+
+  const dominantCurrency = CurrencyFormatterUtility.current.getDominantCurrency(
+    filteredAssets.map((a) => a.procurement?.currency || a.currency)
   );
 
   const lifecycleOptions: SelectOption[] = AssetInventoryCON.LIFECYCLE_OPTIONS.map((opt) => ({
@@ -370,10 +456,12 @@ export default function AssetInventoryScreenController({
       >
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
-            {AssetInventoryCON.TITLE}
+            {isStandardUser ? 'My Assigned Devices & Assets' : AssetInventoryCON.TITLE}
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
-            {AssetInventoryCON.SUBTITLE}
+            {isStandardUser
+              ? 'View and inspect enterprise hardware and computing equipment assigned directly to your custody.'
+              : AssetInventoryCON.SUBTITLE}
           </p>
         </div>
 
@@ -381,10 +469,12 @@ export default function AssetInventoryScreenController({
         <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              ${totalValuation.toLocaleString()}
+              {valuationSummary
+                ? `${valuationSummary.targetCurrencySymbol}${valuationSummary.convertedTotalValuation.toLocaleString()}`
+                : CurrencyFormatterUtility.current.format(totalValuation, dominantCurrency)}
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              Portfolio Valuation
+              {isStandardUser ? 'Assigned Valuation' : 'Portfolio Valuation'}
             </span>
           </div>
 
@@ -395,7 +485,7 @@ export default function AssetInventoryScreenController({
               {filteredAssets.length}
             </span>
             <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              Total Devices
+              {isStandardUser ? 'My Devices' : 'Total Devices'}
             </span>
           </div>
         </div>
@@ -673,14 +763,22 @@ export default function AssetInventoryScreenController({
         <EmptyStateSharedComponent
           icon={<Laptop className="w-6 h-6 text-slate-400 dark:text-zinc-500" />}
           title={
-            searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
-              ? 'No Matching Hardware Assets'
-              : 'No Hardware Assets in Registry'
+            isStandardUser
+              ? searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+                ? 'No Matching Assigned Assets'
+                : 'No Assigned Assets Found'
+              : searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+                ? 'No Matching Hardware Assets'
+                : 'No Hardware Assets in Registry'
           }
           description={
-            searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
-              ? 'No assets matched your search query or active filter criteria. Try clearing search filters or changing parameters.'
-              : 'Your enterprise hardware asset registry is currently empty. Register your first device or import assets via CSV.'
+            isStandardUser
+              ? searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+                ? 'No assigned assets matched your search query or active filter criteria. Try clearing search filters.'
+                : 'You do not currently have any devices or hardware assets assigned to your account. Contact IT Operations to request device provisioning.'
+              : searchQuery || selectedCategory !== 'ALL' || selectedLifecycle !== 'ALL' || complianceFilter !== 'ALL'
+                ? 'No assets matched your search query or active filter criteria. Try clearing search filters or changing parameters.'
+                : 'Your enterprise hardware asset registry is currently empty. Register your first device or import assets via CSV.'
           }
         />
       )}
@@ -743,7 +841,10 @@ export default function AssetInventoryScreenController({
                       </div>
                     </td>
                     <td className={`py-3.5 px-4 font-mono font-medium text-slate-900 dark:text-white ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
-                      ${asset.currentValue?.toLocaleString() || 0}
+                      {CurrencyFormatterUtility.current.format(
+                        asset.currentValue,
+                        asset.procurement?.currency || asset.currency
+                      )}
                     </td>
                     <td className={`py-3.5 px-4 ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
                       {asset.security?.isCompliant ? (
@@ -828,7 +929,10 @@ export default function AssetInventoryScreenController({
               <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3">
                 <div className="flex items-baseline justify-between">
                   <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-                    ${asset.currentValue?.toLocaleString() || 0}
+                    {CurrencyFormatterUtility.current.format(
+                      asset.currentValue,
+                      asset.procurement?.currency || asset.currency
+                    )}
                   </span>
                   <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
                     {asset.assetNumber}

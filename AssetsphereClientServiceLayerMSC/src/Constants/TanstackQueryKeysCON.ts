@@ -1,5 +1,7 @@
 export default class TanstackQueryKeysCON {
   public static readonly ASSETS = ['assets'] as const;
+  public static readonly ASSET_VALUATION_SUMMARY = (assetIds?: string[]) =>
+    ['assets', 'valuation-summary', assetIds ? assetIds.sort().join(',') : 'all'] as const;
   public static readonly ASSET_DETAIL = (id: string) => ['assets', id] as const;
   public static readonly ASSET_QR = (qrId: string) => ['assets', 'qr', qrId] as const;
   public static readonly EMPLOYEES = ['employees'] as const;

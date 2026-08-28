@@ -112,9 +112,9 @@ export default function CreatableCustomSelectSharedComponent({
   const heightClass = size === 'sm' ? 'h-9 px-2.5' : 'h-10 px-3';
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef}>
+    <div className={`space-y-1.5 ${className}`} ref={dropdownRef}>
       {label && (
-        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 mb-1 flex items-center justify-between">
+        <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 flex items-center justify-between">
           <span>
             {label} {required && <span className="text-rose-500 font-bold">*</span>}
           </span>
@@ -127,46 +127,44 @@ export default function CreatableCustomSelectSharedComponent({
         </label>
       )}
 
-      {/* Trigger Button */}
-      <button
-        type="button"
-        disabled={disabled}
-        onClick={() => !disabled && setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between text-xs rounded-xl bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 hover:border-slate-400 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 ${
-          disabled ? 'opacity-50 cursor-not-allowed' : ''
-        } ${heightClass} ${triggerClassName || ''}`}
-      >
-        <div className="flex items-center gap-2 truncate min-w-0 pr-2">
-          {selectedOption?.icon}
-          {displayLabel ? (
-            <span className="truncate font-medium">{displayLabel}</span>
-          ) : (
-            <span className="text-slate-400 dark:text-zinc-500 truncate">{placeholder}</span>
-          )}
-        </div>
-        <ChevronDown
-          className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 shrink-0 transition-transform duration-200 ${
-            isOpen ? 'rotate-180 text-[#0C2086] dark:text-blue-400' : ''
-          }`}
-        />
-      </button>
-
-      {helperText && (
-        <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">{helperText}</p>
-      )}
-
-      {/* Dropdown Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 4, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 4, scale: 0.98 }}
-            transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className={`absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl p-1.5 max-h-72 overflow-hidden flex flex-col ${
-              dropdownClassName || ''
+      {/* Relative wrapper for Trigger Button & Floating Dropdown */}
+      <div className="relative">
+        {/* Trigger Button */}
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          className={`w-full flex items-center justify-between text-xs rounded-xl bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 hover:border-slate-400 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 ${
+            disabled ? 'opacity-50 cursor-not-allowed' : ''
+          } ${heightClass} ${triggerClassName || ''}`}
+        >
+          <div className="flex items-center gap-2 truncate min-w-0 pr-2">
+            {selectedOption?.icon}
+            {displayLabel ? (
+              <span className="truncate font-medium">{displayLabel}</span>
+            ) : (
+              <span className="text-slate-400 dark:text-zinc-500 truncate">{placeholder}</span>
+            )}
+          </div>
+          <ChevronDown
+            className={`w-3.5 h-3.5 text-slate-400 dark:text-zinc-500 shrink-0 transition-transform duration-200 ${
+              isOpen ? 'rotate-180 text-[#0C2086] dark:text-blue-400' : ''
             }`}
-          >
+          />
+        </button>
+
+        {/* Dropdown Menu Anchored directly below Trigger Button */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: 4, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.98 }}
+              transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className={`absolute left-0 right-0 top-full mt-1.5 z-50 bg-white dark:bg-[#121215] border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl p-1.5 max-h-72 overflow-hidden flex flex-col ${
+                dropdownClassName || ''
+              }`}
+            >
             {/* Search / Custom Input Header */}
             {enableSearch && (
               <div className="p-1 border-b border-slate-100 dark:border-zinc-800/80 mb-1">
@@ -257,6 +255,11 @@ export default function CreatableCustomSelectSharedComponent({
           </motion.div>
         )}
       </AnimatePresence>
+      </div>
+
+      {helperText && (
+        <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">{helperText}</p>
+      )}
     </div>
   );
 }

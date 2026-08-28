@@ -71,6 +71,19 @@ export interface CreateAssetRequest {
   };
 }
 
+export interface AssetValuationSummaryResponse {
+  targetCurrency: string;
+  targetCurrencySymbol: string;
+  convertedTotalValuation: number;
+  totalUsdValuation: number;
+  totalInrValuation: number;
+  usdAssetCount: number;
+  inrAssetCount: number;
+  totalAssetCount: number;
+  exchangeRateUsdToInr: number;
+  exchangeRateUpdatedAt: string;
+}
+
 export default class AssetInventoryService {
   public static current: AssetInventoryService = new AssetInventoryService();
 
@@ -170,6 +183,23 @@ export default class AssetInventoryService {
     return true;
   }
 
+  public async getValuationSummary(assetIds?: string[]): Promise<AssetValuationSummaryResponse> {
+    const config = ApplicationNetworkAPIConfiguration.current.getConfiguration();
+    const response = await fetch(config.endpoints.assetInventory.valuationSummary, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify({ assetIds: assetIds && assetIds.length > 0 ? assetIds : undefined }),
+    });
+
+    const json = await response.json();
+    if (!response.ok) {
+      const errorMsg = json.message || json.title || `Valuation summary failed with HTTP ${response.status}`;
+      throw new Error(errorMsg);
+    }
+
+    return json.data;
+  }
+
   private mapDtoToAsset(dto: BackendAssetDTO): Asset {
     return {
       id: dto.id,
@@ -224,6 +254,7 @@ export default class AssetInventoryService {
         isCapitalized: true,
         procurementMethod: 'Direct Purchase',
       },
+      currency: dto.currency || 'USD',
       warranty: {
         warrantyStart: dto.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
         warrantyEnd: new Date(Date.now() + 365 * 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],

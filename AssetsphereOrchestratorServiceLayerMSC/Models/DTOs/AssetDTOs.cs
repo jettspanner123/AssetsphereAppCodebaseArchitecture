@@ -140,3 +140,22 @@ public sealed class AssetBulkActionDTO
     public string Action { get; set; } = string.Empty; // "UPDATE_STATUS", "DELETE", "ASSIGN_LOCATION"
     public string? Value { get; set; }
 }
+
+public sealed class AssetValuationSummaryRequestDTO
+{
+    public List<Guid>? AssetIds { get; set; }
+}
+
+public sealed class AssetValuationSummaryResponseDTO
+{
+    public string TargetCurrency { get; set; } = "INR";
+    public string TargetCurrencySymbol { get; set; } = "₹";
+    public decimal ConvertedTotalValuation { get; set; }
+    public decimal TotalUsdValuation { get; set; }
+    public decimal TotalInrValuation { get; set; }
+    public int UsdAssetCount { get; set; }
+    public int InrAssetCount { get; set; }
+    public int TotalAssetCount { get; set; }
+    public decimal ExchangeRateUsdToInr { get; set; }
+    public DateTime ExchangeRateUpdatedAt { get; set; }
+}

@@ -122,9 +122,9 @@ export default function AssetFormModalController({
   const [category, setCategory] = useState<AssetCategory>(initialAsset?.category || 'Computing');
   const [serialNumber, setSerialNumber] = useState(initialAsset?.serialNumber || '');
   const [manufacturer, setManufacturer] = useState(initialAsset?.manufacturer || '');
-  const [purchaseCost, setPurchaseCost] = useState(initialAsset?.procurement?.purchaseCost || 1499);
+  const [purchaseCost, setPurchaseCost] = useState(initialAsset?.procurement?.purchaseCost ?? 1499);
   const [currency, setCurrency] = useState<'USD' | 'INR'>(
-    (initialAsset?.procurement?.currency as 'USD' | 'INR') || 'USD'
+    ((initialAsset?.procurement?.currency || initialAsset?.currency) as 'USD' | 'INR') || 'USD'
   );
 
   // Hardware Specs State
@@ -173,17 +173,21 @@ export default function AssetFormModalController({
   }
   const displayAsset = initialAsset || lastAssetRef.current;
   const prevIsOpenRef = React.useRef(isOpen);
+  const prevAssetIdRef = React.useRef(initialAsset?.id);
 
   React.useEffect(() => {
-    if (isOpen && !prevIsOpenRef.current) {
+    const isOpening = isOpen && !prevIsOpenRef.current;
+    const hasAssetChanged = isOpen && initialAsset?.id !== prevAssetIdRef.current;
+
+    if (isOpening || hasAssetChanged) {
       setExitDirection('down');
       if (displayAsset) {
         setDeviceName(displayAsset.deviceName || '');
         setCategory(displayAsset.category || 'Computing');
         setSerialNumber(displayAsset.serialNumber || '');
         setManufacturer(displayAsset.manufacturer || '');
-        setPurchaseCost(displayAsset.procurement?.purchaseCost || 1499);
-        setCurrency((displayAsset.procurement?.currency as 'USD' | 'INR') || 'USD');
+        setPurchaseCost(displayAsset.procurement?.purchaseCost ?? 1499);
+        setCurrency(((displayAsset.procurement?.currency || displayAsset.currency) as 'USD' | 'INR') || 'USD');
         setProcessor(displayAsset.hardwareSpecs?.cpu || displayAsset.hardwareSpecs?.processor || 'Apple M3 Pro');
         setRamGbs(displayAsset.hardwareSpecs?.ramGbs || 32);
         if (displayAsset.hardwareSpecs?.storageDrives && displayAsset.hardwareSpecs.storageDrives.length > 0) {
@@ -225,7 +229,8 @@ export default function AssetFormModalController({
       }
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, displayAsset, workLocations, departmentKeys]);
+    prevAssetIdRef.current = initialAsset?.id;
+  }, [isOpen, initialAsset, displayAsset, workLocations, departmentKeys]);
 
   // Employee Select Options for Searchable Dropdown
   const employeeSelectOptions: SelectOption[] = React.useMemo(() => {
@@ -410,6 +415,7 @@ export default function AssetFormModalController({
         securityCompliancePct: 99,
       },
       currentValue: Number(purchaseCost) || 0,
+      currency: currency,
       depreciationMethod: 'Straight Line',
       usefulLifeYears: 3,
       salvageValue: Math.round((Number(purchaseCost) || 0) * 0.1),

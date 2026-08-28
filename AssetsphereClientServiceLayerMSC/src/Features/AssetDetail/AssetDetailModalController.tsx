@@ -27,6 +27,7 @@ import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
+import CurrencyFormatterUtility from '../../Utilities/CurrencyFormatterUtility';
 
 export interface AssetDetailModalControllerProps {
   asset: Asset | null;
@@ -130,7 +131,11 @@ export default function AssetDetailModalController({
               {displayAsset.lifecycleStatus}
             </BadgeSharedComponent>
             <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">
-              Valuation: ${displayAsset.currentValue?.toLocaleString()}
+              Valuation:{' '}
+              {CurrencyFormatterUtility.current.format(
+                displayAsset.currentValue,
+                displayAsset.procurement?.currency || displayAsset.currency
+              )}
             </span>
           </div>
 
@@ -250,7 +255,12 @@ export default function AssetDetailModalController({
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Original Cost:</span>
-                  <p className="font-mono font-medium">${displayAsset.procurement?.purchaseCost?.toLocaleString() || 0}</p>
+                  <p className="font-mono font-medium">
+                    {CurrencyFormatterUtility.current.format(
+                      displayAsset.procurement?.purchaseCost,
+                      displayAsset.procurement?.currency || displayAsset.currency
+                    )}
+                  </p>
                 </div>
                 <div>
                   <span className="text-slate-400 font-medium">Vendor:</span>

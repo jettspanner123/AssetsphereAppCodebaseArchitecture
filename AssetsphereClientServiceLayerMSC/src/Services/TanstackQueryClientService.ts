@@ -12,7 +12,10 @@ import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenServ
 import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models/SignupScreenModel';
 import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
 import { Asset } from '../Types/AssetType';
-import { CreateAssetRequest } from '../Features/AssetInventory/Services/AssetInventoryService';
+import {
+  CreateAssetRequest,
+  AssetValuationSummaryResponse,
+} from '../Features/AssetInventory/Services/AssetInventoryService';
 import { Employee } from '../Types/EmployeeType';
 import { CreateEmployeeRequest } from '../Features/Employees/Services/EmployeesDirectoryService';
 import TanstackQueryKeysCON from '../Constants/TanstackQueryKeysCON';
@@ -206,6 +209,27 @@ export class AssetQueryService {
     });
   }
 
+  public useAssetValuationSummaryQuery(
+    assetIds?: string[],
+    options?: Omit<UseQueryOptions<AssetValuationSummaryResponse, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<AssetValuationSummaryResponse, Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.ASSET_VALUATION_SUMMARY(assetIds),
+      queryFn: async () => {
+        const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
+        return await AssetInventoryService.current.getValuationSummary(assetIds);
+      },
+      ...options,
+    });
+  }
+
+  public assetValuationSummaryQuery(
+    assetIds?: string[],
+    options?: Omit<UseQueryOptions<AssetValuationSummaryResponse, Error>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<AssetValuationSummaryResponse, Error> {
+    return this.useAssetValuationSummaryQuery(assetIds, options);
+  }
+
   public useCreateAssetMutation(
     options?: UseMutationOptions<Asset, Error, CreateAssetRequest>
   ): UseMutationResult<Asset, Error, CreateAssetRequest> {
@@ -226,6 +250,7 @@ export class AssetQueryService {
           }
         );
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },
@@ -257,6 +282,7 @@ export class AssetQueryService {
           }
         );
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },
@@ -288,6 +314,7 @@ export class AssetQueryService {
           }
         );
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },

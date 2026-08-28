@@ -178,13 +178,50 @@ public sealed class AssetInventoryService
         if (request.AssignedEmployeeName != null) asset.AssignedEmployeeName = request.AssignedEmployeeName;
         if (request.AssignedDepartment != null) asset.AssignedDepartment = request.AssignedDepartment;
         if (request.Location != null) asset.Location = request.Location;
-        if (request.PurchasePrice.HasValue) asset.PurchasePrice = request.PurchasePrice.Value;
+        if (request.PurchasePrice.HasValue)
+        {
+            asset.PurchasePrice = request.PurchasePrice.Value;
+            asset.CurrentBookValue = request.PurchasePrice.Value;
+        }
         if (request.CurrentBookValue.HasValue) asset.CurrentBookValue = request.CurrentBookValue.Value;
         if (request.DepreciationMethod != null) asset.DepreciationMethod = request.DepreciationMethod;
         if (request.UsefulLifeMonths.HasValue) asset.UsefulLifeMonths = request.UsefulLifeMonths.Value;
         if (request.SalvageValue.HasValue) asset.SalvageValue = request.SalvageValue.Value;
         if (request.HardwareSpecsJson != null) asset.HardwareSpecsJson = request.HardwareSpecsJson;
-        if (request.ProcurementInfoJson != null) asset.ProcurementInfoJson = request.ProcurementInfoJson;
+        if (request.ProcurementInfoJson != null)
+        {
+            asset.ProcurementInfoJson = request.ProcurementInfoJson;
+        }
+        else if (!string.IsNullOrWhiteSpace(request.Currency) || request.PurchasePrice.HasValue)
+        {
+            try
+            {
+                var docObj = !string.IsNullOrWhiteSpace(asset.ProcurementInfoJson)
+                    ? System.Text.Json.Nodes.JsonNode.Parse(asset.ProcurementInfoJson) as System.Text.Json.Nodes.JsonObject
+                    : new System.Text.Json.Nodes.JsonObject();
+
+                docObj ??= new System.Text.Json.Nodes.JsonObject();
+
+                if (!string.IsNullOrWhiteSpace(request.Currency))
+                {
+                    string curUpper = request.Currency.Trim().ToUpper();
+                    docObj["currency"] = curUpper;
+                    docObj["Currency"] = curUpper;
+                }
+                if (request.PurchasePrice.HasValue)
+                {
+                    docObj["purchaseCost"] = request.PurchasePrice.Value;
+                    docObj["PurchaseCost"] = request.PurchasePrice.Value;
+                }
+                if (request.Manufacturer != null)
+                {
+                    docObj["vendorName"] = request.Manufacturer;
+                }
+
+                asset.ProcurementInfoJson = docObj.ToJsonString();
+            }
+            catch { }
+        }
         if (request.WarrantyInfoJson != null) asset.WarrantyInfoJson = request.WarrantyInfoJson;
         if (request.SecurityAndComplianceJson != null) asset.SecurityAndComplianceJson = request.SecurityAndComplianceJson;
         if (request.NetworkConfigJson != null) asset.NetworkConfigJson = request.NetworkConfigJson;
@@ -282,6 +319,137 @@ public sealed class AssetInventoryService
         return assets.Count;
     }
 
+    private static decimal _cachedExchangeRate = 87.5m;
+    private static DateTime _rateCacheExpiry = DateTime.MinValue;
+    private static readonly HttpClient _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+
+    private static async Task<decimal> GetLiveUsdToInrRateAsync()
+    {
+        if (DateTime.UtcNow < _rateCacheExpiry)
+        {
+            return _cachedExchangeRate;
+        }
+
+        try
+        {
+            var response = await _httpClient.GetAsync("https://open.er-api.com/v6/latest/USD");
+            if (response.IsSuccessStatusCode)
+            {
+                using var stream = await response.Content.ReadAsStreamAsync();
+                using var doc = await System.Text.Json.JsonDocument.ParseAsync(stream);
+                if (doc.RootElement.TryGetProperty("rates", out var rates) &&
+                    rates.TryGetProperty("INR", out var inrRate))
+                {
+                    decimal rate = inrRate.GetDecimal();
+                    if (rate > 0)
+                    {
+                        _cachedExchangeRate = rate;
+                        _rateCacheExpiry = DateTime.UtcNow.AddHours(1);
+                        return _cachedExchangeRate;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Fallback to latest cached rate or 87.5
+        }
+
+        return _cachedExchangeRate;
+    }
+
+    public async Task<AssetValuationSummaryResponseDTO> GetValuationSummaryAsync(AssetValuationSummaryRequestDTO? request)
+    {
+        // 1. Fetch Target Currency from AS_ConfigurationConstantTBL
+        string targetCurrency = "INR";
+        var config = await _dbContext.ConfigurationConstants
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.ConfigurationKey == "PORTFOLIO_VALUATION_CURRENCY" && !c.IsDeleted);
+        if (config != null && !string.IsNullOrWhiteSpace(config.ConfigurationValue))
+        {
+            targetCurrency = config.ConfigurationValue.Trim().ToUpper();
+        }
+
+        // 2. Fetch live exchange rate
+        decimal usdToInrRate = await GetLiveUsdToInrRateAsync();
+
+        // 3. Query active assets
+        IQueryable<AssetEntityClass> query = _dbContext.Assets
+            .AsNoTracking()
+            .Where(a => !a.IsDeleted);
+
+        if (request?.AssetIds != null && request.AssetIds.Count > 0)
+        {
+            query = query.Where(a => request.AssetIds.Contains(a.Id));
+        }
+
+        List<AssetEntityClass> assets = await query.ToListAsync();
+
+        decimal totalUsd = 0;
+        decimal totalInr = 0;
+        int usdCount = 0;
+        int inrCount = 0;
+
+        foreach (var a in assets)
+        {
+            string cur = "USD";
+            if (!string.IsNullOrWhiteSpace(a.ProcurementInfoJson))
+            {
+                try
+                {
+                    using var doc = System.Text.Json.JsonDocument.Parse(a.ProcurementInfoJson);
+                    if (doc.RootElement.TryGetProperty("currency", out var prop) ||
+                        doc.RootElement.TryGetProperty("Currency", out prop))
+                    {
+                        cur = prop.GetString()?.Trim().ToUpper() ?? "USD";
+                    }
+                }
+                catch { }
+            }
+
+            decimal val = a.CurrentBookValue > 0 ? a.CurrentBookValue : a.PurchasePrice;
+
+            if (cur == "INR" || cur == "₹" || cur == "RUPEES")
+            {
+                totalInr += val;
+                inrCount++;
+            }
+            else
+            {
+                totalUsd += val;
+                usdCount++;
+            }
+        }
+
+        decimal convertedTotal;
+        string targetSymbol;
+
+        if (targetCurrency == "INR")
+        {
+            targetSymbol = "₹";
+            convertedTotal = totalInr + (totalUsd * usdToInrRate);
+        }
+        else
+        {
+            targetSymbol = "$";
+            convertedTotal = totalUsd + (usdToInrRate > 0 ? (totalInr / usdToInrRate) : 0);
+        }
+
+        return new AssetValuationSummaryResponseDTO
+        {
+            TargetCurrency = targetCurrency,
+            TargetCurrencySymbol = targetSymbol,
+            ConvertedTotalValuation = Math.Round(convertedTotal, 2),
+            TotalUsdValuation = Math.Round(totalUsd, 2),
+            TotalInrValuation = Math.Round(totalInr, 2),
+            UsdAssetCount = usdCount,
+            InrAssetCount = inrCount,
+            TotalAssetCount = assets.Count,
+            ExchangeRateUsdToInr = usdToInrRate,
+            ExchangeRateUpdatedAt = _rateCacheExpiry == DateTime.MinValue ? DateTime.UtcNow : _rateCacheExpiry.AddHours(-1)
+        };
+    }
+
     private static AssetResponseDTO MapToDTO(AssetEntityClass asset)
     {
         HardwareSpecsDTO? specs = null;
@@ -303,9 +471,10 @@ public sealed class AssetInventoryService
             try
             {
                 using var doc = System.Text.Json.JsonDocument.Parse(asset.ProcurementInfoJson);
-                if (doc.RootElement.TryGetProperty("currency", out var prop))
+                if (doc.RootElement.TryGetProperty("currency", out var prop) ||
+                    doc.RootElement.TryGetProperty("Currency", out prop))
                 {
-                    currency = prop.GetString() ?? "USD";
+                    currency = prop.GetString()?.Trim().ToUpper() ?? "USD";
                 }
             }
             catch { }

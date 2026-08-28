@@ -34,9 +34,9 @@ import CustomSelectSharedComponent, {
 import CreatableCustomSelectSharedComponent, {
   CreatableSelectOption,
 } from '../../Shared/Components/CreatableCustomSelectSharedComponent';
-import RichTextEditorSharedComponent from '../../Shared/Components/RichTextEditorSharedComponent';
 import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryActionButtonSharedComponent';
 import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
+import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
 import DeviceServiceRequestDetailModalController from './Components/DeviceServiceRequestDetailModalController';
 import {
   DeviceServiceRequestItemType,
@@ -144,10 +144,9 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
   const [usabilityState, setUsabilityState] = useState<string>('Intermittently Usable / Crashes');
   const [serviceChannel, setServiceChannel] = useState<string>('On-Site IT Service Desk Drop-Off');
   const [urgency, setUrgency] = useState<string>('MEDIUM');
-  const [workLocation, setWorkLocation] = useState<string>('Austin Silicon Labs - TX');
-  const [descriptionRichText, setDescriptionRichText] = useState<string>(
-    '### Problem Summary\nDescribe what happens when the issue occurs.\n\n### Steps to Reproduce\n1. Power on device\n2. Observe screen behavior'
-  );
+  const [workLocation, setWorkLocation] = useState<string>('');
+  const [descriptionText, setDescriptionText] = useState<string>('');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState<boolean>(false);
 
   // Filter and Inspect State
   const [historySearchTerm, setHistorySearchTerm] = useState<string>('');
@@ -266,14 +265,14 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
       return workLocationsList.map((loc: string) => ({
         value: loc,
         label: loc,
-        icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" />,
+        icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" />,
       }));
     }
     return [
-      { value: 'Austin Silicon Labs - TX', label: 'Austin Silicon Labs - TX', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-      { value: 'San Jose Technology Park - CA', label: 'San Jose Technology Park - CA', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-      { value: 'London High Street Office - UK', label: 'London High Street Office - UK', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-      { value: 'Remote / Work From Home', label: 'Remote / Work From Home', icon: <MapPin className="w-3.5 h-3.5 text-cyan-500" /> },
+      { value: 'Austin Silicon Labs - TX', label: 'Austin Silicon Labs - TX', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+      { value: 'San Jose Technology Park - CA', label: 'San Jose Technology Park - CA', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+      { value: 'London High Street Office - UK', label: 'London High Street Office - UK', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+      { value: 'Remote / Work From Home', label: 'Remote / Work From Home', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
     ];
   }, [workLocationsList]);
 
@@ -297,8 +296,15 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
     }
   }, [assignedDeviceOptions, selectedAssetId]);
 
-  // Handle Form Submission
-  const handleSubmitRequest = async (e: React.FormEvent) => {
+  // Pre-select first work location from backend query if not already selected
+  useEffect(() => {
+    if (workLocationsList && workLocationsList.length > 0 && !workLocation) {
+      setWorkLocation(workLocationsList[0]);
+    }
+  }, [workLocationsList, workLocation]);
+
+  // Step 1: Validate Form & Open Confirmation Modal
+  const handleSubmitRequest = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!serviceCategory.trim()) {
@@ -309,13 +315,22 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
       toast.error('Please select a component subtype.');
       return;
     }
-    if (!descriptionRichText.trim() || descriptionRichText.trim().length < 10) {
+    if (!workLocation.trim()) {
+      toast.error('Please select a work location.');
+      return;
+    }
+    if (!descriptionText.trim() || descriptionText.trim().length < 10) {
       toast.error('Please provide a detailed technical problem description (at least 10 characters).');
       return;
     }
 
+    setIsConfirmModalOpen(true);
+  };
+
+  // Step 2: Finalize Service Request Creation upon Confirmation
+  const handleConfirmSubmitRequest = async () => {
     try {
-      await createMutation.mutateAsync({
+      const newReq = await createMutation.mutateAsync({
         targetUserId: selectedTargetUser?.id || currentUser?.id,
         targetUserName: selectedTargetUser?.fullName || currentUser?.fullName,
         targetUserEmail: selectedTargetUser?.email || currentUser?.email,
@@ -328,11 +343,14 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
         serviceChannel,
         urgency,
         workLocation,
-        descriptionRichText,
+        descriptionRichText: descriptionText,
       });
 
-      toast.success('Device service request submitted successfully! An enterprise ticket has been opened.');
-      setDescriptionRichText('### Problem Summary\n\n### Steps to Reproduce\n1. ');
+      toast.success(
+        `Device service request #${newReq?.requestNumber || ''} submitted successfully! An enterprise ticket has been opened.`
+      );
+      setDescriptionText('');
+      setIsConfirmModalOpen(false);
     } catch (err: any) {
       toast.error(err.message || 'Failed to submit device service request.');
     }
@@ -514,7 +532,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
               New Device Service Request Form
             </h2>
             <p className="text-xs text-slate-400 dark:text-zinc-500 mt-0.5">
-              Fill in the technical parameters below. Every dropdown supports instant custom values by typing inline.
+              Fill in the technical parameters below to register an enterprise hardware service request.
             </p>
           </div>
         </div>
@@ -528,9 +546,11 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
               value={selectedTargetUserId}
               options={targetUserOptions}
               onChange={(val) => setSelectedTargetUserId(val)}
-              placeholder="Select an employee or type custom email/ID..."
-              searchPlaceholder="Search employees by name, email, department..."
-              helperText="Operator privilege: Raise a hardware service request on behalf of any enterprise team member."
+              placeholder="Select an enterprise employee..."
+              searchPlaceholder="Search employees by name, email, department, code..."
+              enableCustomCreation={false}
+              enableSearch={true}
+              helperText="Operator privilege: Select any registered enterprise employee to raise a hardware request on their behalf."
             />
           </div>
         ) : (
@@ -636,15 +656,23 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
           />
         </div>
 
-        {/* Row 5: Rich Text Problem Description */}
-        <div>
-          <RichTextEditorSharedComponent
-            label="Detailed Technical Problem Description & Diagnostic Notes"
+        {/* Row 5: Detailed Technical Problem Description */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-medium text-slate-600 dark:text-zinc-400 flex items-center justify-between">
+            <span>
+              Detailed Technical Problem Description & Diagnostic Notes <span className="text-rose-500 font-bold">*</span>
+            </span>
+            <span className="text-[11px] font-mono text-slate-400 dark:text-zinc-500">
+              {descriptionText.length} characters
+            </span>
+          </label>
+          <textarea
+            rows={5}
             required
-            value={descriptionRichText}
-            onChange={(val) => setDescriptionRichText(val)}
+            value={descriptionText}
+            onChange={(e) => setDescriptionText(e.target.value)}
             placeholder="Provide a comprehensive explanation of the issue, error codes, steps to reproduce, or diagnostic observations..."
-            minHeight="150px"
+            className="w-full p-3.5 text-xs bg-slate-50/50 dark:bg-zinc-800/40 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/60 dark:focus:ring-blue-500/60 focus:bg-white dark:focus:bg-zinc-900 transition-all font-sans leading-relaxed resize-y min-h-[120px]"
           />
         </div>
 
@@ -1056,6 +1084,75 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
         onClose={() => setInspectingRequest(null)}
         onUpdateStatus={handleUpdateStatus}
         onAdminUpdate={handleAdminUpdate}
+      />
+
+      {/* Submission Confirmation Modal */}
+      <ConfirmationModalSharedComponent
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmSubmitRequest}
+        title="Confirm Device Service Request"
+        subtitle="Review the hardware issue summary before dispatching to IT support."
+        description="Once confirmed, an enterprise IT service ticket will be registered and assigned to the hardware service desk."
+        variant="primary"
+        confirmText="Confirm & Submit"
+        cancelText="Back to Edit"
+        isLoading={createMutation.isPending}
+        maxWidth="lg"
+        additionalContent={
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-200/80 dark:border-zinc-700/80 space-y-3 text-xs font-sans">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-slate-700 dark:text-zinc-300">
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Target Requester
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {selectedTargetUser?.fullName || currentUser?.fullName || 'Requester'}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Device / Hardware
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white truncate block">
+                  {assetName || 'Custom Equipment'} ({assetTag || 'CUSTOM-TAG'})
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Issue Category
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {serviceCategory}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Component / Fault
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {componentSubtype}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Urgency Priority
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {urgency}
+                </span>
+              </div>
+              <div>
+                <span className="text-[10px] font-mono uppercase text-slate-400 dark:text-zinc-500 font-semibold block">
+                  Work Location
+                </span>
+                <span className="font-semibold text-slate-900 dark:text-white">
+                  {workLocation || 'Standard Location'}
+                </span>
+              </div>
+            </div>
+          </div>
+        }
       />
     </div>
   );

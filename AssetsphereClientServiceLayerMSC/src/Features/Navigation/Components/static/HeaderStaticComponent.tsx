@@ -139,7 +139,7 @@ export default function HeaderStaticComponent({
         <div className="relative">
           <button
             onClick={onToggleNotifications}
-            className="p-2 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative"
+            className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative flex items-center justify-center"
             title="Notifications"
           >
             <Bell className="w-4 h-4" />
@@ -164,7 +164,7 @@ export default function HeaderStaticComponent({
         <div className="relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="p-1.5 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer flex items-center gap-1.5"
+            className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative flex items-center justify-center"
             title={`${displayName} - Profile & Settings`}
           >
             {user?.avatarUrl ? (

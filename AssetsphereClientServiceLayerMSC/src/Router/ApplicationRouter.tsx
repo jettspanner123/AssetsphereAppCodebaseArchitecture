@@ -252,10 +252,14 @@ export function DashboardShell(): React.JSX.Element {
 
   const handleSelectTab = (tab: TabType) => {
     // Validate module permissions
-    if (tab !== 'dashboard' && !ApplicationPermissionService.current.canAccessTab(tab)) {
+    if (!ApplicationPermissionService.current.canAccessTab(tab)) {
+      const fallbackTab: TabType = ApplicationPermissionService.current.canAccessTab('dashboard')
+        ? 'dashboard'
+        : 'inventory';
       toast.error('Access Denied', {
-        description: 'You do not have permission to access this module. Redirecting to Dashboard.',
+        description: `You do not have permission to access this module. Redirecting.`,
       });
+      handleSelectTab(fallbackTab);
       return;
     }
 
@@ -277,18 +281,21 @@ export function DashboardShell(): React.JSX.Element {
       settings: ApplicationRouteCON.DASHBOARD_SETTINGS,
     };
     navigate({
-      to: routeMap[tab] || ApplicationRouteCON.DASHBOARD_OVERVIEW,
+      to: routeMap[tab] || (ApplicationPermissionService.current.canAccessTab('dashboard') ? ApplicationRouteCON.DASHBOARD_OVERVIEW : ApplicationRouteCON.DASHBOARD_INVENTORY),
       search: (prev: any) => prev,
     });
   };
 
   // Guard activeTab on route changes or direct URL deep-links
   useEffect(() => {
-    if (activeTab !== 'dashboard' && !ApplicationPermissionService.current.canAccessTab(activeTab)) {
+    if (!ApplicationPermissionService.current.canAccessTab(activeTab)) {
+      const fallbackTab: TabType = ApplicationPermissionService.current.canAccessTab('dashboard')
+        ? 'dashboard'
+        : 'inventory';
       toast.error('Access Denied', {
-        description: 'You do not have permission to access this module. Redirecting to Dashboard.',
+        description: 'You do not have permission to access this module.',
       });
-      handleSelectTab('dashboard');
+      handleSelectTab(fallbackTab);
     }
   }, [activeTab]);
 
@@ -562,8 +569,8 @@ export function DashboardShell(): React.JSX.Element {
       assignedEmployeeId: assetData.assignedToEmployeeId,
       assignedEmployeeName: assetData.assignedToEmployeeName,
       assignedDepartment: assetData.department,
-      purchasePrice: assetData.procurement?.purchaseCost || 1499,
-      currency: assetData.procurement?.currency || 'USD',
+      purchasePrice: assetData.procurement?.purchaseCost ?? (Number(assetData.currentValue) || 1499),
+      currency: assetData.procurement?.currency || assetData.currency || 'USD',
       location: assetData.currentLocation || 'HQ Warehouse',
       notes: assetData.aiNotes,
       specs: {
@@ -810,7 +817,12 @@ const loginRoute = createRoute({
             password: '***',
             rememberMe: true,
           });
-          navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+          const upperRole = String(authState.userRole || '').toUpperCase();
+          if (upperRole === 'USER') {
+            navigate({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+          } else {
+            navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+          }
         }}
       />
     );
@@ -824,6 +836,10 @@ const signupRoute = createRoute({
   beforeLoad: () => {
     const session = LoginScreenService.current.getSavedSession();
     if (session) {
+      const upperRole = String(session.userRole || '').toUpperCase();
+      if (upperRole === 'USER') {
+        throw redirect({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+      }
       throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
     }
   },
@@ -858,7 +874,12 @@ const signupRoute = createRoute({
             password: '***',
             rememberMe: true,
           });
-          navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+          const upperRole = String(authState.userRole || '').toUpperCase();
+          if (upperRole === 'USER') {
+            navigate({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+          } else {
+            navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+          }
         }}
       />
     );
@@ -872,6 +893,10 @@ const forgotPasswordRoute = createRoute({
   beforeLoad: () => {
     const session = LoginScreenService.current.getSavedSession();
     if (session) {
+      const upperRole = String(session.userRole || '').toUpperCase();
+      if (upperRole === 'USER') {
+        throw redirect({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+      }
       throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
     }
   },
@@ -914,6 +939,10 @@ const indexRoute = createRoute({
     if (!session) {
       throw redirect({ to: ApplicationRouteCON.LOGIN });
     }
+    const upperRole = String(session.userRole || '').toUpperCase();
+    if (upperRole === 'USER') {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+    }
     throw redirect({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
   },
 });
@@ -936,6 +965,13 @@ const dashboardLayoutRoute = createRoute({
 const dashboardOverviewRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: '/',
+  beforeLoad: () => {
+    const session = LoginScreenService.current.getSavedSession();
+    const upperRole = String(session?.userRole || '').toUpperCase();
+    if (upperRole === 'USER' || !ApplicationPermissionService.current.canAccessTab('dashboard')) {
+      throw redirect({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+    }
+  },
   component: function DashboardOverviewComponent() {
     const navigate = useNavigate();
     const { assets, tickets, recommendations, campaign, isLoadingAssets } = useDashboard();
@@ -977,7 +1013,7 @@ const assetInventoryRoute = createRoute({
   component: function AssetInventoryComponent() {
     const navigate = useNavigate();
     const search = useSearch({ strict: false }) as DashboardSearchParams;
-    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets, refetchAssets, onOpenAddAsset } = useDashboard();
+    const { assets, onImportAssets, onDeleteAsset, isLoadingAssets, refetchAssets, onOpenAddAsset, onOpenEditAsset } = useDashboard();
 
     return (
       <AssetInventoryScreenRoute
@@ -996,6 +1032,7 @@ const assetInventoryRoute = createRoute({
           })
         }
         onOpenAddModal={(tmpl) => onOpenAddAsset?.(tmpl)}
+        onOpenEditModal={(asset) => onOpenEditAsset?.(asset)}
         onOpenQRBadgeModal={(asset) =>
           navigate({
             to: '.',

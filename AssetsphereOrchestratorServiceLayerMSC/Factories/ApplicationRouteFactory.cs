@@ -56,6 +56,7 @@ public sealed class ApplicationRouteFactory
         public const string AssignEmployee = "{id}/Assign";
         public const string BulkAction = "Bulk";
         public const string QrLookup = "Qr/{qrAssetId}";
+        public const string ValuationSummary = "ValuationSummary";
     }
 
     public sealed class EmployeeRoutes

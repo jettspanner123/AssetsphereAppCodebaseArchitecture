@@ -15,6 +15,7 @@ export interface NetworkAPIEndpoints {
     create: string;
     update: (id: string) => string;
     delete: (id: string) => string;
+    valuationSummary: string;
   };
   employees: {
     base: string;
@@ -115,6 +116,7 @@ export default class ApplicationNetworkAPIConfiguration {
           create: `${activeBaseUrl}/Api/V1/AssetInventory`,
           update: (id: string) => `${activeBaseUrl}/Api/V1/AssetInventory/${id}`,
           delete: (id: string) => `${activeBaseUrl}/Api/V1/AssetInventory/${id}`,
+          valuationSummary: `${activeBaseUrl}/Api/V1/AssetInventory/ValuationSummary`,
         },
         employees: {
           base: `${activeBaseUrl}/Api/V1/Employees`,

@@ -44,6 +44,21 @@ public static class DatabaseSeederUtility
                 });
                 await context.SaveChangesAsync();
             }
+
+            var valuationCurrencyConfig = await context.ConfigurationConstants.FirstOrDefaultAsync(c => c.ConfigurationKey == "PORTFOLIO_VALUATION_CURRENCY");
+            if (valuationCurrencyConfig == null)
+            {
+                await context.ConfigurationConstants.AddAsync(new ConfigurationConstantEntityClass
+                {
+                    Id = Guid.NewGuid(),
+                    ConfigurationKey = "PORTFOLIO_VALUATION_CURRENCY",
+                    ConfigurationValue = "INR",
+                    Notes = "Base enterprise portfolio valuation currency (e.g. INR or USD)",
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = "seeder"
+                });
+                await context.SaveChangesAsync();
+            }
         }
         catch
         {

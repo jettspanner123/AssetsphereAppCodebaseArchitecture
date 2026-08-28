@@ -82,6 +82,39 @@ const PRESET_URGENCY_LEVELS: CreatableSelectOption[] = [
   { value: 'CRITICAL', label: 'CRITICAL - Executive / Production emergency' },
 ];
 
+const RICH_OPERATOR_STATUS_OPTIONS: CreatableSelectOption[] = [
+  {
+    value: 'PENDING',
+    label: 'Pending Triage',
+    sublabel: 'Awaiting initial operator review & priority assignment',
+    icon: <Clock className="w-4 h-4 text-amber-500 shrink-0" />,
+  },
+  {
+    value: 'IN_REVIEW',
+    label: 'In Review',
+    sublabel: 'Under active diagnostic investigation by IT service desk',
+    icon: <Search className="w-4 h-4 text-blue-500 shrink-0" />,
+  },
+  {
+    value: 'IN_PROGRESS',
+    label: 'In Progress / Repair',
+    sublabel: 'Hardware bench servicing, parts replacement, or OS recovery',
+    icon: <RefreshCw className="w-4 h-4 text-indigo-500 shrink-0" />,
+  },
+  {
+    value: 'RESOLVED',
+    label: 'Resolved & Operational',
+    sublabel: 'All repairs completed, QA passed, and device returned',
+    icon: <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />,
+  },
+  {
+    value: 'REJECTED',
+    label: 'Rejected / Denied',
+    sublabel: 'Request declined (out-of-warranty, unauthorized, duplicate)',
+    icon: <XCircle className="w-4 h-4 text-rose-500 shrink-0" />,
+  },
+];
+
 const PRESET_STATUS_OPTIONS: CreatableSelectOption[] = [
   { value: 'PENDING', label: 'PENDING - Awaiting Operator Review' },
   { value: 'IN_REVIEW', label: 'IN_REVIEW - Under Initial Triage' },
@@ -116,6 +149,9 @@ export default function DeviceServiceRequestDetailModalController({
   onAdminUpdate,
 }: DeviceServiceRequestDetailModalControllerProps): React.JSX.Element {
   const [technicianNotes, setTechnicianNotes] = useState<string>('');
+  const [selectedNewStatus, setSelectedNewStatus] = useState<ServiceRequestStatusType>(
+    (request?.status as ServiceRequestStatusType) || 'PENDING'
+  );
   const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
   const [isEditMode, setIsEditMode] = useState<boolean>(false);
   const [showOriginalData, setShowOriginalData] = useState<boolean>(false);
@@ -144,6 +180,9 @@ export default function DeviceServiceRequestDetailModalController({
 
   // Initialize edit fields from displayRequest
   const syncEditFields = (req: DeviceServiceRequestItemType) => {
+    if (req.status) {
+      setSelectedNewStatus((req.status.toUpperCase() as ServiceRequestStatusType) || 'PENDING');
+    }
     setEditTargetUserName(req.targetUserName || '');
     setEditTargetUserEmail(req.targetUserEmail || '');
     setEditAssetTag(req.assetTag || '');
@@ -160,16 +199,22 @@ export default function DeviceServiceRequestDetailModalController({
   };
 
   useEffect(() => {
+    if (isOpen) {
+      if (displayRequest) {
+        syncEditFields(displayRequest);
+        if (displayRequest.status) {
+          setSelectedNewStatus((displayRequest.status.toUpperCase() as ServiceRequestStatusType) || 'PENDING');
+        }
+      }
+    }
     if (isOpen && !prevIsOpenRef.current) {
       setExitDirection('down');
       setIsEditMode(false);
       setShowOriginalData(false);
-      if (displayRequest) {
-        syncEditFields(displayRequest);
-      }
+      setTechnicianNotes('');
     }
     prevIsOpenRef.current = isOpen;
-  }, [isOpen, displayRequest]);
+  }, [isOpen, displayRequest?.id, displayRequest?.status]);
 
   // Parse edit history and original data if available
   const parsedAuditHistory: DeviceServiceRequestAuditItemType[] = useMemo(() => {
@@ -269,18 +314,18 @@ export default function DeviceServiceRequestDetailModalController({
     }, 0);
   };
 
-  const handleDismissButton = () => {
-    setExitDirection('up');
-    setTimeout(() => {
-      onClose();
-    }, 0);
-  };
-
   const handleStatusAction = async (status: ServiceRequestStatusType) => {
     if (!onUpdateStatus) return;
     setExitDirection('up');
-    await onUpdateStatus(status, technicianNotes.trim() || undefined);
-    setTechnicianNotes('');
+    try {
+      await onUpdateStatus(status, technicianNotes.trim() || undefined);
+      setTechnicianNotes('');
+      setTimeout(() => {
+        onClose();
+      }, 0);
+    } catch {
+      // Keep modal open if update fails
+    }
   };
 
   const handleStartEdit = () => {
@@ -317,20 +362,7 @@ export default function DeviceServiceRequestDetailModalController({
     <ModalSharedComponent
       isOpen={isOpen}
       onClose={onClose}
-      title={
-        <div className="flex items-center gap-3">
-          <span className="font-serif-headline font-bold text-slate-900 dark:text-white">
-            Ticket #{displayRequest.requestNumber}
-          </span>
-          {getStatusBadge(displayRequest.status)}
-          {getUrgencyBadge(displayRequest.urgency)}
-          {isEditMode && (
-            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30">
-              Admin Edit Mode Active
-            </span>
-          )}
-        </div>
-      }
+      title={`Ticket #${displayRequest.requestNumber}`}
       subtitle={`Submitted on ${new Date(displayRequest.createdAt).toLocaleDateString()} at ${new Date(
         displayRequest.createdAt
       ).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} • Requester: ${displayRequest.requesterName}`}
@@ -348,14 +380,6 @@ export default function DeviceServiceRequestDetailModalController({
               onClick={handleCloseButton}
             >
               Close
-            </ButtonSharedComponent>
-            <ButtonSharedComponent
-              variant="ghost"
-              size="sm"
-              onClick={handleDismissButton}
-              className="text-slate-500 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-zinc-200"
-            >
-              Dismiss
             </ButtonSharedComponent>
           </div>
 
@@ -399,17 +423,25 @@ export default function DeviceServiceRequestDetailModalController({
                   </ButtonSharedComponent>
                 )}
 
-                {/* Operator Quick Status Resolve */}
-                {isOperatorOrHigher && displayRequest.status !== 'RESOLVED' && displayRequest.status !== 'REJECTED' && (
+                {/* Operator Ticket Update Action */}
+                {isOperatorOrHigher && (
                   <ButtonSharedComponent
                     variant="primary"
                     size="sm"
-                    onClick={() => handleStatusAction('RESOLVED')}
-                    disabled={isUpdatingStatus}
-                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-                    icon={<CheckCircle2 className="w-3.5 h-3.5 !text-white" />}
+                    onClick={() => handleStatusAction(selectedNewStatus)}
+                    disabled={isUpdatingStatus || (selectedNewStatus === displayRequest.status && !technicianNotes.trim())}
+                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold cursor-pointer"
+                    icon={
+                      isUpdatingStatus ? (
+                        <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
+                      ) : (
+                        <CheckCircle2 className="w-3.5 h-3.5 !text-white" />
+                      )
+                    }
                   >
-                    <span className="!text-white font-medium">Resolve Ticket</span>
+                    <span className="!text-white font-medium">
+                      {isUpdatingStatus ? 'Updating Ticket...' : 'Update Ticket'}
+                    </span>
                   </ButtonSharedComponent>
                 )}
               </>
@@ -419,6 +451,25 @@ export default function DeviceServiceRequestDetailModalController({
       }
     >
       <div className="space-y-6 text-xs">
+        {/* Top Status & Urgency Metadata Bar */}
+        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/80 dark:border-zinc-700/80">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="text-[11px] font-mono font-medium text-slate-500 dark:text-zinc-400">
+              Status & Priority:
+            </span>
+            {getStatusBadge(displayRequest.status)}
+            {getUrgencyBadge(displayRequest.urgency)}
+            {isEditMode && (
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 font-mono">
+                Admin Edit Mode Active
+              </span>
+            )}
+          </div>
+
+          <div className="text-[11px] font-mono text-slate-400 dark:text-zinc-500">
+            Ticket ID: <span className="font-semibold text-slate-700 dark:text-zinc-300">#{displayRequest.requestNumber}</span>
+          </div>
+        </div>
         {/* ========================================================================= */}
         {/* READ ONLY INSPECTION VIEW                                                 */}
         {/* ========================================================================= */}
@@ -518,7 +569,7 @@ export default function DeviceServiceRequestDetailModalController({
 
             {/* Section 2: Hardware Specs & Fault Area (15px top margin) */}
             <div className="space-y-3 mt-[15px]">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[35px]">
                 <Laptop className="w-3.5 h-3.5 text-blue-500" />
                 2. Hardware Details & Fault Classification
               </h4>
@@ -557,8 +608,8 @@ export default function DeviceServiceRequestDetailModalController({
             </div>
 
             {/* Section 3: Diagnostic Problem Notes (15px top margin) */}
-            <div className="space-y-3 mt-[15px]">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+            <div className="space-y-3 mt-[35px]">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[35px]">
                 <FileText className="w-3.5 h-3.5 text-blue-500" />
                 3. Diagnostic Notes & Problem Description
               </h4>
@@ -570,7 +621,7 @@ export default function DeviceServiceRequestDetailModalController({
 
             {/* Section 4: Resolution & Operator Actions (15px top margin) */}
             <div className="space-y-3 mt-[15px]">
-              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[15px]">
+              <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider font-mono flex items-center gap-1.5 pb-2 border-b border-slate-100 dark:border-zinc-800 mt-[35px]">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
                 4. Resolution & Operator Workflow
               </h4>
@@ -587,60 +638,36 @@ export default function DeviceServiceRequestDetailModalController({
 
               {/* Operator Action Controls */}
               {isOperatorOrHigher && (
-                <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-zinc-800/30 border border-slate-200/80 dark:border-zinc-800 space-y-3">
-                  <label className="block text-xs font-medium text-slate-700 dark:text-zinc-300">
-                    Technician / Operational Notes
-                  </label>
+                <div className="p-4 rounded-xl bg-slate-50/70 dark:bg-zinc-800/30 border border-slate-200/80 dark:border-zinc-800 space-y-4">
+                  {/* Line 1: Status Selection Dropdown (Full Width) */}
+                  <div>
+                    <CreatableCustomSelectSharedComponent
+                      label="Update Ticket Lifecycle Status"
+                      required
+                      value={selectedNewStatus}
+                      options={RICH_OPERATOR_STATUS_OPTIONS}
+                      onChange={(val) => setSelectedNewStatus(val as ServiceRequestStatusType)}
+                      enableCustomCreation={false}
+                      enableSearch={false}
+                      helperText="Select a lifecycle state to transition the hardware ticket workflow."
+                    />
+                  </div>
 
-                  <input
-                    type="text"
-                    value={technicianNotes}
-                    onChange={(e) => setTechnicianNotes(e.target.value)}
-                    placeholder="Enter technician diagnostic findings, repair logs, or comments..."
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
-                  />
-
-                  <div className="flex flex-wrap items-center gap-2 pt-1">
-                    <ButtonSharedComponent
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction('IN_REVIEW')}
-                      disabled={isUpdatingStatus || displayRequest.status === 'IN_REVIEW'}
-                      className="hover:border-blue-300 hover:text-blue-600"
-                    >
-                      Mark In Review
-                    </ButtonSharedComponent>
-
-                    <ButtonSharedComponent
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction('IN_PROGRESS')}
-                      disabled={isUpdatingStatus || displayRequest.status === 'IN_PROGRESS'}
-                      className="hover:border-blue-300 hover:text-[#0C2086]"
-                    >
-                      Mark In Progress
-                    </ButtonSharedComponent>
-
-                    <ButtonSharedComponent
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleStatusAction('RESOLVED')}
-                      disabled={isUpdatingStatus || displayRequest.status === 'RESOLVED'}
-                      className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
-                      icon={<CheckCircle2 className="w-3.5 h-3.5 !text-white" />}
-                    >
-                      <span className="!text-white font-medium">Resolve Ticket</span>
-                    </ButtonSharedComponent>
-
-                    <ButtonSharedComponent
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleStatusAction('REJECTED')}
-                      disabled={isUpdatingStatus || displayRequest.status === 'REJECTED'}
-                      className="text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/50 hover:border-rose-300"
-                    >
-                      Reject Request
-                    </ButtonSharedComponent>
+                  {/* Line 2: Technician Notes Textarea (Full Width, Expanded Height) */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-slate-700 dark:text-zinc-300 block">
+                      Technician / Operational Notes
+                    </label>
+                    <textarea
+                      rows={4}
+                      value={technicianNotes}
+                      onChange={(e) => setTechnicianNotes(e.target.value)}
+                      placeholder="Enter diagnostic findings, bench repair logs, parts replaced, or resolution summary..."
+                      className="w-full p-3 text-xs bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/50 focus:border-[#0C2086] transition-all font-sans leading-relaxed resize-y min-h-[95px]"
+                    />
+                    <p className="text-[11px] text-slate-400 dark:text-zinc-500">
+                      Notes will be logged into the permanent revision audit trail and shown upon ticket inspection.
+                    </p>
                   </div>
                 </div>
               )}
@@ -727,10 +754,10 @@ export default function DeviceServiceRequestDetailModalController({
                       workLocationOptions && workLocationOptions.length > 0
                         ? workLocationOptions
                         : [
-                            { value: 'Austin Silicon Labs - TX', label: 'Austin Silicon Labs - TX', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-                            { value: 'San Jose Technology Park - CA', label: 'San Jose Technology Park - CA', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-                            { value: 'London High Street Office - UK', label: 'London High Street Office - UK', icon: <MapPin className="w-3.5 h-3.5 text-emerald-500" /> },
-                            { value: 'Remote / Work From Home', label: 'Remote / Work From Home', icon: <MapPin className="w-3.5 h-3.5 text-cyan-500" /> },
+                            { value: 'Austin Silicon Labs - TX', label: 'Austin Silicon Labs - TX', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+                            { value: 'San Jose Technology Park - CA', label: 'San Jose Technology Park - CA', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+                            { value: 'London High Street Office - UK', label: 'London High Street Office - UK', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
+                            { value: 'Remote / Work From Home', label: 'Remote / Work From Home', icon: <MapPin className="w-3.5 h-3.5 text-slate-400 dark:text-zinc-500" /> },
                           ]
                     }
                     onChange={setEditWorkLocation}

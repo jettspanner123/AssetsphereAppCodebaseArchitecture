@@ -20,7 +20,7 @@ export default class ApplicationPermissionCON {
 
   // Granular Tab Visibility Permissions
   public static readonly CAN_VIEW_TAB_DASHBOARD: Set<UserRoleType> =
-    ApplicationPermissionPreset.current.allRoles();
+    ApplicationPermissionPreset.current.operatorRolePreset();
   public static readonly CAN_VIEW_TAB_INVENTORY: Set<UserRoleType> =
     ApplicationPermissionPreset.current.allRoles();
   public static readonly CAN_VIEW_TAB_LICENSES: Set<UserRoleType> =

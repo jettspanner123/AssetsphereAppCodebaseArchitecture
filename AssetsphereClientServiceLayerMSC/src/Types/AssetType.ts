@@ -319,6 +319,7 @@ export interface Asset {
 
   hardwareSpecs?: HardwareSpecs;
   procurement: ProcurementInfo;
+  currency?: string;
   warranty: WarrantyInfo;
   security: SecurityAndCompliance;
   network: NetworkConfig;

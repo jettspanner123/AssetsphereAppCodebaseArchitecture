@@ -8,6 +8,7 @@ export interface AssetInventoryScreenRouteProps {
   onRefresh?: () => void;
   onSelectAsset: (asset: Asset) => void;
   onOpenAddModal: (templateAsset?: Asset) => void;
+  onOpenEditModal?: (asset: Asset) => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onExportCSV: () => void;
   onImportAssets?: (importedAssets: Asset[]) => void;
@@ -28,6 +29,7 @@ export default function AssetInventoryScreenRoute({
   onRefresh,
   onSelectAsset,
   onOpenAddModal,
+  onOpenEditModal,
   onOpenQRBadgeModal,
   onExportCSV,
   onImportAssets,
@@ -48,6 +50,7 @@ export default function AssetInventoryScreenRoute({
       onRefresh={onRefresh}
       onSelectAsset={onSelectAsset}
       onOpenAddModal={onOpenAddModal}
+      onOpenEditModal={onOpenEditModal}
       onOpenQRBadgeModal={onOpenQRBadgeModal}
       onExportCSV={onExportCSV}
       onImportAssets={onImportAssets}

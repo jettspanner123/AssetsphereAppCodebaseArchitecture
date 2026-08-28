@@ -9,6 +9,7 @@ import CardSharedComponent from '../../../Shared/Components/CardSharedComponent'
 import EmptyStateSharedComponent from '../../../Shared/Components/EmptyStateSharedComponent';
 import PermissionGuardSharedComponent from '../../../Shared/Components/PermissionGuardSharedComponent';
 import ApplicationPermissionCON from '../../../Constants/ApplicationPermissionCON';
+import CurrencyFormatterUtility from '../../../Utilities/CurrencyFormatterUtility';
 import {
   User,
   Mail,
@@ -71,6 +72,9 @@ export default function EmployeeDetailModalController({
 
   // Financial and Telemetry Aggregates
   const totalValuation = assignedAssets.reduce((sum, a) => sum + (a.currentValue || 0), 0);
+  const dominantCurrency = CurrencyFormatterUtility.current.getDominantCurrency(
+    assignedAssets.map((a) => a.procurement?.currency || a.currency)
+  );
   const avgHealthScore =
     assignedAssets.length > 0
       ? Math.round(
@@ -336,7 +340,7 @@ export default function EmployeeDetailModalController({
                 <div>
                   <span className="text-[11px] text-slate-500 dark:text-zinc-400 font-medium">Combined Asset Value</span>
                   <p className="font-mono text-base font-bold text-slate-900 dark:text-white">
-                    ${totalValuation.toLocaleString()}
+                    {CurrencyFormatterUtility.current.format(totalValuation, dominantCurrency)}
                   </p>
                 </div>
               </div>
@@ -399,7 +403,12 @@ export default function EmployeeDetailModalController({
                         </div>
                         <div>
                           <span className="text-slate-400 font-medium">Valuation:</span>
-                          <p className="font-mono font-medium">${asset.currentValue?.toLocaleString() || 0}</p>
+                          <p className="font-mono font-medium">
+                            {CurrencyFormatterUtility.current.format(
+                              asset.currentValue,
+                              asset.procurement?.currency || asset.currency
+                            )}
+                          </p>
                         </div>
                         <div>
                           <span className="text-slate-400 font-medium">Health Score:</span>

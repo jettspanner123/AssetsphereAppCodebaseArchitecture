@@ -1,4 +1,4 @@
-import { Controller, Get, Res, HttpStatus, Logger } from '@nestjs/common';
+import { Controller, Get, Res, HttpStatus, Logger, Inject } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Response } from 'express';
 import { ApplicationRouteFactory } from '../../Factories/ApplicationRouteFactory';
@@ -13,29 +13,31 @@ import { ValidationCException } from '../../Exceptions/ValidationCException';
 export class HealthCheckController {
   private readonly _logger: Logger = new Logger(HealthCheckController.name);
 
-  public constructor(private readonly _healthCheckService: HealthCheckService) {}
+  public constructor(
+    @Inject(HealthCheckService) private readonly _healthCheckService: HealthCheckService
+  ) {}
 
   @Get(ApplicationRouteFactory.HealthCheckRoutes.Status)
   @ApiOperation({ summary: 'Execute full system and AI readiness diagnostics' })
-  @ApiResponse({ status: 200, description: 'Diagnostic report retrieved successfully', type: ApiResponseClass })
+  @ApiResponse({ status: 200, description: 'Diagnostic report retrieved successfully', type: HealthCheckResponseDTO })
   @ApiResponse({ status: 503, description: 'One or more critical subsystems are unhealthy' })
   public async getStatus(@Res() res: Response): Promise<void> {
     try {
-      const report: HealthCheckResponseDTO = await this._healthCheckService.checkHealthAsync();
+      const report: HealthCheckResponseDTO = await this._healthCheckService.CheckHealthAsync();
 
-      HealthCheckAssertion.current.assertHealthReport(report);
+      HealthCheckAssertion.Current.AssertHealthReport(report);
 
       const statusCode: number =
-        report.overallStatus === HealthStatusType.Healthy
+        report.OverallStatus === HealthStatusType.Healthy
           ? HttpStatus.OK
-          : report.overallStatus === HealthStatusType.Degraded
+          : report.OverallStatus === HealthStatusType.Degraded
             ? HttpStatus.OK
             : HttpStatus.SERVICE_UNAVAILABLE;
 
       const message: string =
-        report.overallStatus === HealthStatusType.Healthy
+        report.OverallStatus === HealthStatusType.Healthy
           ? 'All AI microservice systems are operational and healthy.'
-          : report.overallStatus === HealthStatusType.Degraded
+          : report.OverallStatus === HealthStatusType.Degraded
             ? 'AI microservice operational with degraded performance.'
             : 'One or more critical AI subsystems are unhealthy.';
 
@@ -45,7 +47,7 @@ export class HealthCheckController {
       if (valEx instanceof ValidationCException) {
         this._logger.warn(`Health check validation warning: ${valEx.message}`);
         res.status(HttpStatus.BAD_REQUEST).json(
-          ApiResponseClass.Failed<HealthCheckResponseDTO>(valEx.message, valEx.validationErrors, HttpStatus.BAD_REQUEST)
+          ApiResponseClass.Failed<HealthCheckResponseDTO>(valEx.message, valEx.ValidationErrors, HttpStatus.BAD_REQUEST)
         );
       } else {
         const error = valEx as Error;
@@ -65,8 +67,8 @@ export class HealthCheckController {
   @ApiOperation({ summary: 'Fast lightweight liveness ping' })
   @ApiResponse({ status: 200, description: 'Service is responding to network traffic' })
   public async ping(@Res() res: Response): Promise<void> {
-    const payload = ApiResponseClass.Succeeded<{ status: string; timestamp: string }>(
-      { status: 'PONG', timestamp: new Date().toISOString() },
+    const payload = ApiResponseClass.Succeeded<{ Status: string; Timestamp: string }>(
+      { Status: 'PONG', Timestamp: new Date().toISOString() },
       'Liveness probe succeeded.',
       HttpStatus.OK
     );

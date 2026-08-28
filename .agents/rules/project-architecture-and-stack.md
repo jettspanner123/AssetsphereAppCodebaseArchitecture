@@ -57,3 +57,15 @@
   - **Colors**: No hardcoded color strings. Strictly use `ColorFactoryCON` and `ApplicationBaselineColorStateStore`.
   - **Spacing**: No hardcoded margin/padding/gap numbers. Strictly use `EdgeInsetsCON`.
   - **Primary CTA Buttons**: Exact `#0C2086` brand blue (hover `#081765`) with `!text-white` invariant.
+
+## 8. AI Service Architecture (NestJS TypeScript - MSC)
+- **Rules File**: `AssetsphereAIServiceLayerMSC/CODING-RULES.md` and `.agents/rules/ai-service-layer-orchestrator-parity.md`
+- **1:1 Parity Invariant**: All code quality, file/folder structure, DTO naming, PascalCase properties, assertions, and exceptions in `AssetsphereAIServiceLayerMSC` MUST strictly mirror `AssetsphereOrchestratorServiceLayerMSC`.
+- **Structure**:
+  - `src/Features/${FeatureName}/`: Controllers, Services, Assertions (Singletons with `Current`), Models (DTOs), Modules.
+  - `src/Factories/ApplicationRouteFactory.ts`: Centralized route constants (no hardcoded route strings).
+  - `src/Models/Classes/ApiResponseClass.ts`: Standardized response envelope (`Data`, `Success`, `Message`, `Errors`, `StatusCode`, `Timestamp`).
+  - `src/Exceptions/ValidationCException.ts`: Custom validation exception.
+  - `src/Filters/HttpExceptionGlobalFilter.ts`: Global exception filter returning `ApiResponseClass.Failed`.
+  - **API Documentation**: Scalar API Reference at `/Api/V1/Documentation`.
+

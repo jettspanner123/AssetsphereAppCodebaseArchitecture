@@ -1,27 +1,27 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
 export class ValidationCException extends HttpException {
-  public readonly validationErrors: string[];
+  public readonly ValidationErrors: string[];
 
   public constructor(messageOrErrors: string | string[]) {
     if (Array.isArray(messageOrErrors)) {
       super(
         {
-          message: messageOrErrors.length > 0 ? messageOrErrors[0] : 'Validation failed.',
-          errors: messageOrErrors,
+          Message: messageOrErrors.length > 0 ? messageOrErrors[0] : 'Validation failed.',
+          Errors: messageOrErrors,
         },
         HttpStatus.BAD_REQUEST
       );
-      this.validationErrors = messageOrErrors;
+      this.ValidationErrors = messageOrErrors;
     } else {
       super(
         {
-          message: messageOrErrors,
-          errors: [messageOrErrors],
+          Message: messageOrErrors,
+          Errors: [messageOrErrors],
         },
         HttpStatus.BAD_REQUEST
       );
-      this.validationErrors = [messageOrErrors];
+      this.ValidationErrors = [messageOrErrors];
     }
   }
 }

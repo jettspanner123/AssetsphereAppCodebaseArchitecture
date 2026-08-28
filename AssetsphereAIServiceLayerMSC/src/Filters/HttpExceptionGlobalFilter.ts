@@ -25,7 +25,7 @@ export class HttpExceptionGlobalFilter implements ExceptionFilter {
     if (exception instanceof ValidationCException) {
       statusCode = HttpStatus.BAD_REQUEST;
       message = exception.message;
-      errors = exception.validationErrors;
+      errors = exception.ValidationErrors;
       this._logger.warn(`Validation failure: ${message}`);
     } else if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
@@ -33,10 +33,12 @@ export class HttpExceptionGlobalFilter implements ExceptionFilter {
 
       if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
         const resObj = exceptionResponse as Record<string, any>;
-        message = resObj.message || exception.message;
+        message = resObj.Message || resObj.message || exception.message;
         if (Array.isArray(resObj.message)) {
           errors = resObj.message;
           message = 'Request validation failed.';
+        } else if (resObj.Errors && Array.isArray(resObj.Errors)) {
+          errors = resObj.Errors;
         } else if (resObj.errors && Array.isArray(resObj.errors)) {
           errors = resObj.errors;
         }

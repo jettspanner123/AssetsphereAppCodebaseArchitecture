@@ -6,6 +6,11 @@ export class ApplicationRouteFactory {
     Ping: 'Ping',
   } as const;
 
+  public static readonly DocumentationRoutes = {
+    ControllerURL: '/Api/V1/Documentation',
+    OpenApiSpec: '/Api/V1/Documentation/OpenApi.json',
+  } as const;
+
   public static readonly AiDiagnosticsRoutes = {
     ControllerURL: 'Api/V1/AiDiagnostics',
     Analyze: 'Analyze',

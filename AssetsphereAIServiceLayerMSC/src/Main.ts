@@ -5,8 +5,10 @@ dotenv.config();
 import { NestFactory } from '@nestjs/core';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 import { AppModule } from './AppModule';
 import { HttpExceptionGlobalFilter } from './Filters/HttpExceptionGlobalFilter';
+import { ApplicationRouteFactory } from './Factories/ApplicationRouteFactory';
 
 async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
@@ -32,7 +34,7 @@ async function bootstrap(): Promise<void> {
     credentials: true,
   });
 
-  // Swagger OpenAPI Documentation Configuration
+  // OpenAPI Document Generation
   const config = new DocumentBuilder()
     .setTitle('Assetsphere AI Microservice API')
     .setDescription('Enterprise AI orchestration, telemetry diagnostics, and predictive hardware health analytics')
@@ -42,14 +44,30 @@ async function bootstrap(): Promise<void> {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger', app, document);
+
+  // Serve raw OpenAPI JSON specification
+  app.getHttpAdapter().get(ApplicationRouteFactory.DocumentationRoutes.OpenApiSpec, (_req: any, res: any) => {
+    res.setHeader('Content-Type', 'application/json');
+    res.send(document);
+  });
+
+  // Mount Scalar API Reference Documentation on /Api/V1/Documentation
+  app.use(
+    ApplicationRouteFactory.DocumentationRoutes.ControllerURL,
+    apiReference({
+      spec: {
+        content: document,
+      },
+    })
+  );
 
   const port = parseInt(process.env.PORT || '8000', 10);
   await app.listen(port, '0.0.0.0');
 
   logger.log(`🚀 AssetsphereAIServiceLayerMSC running on: http://localhost:${port}`);
-  logger.log(`📚 Swagger OpenAPI documentation available at: http://localhost:${port}/swagger`);
-  logger.log(`🩺 HealthCheck endpoint: http://localhost:${port}/Api/V1/HealthCheck`);
+  logger.log(`📖 Scalar API Reference available at: http://localhost:${port}${ApplicationRouteFactory.DocumentationRoutes.ControllerURL}`);
+  logger.log(`📄 OpenAPI Spec JSON available at: http://localhost:${port}${ApplicationRouteFactory.DocumentationRoutes.OpenApiSpec}`);
+  logger.log(`🩺 HealthCheck endpoint: http://localhost:${port}/${ApplicationRouteFactory.HealthCheckRoutes.ControllerURL}`);
 }
 
 bootstrap().catch((err: Error) => {

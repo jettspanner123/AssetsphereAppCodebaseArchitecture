@@ -225,6 +225,72 @@
   - `bun install` completed successfully.
   - `bun run ai:lint` and `bun run ai:build` compiled cleanly with 0 errors.
 
+## 16. Scalar API Reference Integration for AI Microservice
+- **Objective**: Replace standard Swagger UI with modern, interactive **Scalar API Reference** (`@scalar/nestjs-api-reference`), exposing interactive documentation at `/Api/V1/Documentation` and raw OpenAPI JSON at `/Api/V1/Documentation/OpenApi.json`.
+- **Files Modified**:
+  - [`AssetsphereAIServiceLayerMSC/package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/package.json):
+    - Added `@scalar/nestjs-api-reference` dependency.
+  - [`AssetsphereAIServiceLayerMSC/src/Factories/ApplicationRouteFactory.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Factories/ApplicationRouteFactory.ts):
+    - Added `DocumentationRoutes` constant defining `ControllerURL: '/Api/V1/Documentation'` and `OpenApiSpec: '/Api/V1/Documentation/OpenApi.json'`.
+  - [`AssetsphereAIServiceLayerMSC/src/Main.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Main.ts):
+    - Mounted `apiReference` on `ApplicationRouteFactory.DocumentationRoutes.ControllerURL` (`/Api/V1/Documentation`).
+    - Exposed raw OpenAPI JSON specification at `ApplicationRouteFactory.DocumentationRoutes.OpenApiSpec` (`/Api/V1/Documentation/OpenApi.json`).
+- **Verification**:
+  - `bun install` resolved all dependencies.
+  - `bun run ai:lint` and `bun run ai:build` compiled cleanly with 0 errors.
+
+## 17. AI Microservice Runtime Startup Fixes & Diagnostics Verification
+- **Objective**: Resolve runtime reflection errors during NestJS startup with `@nestjs/swagger` and `tsx`, and verify live diagnostic HTTP responses on port 8000.
+- **Root Cause & Fixes**:
+  - NestJS Swagger schema reflection requires explicit types when running with esbuild/tsx.
+  - Added explicit `type: () => Boolean`, `type: () => String`, etc., across [`ApiResponseClass.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Models/Classes/ApiResponseClass.ts) and [`HealthCheckDTOs.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Models/HealthCheckDTOs.ts).
+  - Extracted anonymous `systemInfo` object type in `HealthCheckDTOs.ts` into a dedicated `SystemTelemetryInfoDTO` class.
+  - Added `@Inject(HealthCheckService)` in [`HealthCheckController.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckController.ts).
+  - Fixed variable name typo in [`HealthCheckService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Services/HealthCheckService.ts).
+- **Live Verification**:
+  - `GET http://localhost:8000/Api/V1/HealthCheck/Ping` -> Returns `200 OK` (`{ success: true, data: { status: 'PONG' } }`).
+  - `GET http://localhost:8000/Api/V1/HealthCheck` -> Returns `200 OK` with full telemetry report (process memory, Gemini AI probe, OS specs).
+  - `GET http://localhost:8000/Api/V1/Documentation` -> Returns `200 OK` (Scalar HTML UI).
+  - `GET http://localhost:8000/Api/V1/Documentation/OpenApi.json` -> Returns `200 OK` (OpenAPI 3.0 specification).
+  - `bun run ai:lint` and `bun run ai:build` completed with 0 errors.
+
+## 18. Strict 1:1 .NET Architecture & PascalCase JSON Alignment
+- **Objective**: Ensure `AssetsphereAIServiceLayerMSC` (NestJS) completely mirrors the `.NET` Orchestrator layer architecture, folder structure, code patterns, and PascalCase serialization across all responses and DTOs.
+- **Files Refactored**:
+  - [`AssetsphereAIServiceLayerMSC/src/Models/Classes/ApiResponseClass.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Models/Classes/ApiResponseClass.ts):
+    - Aligned properties to strict PascalCase: `Data`, `Success`, `Message`, `Errors`, `StatusCode`, `Timestamp`.
+  - [`AssetsphereAIServiceLayerMSC/src/Exceptions/ValidationCException.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Exceptions/ValidationCException.ts):
+    - Formatted exception with `ValidationErrors` and `Message`.
+  - [`AssetsphereAIServiceLayerMSC/src/Filters/HttpExceptionGlobalFilter.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Filters/HttpExceptionGlobalFilter.ts):
+    - Catch-all filter emitting `ApiResponseClass.Failed` with PascalCase error envelopes.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Models/HealthCheckDTOs.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Models/HealthCheckDTOs.ts):
+    - 1:1 parity with .NET: `ComponentHealthDTO` (`ComponentName`, `Status`, `LatencyMs`, `Details`, `CheckedAt`), `RuntimeHealthDTO` (`EnvironmentName`, `Uptime`, `MemoryAllocatedMB`, `ThreadCount`, `RuntimeVersion`), and `HealthCheckResponseDTO` (`OverallStatus`, `TotalDurationMs`, `Runtime`, `Subsystems`, `Timestamp`).
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Assertion/HealthCheckAssertion.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Assertion/HealthCheckAssertion.ts):
+    - Singleton accessor `HealthCheckAssertion.Current` and methods `CheckForNullRequest`, `AssertHealthReport`.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Services/HealthCheckService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Services/HealthCheckService.ts):
+    - Implemented `CheckHealthAsync` returning fully-populated `RuntimeHealthDTO`, `ComponentHealthDTO[]`, and execution duration.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckController.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckController.ts):
+    - Returns `ApiResponseClass.Succeeded` envelopes with PascalCase JSON payload.
+- **Verification**:
+  - `GET http://localhost:8000/Api/V1/HealthCheck/Ping` verified live: `{ "Data": { "Status": "PONG", "Timestamp": "..." }, "Success": true, "Message": "Liveness probe succeeded.", "StatusCode": 200, "Timestamp": "..." }`.
+  - `GET http://localhost:8000/Api/V1/HealthCheck` verified live with full PascalCase telemetry structure.
+  - Monorepo-wide `bun run lint` and `bun run build` completed with 0 errors across `@assetsphere/ai-service`, `@assetsphere/client`, and `@assetsphere/server`.
+
+## 19. Persisted AI Service Layer 1:1 .NET Parity Rule
+- **Objective**: Persist a permanent workspace rule requiring all future feature developments in `AssetsphereAIServiceLayerMSC` (NestJS) to first inspect `AssetsphereOrchestratorServiceLayerMSC` (.NET) and replicate its code quality, folder layout, singleton assertions, DTOs, and PascalCase invariants 1:1.
+- **Rule Files Created / Modified**:
+  - [`.agents/rules/ai-service-layer-orchestrator-parity.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/.agents/rules/ai-service-layer-orchestrator-parity.md) [NEW]:
+    - Mandatory pre-coding inspection of .NET orchestrator codebase.
+    - Exact MSC folder and file layout parity (`Features/${FeatureName}/Controllers, Services, Assertion, Models, Constants, Utilities`).
+    - Strict PascalCase naming and serialization invariant.
+    - Mandatory singleton assertions (`${FeatureName}Assertion.Current`) and `ApiResponseClass<T>` envelopes.
+  - [`.agents/rules/project-architecture-and-stack.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/.agents/rules/project-architecture-and-stack.md):
+    - Added Section 8 documenting `AI Service Architecture (NestJS TypeScript - MSC)`.
+
+
+
+
+
 
 
 

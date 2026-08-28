@@ -1,0 +1,32 @@
+{
+  "name": "@assetsphere/ai-service",
+  "version": "1.0.0",
+  "description": "Assetsphere AI Orchestration & Diagnostics Microservice Layer (MSC)",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/Main.ts",
+    "start": "node dist/Main.js",
+    "build": "rimraf dist && tsc -p tsconfig.build.json",
+    "lint": "tsc --noEmit",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "@google/genai": "^2.4.0",
+    "@nestjs/common": "^11.0.11",
+    "@nestjs/core": "^11.0.11",
+    "@nestjs/platform-express": "^11.0.11",
+    "@nestjs/swagger": "^11.0.6",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.1",
+    "dotenv": "^17.2.3",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.10",
+    "rimraf": "^6.0.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  }
+}

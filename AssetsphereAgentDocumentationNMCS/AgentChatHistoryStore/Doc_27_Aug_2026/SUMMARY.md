@@ -45,9 +45,9 @@
   - `bun run client:build` succeeded in 28.2s.
   - `bun run server:build` succeeded in 1.8s.
 
-## 3. Class-Based CLI Command Center (`AssetsphereRunnerScripts/CommandList.py`)
+## 3. Class-Based CLI Command Center (`../../../AssetsphereRunnerScriptsNMSC/CommandList.py`)
 - **Files Created / Modified**:
-  - [`AssetsphereRunnerScripts/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Fully PascalCase, class-based CLI table renderer.
+  - [`../../../AssetsphereRunnerScriptsNMSC/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Fully PascalCase, class-based CLI table renderer.
   - [`package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/package.json): Added `"list:cmd"` and `"list cmd"` scripts executing `python AssetsphereRunnerScripts/CommandList.py`.
 - **Architecture & Highlights**:
   1. **Strict PascalCase & Class-Based Architecture**:
@@ -104,9 +104,9 @@
 ## 7. Dynamic Backend Target Switcher (`backend:live`, `backend:local`, `backend:status`)
 - **Files Created / Modified**:
   - [`AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Configurations/ApplicationNetworkAPIConfiguration.ts): Updated `getBaseUrl()` to dynamically consume `import.meta.env.VITE_BACKEND_API_BASE_URL` with clean fallback to `http://localhost:5125` and registered `healthCheck` endpoint.
-  - [`AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py): Created class-based, PascalCase CLI runner with ANSI brand theme and live health check diagnostic ping.
+  - [`../../../AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py): Created class-based, PascalCase CLI runner with ANSI brand theme and live health check diagnostic ping.
   - [`package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/package.json): Added `backend:live`, `backend:local`, `backend:status` aliases.
-  - [`AssetsphereRunnerScripts/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Added "Environment & Cloud Management" category to the Command Center table.
+  - [`../../../AssetsphereRunnerScriptsNMSC/CommandList.py`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereRunnerScripts/CommandList.py): Added "Environment & Cloud Management" category to the Command Center table.
 - **Commands Available**:
   - `bun run backend:live`: Configures `VITE_BACKEND_API_BASE_URL=https://assetsphereappcodebasearchitecture.onrender.com` and executes live health check probe.
   - `bun run backend:local`: Configures `VITE_BACKEND_API_BASE_URL=http://localhost:5125`.

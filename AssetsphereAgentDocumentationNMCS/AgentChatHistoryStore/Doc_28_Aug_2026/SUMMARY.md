@@ -189,6 +189,43 @@
 - **Verification**:
   - `bun run client:lint` and `bun run client:build` compiled cleanly with 0 errors.
 
+## 15. AssetsphereAIServiceLayerMSC NestJS Application Initialization
+- **Objective**: Establish `AssetsphereAIServiceLayerMSC`, a NestJS AI orchestration and diagnostics service layer, conforming strictly to the repository MSC architecture, singleton assertions, route factories, and envelope patterns defined in `CODING-RULES.md`.
+- **Files Created / Modified**:
+  - [`package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/package.json):
+    - Added `"AssetsphereAIServiceLayerMSC"` to root monorepo `workspaces`.
+    - Added `ai:dev`, `ai:build`, `ai:lint`, and `ai:install` turbo scripts.
+  - [`AssetsphereAIServiceLayerMSC/CODING-RULES.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/CODING-RULES.md) [NEW]:
+    - Copied and adapted coding rules from orchestrator layer for the NestJS TypeScript service.
+  - [`AssetsphereAIServiceLayerMSC/package.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/package.json) [NEW]:
+    - Configured `@assetsphere/ai-service` with NestJS core, platform-express, swagger, class-validator, class-transformer, reflect-metadata, and rxjs.
+  - [`AssetsphereAIServiceLayerMSC/tsconfig.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/tsconfig.json) & [`tsconfig.build.json`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/tsconfig.build.json) [NEW]:
+    - Configured strict decorator metadata and path mapping aliases (`@/*`).
+  - [`AssetsphereAIServiceLayerMSC/src/Factories/ApplicationRouteFactory.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Factories/ApplicationRouteFactory.ts) [NEW]:
+    - Singleton route factory defining endpoints for `HealthCheckRoutes` (`Api/V1/HealthCheck`, `Diagnostics`, `Ping`) and `AiDiagnosticsRoutes`.
+  - [`AssetsphereAIServiceLayerMSC/src/Models/Classes/ApiResponseClass.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Models/Classes/ApiResponseClass.ts) [NEW]:
+    - Standardized `ApiResponseClass<T>` envelope class with Swagger decorators and `Succeeded` / `Failed` static factory helpers.
+  - [`AssetsphereAIServiceLayerMSC/src/Exceptions/ValidationCException.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Exceptions/ValidationCException.ts) [NEW]:
+    - Custom validation exception class.
+  - [`AssetsphereAIServiceLayerMSC/src/Filters/HttpExceptionGlobalFilter.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Filters/HttpExceptionGlobalFilter.ts) [NEW]:
+    - Global exception filter wrapping all HTTP errors into `ApiResponseClass.Failed`.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Models/HealthCheckDTOs.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Models/HealthCheckDTOs.ts) [NEW]:
+    - `HealthStatusType`, `SubsystemHealthDTO`, and `HealthCheckResponseDTO`.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Assertion/HealthCheckAssertion.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Assertion/HealthCheckAssertion.ts) [NEW]:
+    - Singleton assertion validator for diagnostic health reports.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Services/HealthCheckService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/Services/HealthCheckService.ts) [NEW]:
+    - Diagnostic service performing live process RSS/heap memory inspections, Gemini API readiness probe, and host OS telemetry.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckController.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckController.ts) [NEW]:
+    - Controller with Swagger annotations, assertion calls, and `ApiResponseClass` output on `Api/V1/HealthCheck`.
+  - [`AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckModule.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Features/HealthCheck/HealthCheckModule.ts) [NEW]:
+    - Feature module registering controller and service.
+  - [`AssetsphereAIServiceLayerMSC/src/AppModule.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/AppModule.ts) & [`src/Main.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAIServiceLayerMSC/src/Main.ts) [NEW]:
+    - Main entrypoint configuring Swagger on `/swagger`, global validation pipe, CORS, and port `8000`.
+- **Verification**:
+  - `bun install` completed successfully.
+  - `bun run ai:lint` and `bun run ai:build` compiled cleanly with 0 errors.
+
+
 
 
 

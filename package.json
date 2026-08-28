@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "AssetsphereClientServiceLayerMSC",
-    "AssetsphereOrchestratorServiceLayerMSC"
+    "AssetsphereOrchestratorServiceLayerMSC",
+    "AssetsphereAIServiceLayerMSC"
   ],
   "scripts": {
     "start:dev": "turbo dev",
@@ -20,17 +21,22 @@
     "client:lint": "turbo lint --filter=@assetsphere/client",
     "client:install": "bun install --cwd AssetsphereClientServiceLayerMSC",
     "client install": "bun install --cwd AssetsphereClientServiceLayerMSC",
+    "ai:dev": "turbo dev --filter=@assetsphere/ai-service",
+    "ai:build": "turbo build --filter=@assetsphere/ai-service",
+    "ai:lint": "turbo lint --filter=@assetsphere/ai-service",
+    "ai:install": "bun install --cwd AssetsphereAIServiceLayerMSC",
+    "ai install": "bun install --cwd AssetsphereAIServiceLayerMSC",
     "server:dev": "turbo dev --filter=@assetsphere/server",
     "server:build": "turbo build --filter=@assetsphere/server",
     "server:lint": "turbo lint --filter=@assetsphere/server",
-    "backend:live": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=live",
-    "backend live": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=live",
-    "backend:local": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=local",
-    "backend local": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=local",
-    "backend:status": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=status",
-    "backend status": "python AssetsphereRunnerScripts/BackendEnvironmentSwitcher.py --target=status",
-    "list:cmd": "python AssetsphereRunnerScripts/CommandList.py",
-    "list cmd": "python AssetsphereRunnerScripts/CommandList.py"
+    "backend:live": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=live",
+    "backend live": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=live",
+    "backend:local": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=local",
+    "backend local": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=local",
+    "backend:status": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=status",
+    "backend status": "python AssetsphereRunnerScriptsNMSC/BackendEnvironmentSwitcher.py --target=status",
+    "list:cmd": "python AssetsphereRunnerScriptsNMSC/CommandList.py",
+    "list cmd": "python AssetsphereRunnerScriptsNMSC/CommandList.py"
   },
   "devDependencies": {
     "@types/bun": "latest",

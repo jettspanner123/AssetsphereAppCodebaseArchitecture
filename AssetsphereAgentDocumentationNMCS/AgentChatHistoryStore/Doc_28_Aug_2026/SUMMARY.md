@@ -180,6 +180,16 @@
 - **Verification**:
   - `bun run client:lint` and `bun run client:build` compiled cleanly with 0 errors.
 
+## 14. Header Metrics Card Restricted for USER Role
+- **Objective**: Ensure the header metric card (showing Portfolio Valuation and Total Devices) is completely hidden for the `USER` role to maintain enterprise confidential financial data boundaries.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/AssetInventoryScreenController.tsx):
+    - Configured `useAssetValuationSummaryQuery` with `{ enabled: !isStandardUser }` to suppress redundant valuation network requests when standard users are logged in.
+    - Wrapped the header metric counters block in `{!isStandardUser && ( ... )}` so that only non-USER roles (Operators, Admins, Developers) see the executive valuation and device counts.
+- **Verification**:
+  - `bun run client:lint` and `bun run client:build` compiled cleanly with 0 errors.
+
+
 
 
 

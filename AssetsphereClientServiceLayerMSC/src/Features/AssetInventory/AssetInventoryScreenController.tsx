@@ -421,7 +421,8 @@ export default function AssetInventoryScreenController({
   }, [filteredAssets]);
 
   const { data: valuationSummary } = TanstackQueryClientService.current.assets.useAssetValuationSummaryQuery(
-    filteredAssetIds
+    filteredAssetIds,
+    { enabled: !isStandardUser }
   );
 
   const totalValuation = filteredAssets.reduce(
@@ -465,30 +466,32 @@ export default function AssetInventoryScreenController({
           </p>
         </div>
 
-        {/* Executive Typographic Metric Counters */}
-        <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {valuationSummary
-                ? `${valuationSummary.targetCurrencySymbol}${valuationSummary.convertedTotalValuation.toLocaleString()}`
-                : CurrencyFormatterUtility.current.format(totalValuation, dominantCurrency)}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              {isStandardUser ? 'Assigned Valuation' : 'Portfolio Valuation'}
-            </span>
-          </div>
+        {/* Executive Typographic Metric Counters (Hidden for standard USER role) */}
+        {!isStandardUser && (
+          <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-3 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                {valuationSummary
+                  ? `${valuationSummary.targetCurrencySymbol}${valuationSummary.convertedTotalValuation.toLocaleString()}`
+                  : CurrencyFormatterUtility.current.format(totalValuation, dominantCurrency)}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                Portfolio Valuation
+              </span>
+            </div>
 
-          <div className="h-6 w-px bg-slate-200 dark:bg-zinc-800" />
+            <div className="h-6 w-px bg-slate-200 dark:bg-zinc-800" />
 
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-              {filteredAssets.length}
-            </span>
-            <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
-              {isStandardUser ? 'My Devices' : 'Total Devices'}
-            </span>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
+                {filteredAssets.length}
+              </span>
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-medium">
+                Total Devices
+              </span>
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Control Toolbar Card */}

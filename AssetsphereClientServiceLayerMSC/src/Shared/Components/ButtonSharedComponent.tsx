@@ -15,6 +15,7 @@ export interface ButtonSharedComponentProps {
   loadingText?: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
+  title?: string;
 }
 
 export default function ButtonSharedComponent({
@@ -30,6 +31,7 @@ export default function ButtonSharedComponent({
   loadingText,
   type = 'button',
   className = '',
+  title,
 }: ButtonSharedComponentProps): React.JSX.Element {
   let baseStyles =
     'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none whitespace-nowrap';
@@ -66,6 +68,7 @@ export default function ButtonSharedComponent({
       type={type}
       onClick={onClick}
       disabled={isButtonDisabled}
+      title={title}
       whileHover={isButtonDisabled ? {} : { scale: 1.01 }}
       whileTap={isButtonDisabled ? {} : { scale: 0.98 }}
       transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}

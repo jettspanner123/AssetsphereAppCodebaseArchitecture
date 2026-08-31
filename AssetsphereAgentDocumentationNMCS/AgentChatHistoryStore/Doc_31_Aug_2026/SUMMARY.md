@@ -326,3 +326,34 @@
   - Dynamic count badges matching the dark/light mono pill format.
 - **Verification**:
   - Monorepo client lint & production build passed with 0 errors.
+
+---
+
+## 19. Dynamic Add & Remove Employee Roster Management in Software Detail Modal
+- **Objective**: Allow users with `CAN_WRITE_CORE_LICENSES` permission to dynamically allocate and unassign employee seats directly inside the "Assigned Employees Roster" tab in the Software Subscription Detail Modal.
+- **Implementation Highlights**:
+  - **"+ Assign Employees" Modal Flow**:
+    - Filtered candidate list showing only unassigned employees.
+    - Search by employee name, email, role, or code.
+    - Department filter dropdown.
+    - Multi-select capped at available capacity (`totalSeats - assignedSeats`).
+    - Bulk actions: "Select Visible" and "Clear Selection".
+    - Instant persistence with `useUpdateSoftwareLicenseMutation` and cache invalidation.
+  - **"Unassign" Seat Flow**:
+    - Dedicated "Unassign" button on each employee card with `UserMinus` icon.
+    - Protected by `ConfirmationModalSharedComponent` with confirmation message detailing the employee name and subscription title.
+    - Instant deallocation with automatic recalculation of assigned seats and capacity pool.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx)
+  - [`AssetsphereClientServiceLayerMSC/src/Shared/Components/ButtonSharedComponent.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Shared/Components/ButtonSharedComponent.tsx)
+- **Verification**:
+  - Monorepo client lint & production build passed with 0 errors.
+
+---
+
+## 20. Refined Button Label in Assigned Employees Roster
+- **Objective**: Clean up the button label in the "Assigned Employees Roster" tab from `+ Assign Employees` to `Assign Employee` while keeping the `UserPlus` icon.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx)
+- **Verification**:
+  - Monorepo client lint & production build passed with 0 errors.

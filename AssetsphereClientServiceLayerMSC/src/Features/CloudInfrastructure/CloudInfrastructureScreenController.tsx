@@ -10,7 +10,7 @@ import {
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
-import MockDataSeederService from '@/src/Services/MockDataSeederService';
+import { CloudResource } from '../../Types/CloudResourceType';
 
 export default function CloudInfrastructureScreenController(): React.JSX.Element {
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
@@ -39,7 +39,7 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
     UserPreferencesUtility.current.setCloudSingleLine(val);
   };
 
-  const cloudResources = MockDataSeederService.current.getCloudResources();
+  const cloudResources: CloudResource[] = [];
 
   const filteredResources = cloudResources.filter(
     (res) =>

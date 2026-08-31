@@ -64,3 +64,55 @@
   - Refactored `handleSelectTab` and the permission guard `useEffect` in [`ApplicationRouter.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx) to be 100% non-recursive. If no valid session or permission exists, it performs a clean single redirect to Login.
 - **Verification**:
   - Monorepo-wide `bun run lint` & `bun run build` completed with 0 errors.
+
+---
+
+## 4. Pure Database-Driven Template Selection & Mock Fallback Elimination
+- **Objective**: Ensure that when the database contains 0 assets, the "Register Device from Template" modal (`AssetTemplateSelectionModalController`) displays 0 templates and renders the clean `EmptyStateSharedComponent`. Eliminate hardcoded `MockDataSeederService` mock fallbacks across all frontend components.
+- **Root Cause**:
+  - `AssetTemplateSelectionModalController` had a fallback `dbAssets.length > 0 ? dbAssets : MockDataSeederService.current.getAssets()`.
+  - Similar fallbacks existed in `AssetPassportScreenRoute.tsx`, `AssetDetailModalController.tsx`, `CloudInfrastructureScreenController.tsx`, and `DevEditUserViewController.tsx`.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Components/AssetTemplateSelectionModalController.tsx):
+    - Removed `MockDataSeederService` import and fallback. Templates now strictly mirror `dbAssets`. When DB has 0 assets, 0 templates are shown and empty state is rendered.
+  - [`AssetsphereClientServiceLayerMSC/src/Routes/AssetPassportScreenRoute.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Routes/AssetPassportScreenRoute.tsx):
+    - Replaced `MockDataSeederService` fallback with pure `dbAssets`.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/AssetDetail/AssetDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetDetail/AssetDetailModalController.tsx):
+    - Replaced mock employee lookup with live `TanstackQueryClientService.current.employees.useEmployeesQuery()`.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/CloudInfrastructure/CloudInfrastructureScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/CloudInfrastructure/CloudInfrastructureScreenController.tsx):
+    - Replaced mock cloud resources with live array and proper empty state.
+  - [`AssetsphereClientServiceLayerMSC/src/Features/DevDashboard/Views/DevEditUserViewController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DevDashboard/Views/DevEditUserViewController.tsx):
+    - Replaced mock employees with live `useEmployeesQuery()`.
+  - [`AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Router/ApplicationRouter.tsx):
+    - Removed unused `MockDataSeederService` import.
+- **Verification**:
+  - Monorepo `bun run lint` & `bun run build` across all 3 packages passed with 0 errors.
+
+---
+
+## 5. System-Generated `DisplayName` Property on Assets
+- **Objective**: Implement a system-generated `DisplayName` property for all hardware and computing assets across backend, database, and client layers.
+  - **Unassigned Assets (Sitting in Inventory)**: Formatted as `"UA-1"`, `"UA-2"`, `"UA-3"`, etc. based on inventory sequence.
+  - **Assigned Assets**: Formatted as full spelled-out ordinal word strings based on the user's allocated asset count: `"First Assigned Asset"`, `"Second Assigned Asset"`, ..., `"Twenty-First Assigned Asset"`, etc.
+  - **Dynamic Re-evaluation**: Recalculated dynamically when an asset is assigned, reassigned, or returned to inventory.
+- **Database & Schema Updates**:
+  - Added `display_name` column to `AS_AssetsTBL` in Supabase Postgres.
+  - Added `public string? DisplayName { get; set; }` to [`AssetEntityClass.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/Classes/AssetEntityClass.cs).
+  - Added `DisplayName` to `AssetCreateDTO`, `AssetUpdateDTO`, `AssetResponseDTO`, and `AssetAssignDTO` in [`AssetDTOs.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Models/DTOs/AssetDTOs.cs).
+  - Added `displayName?: string;` to `Asset` interface in [`AssetType.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Types/AssetType.ts) and `BackendAssetDTO` in [`AssetInventoryService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetInventory/Services/AssetInventoryService.ts).
+- **Ordinal Generation Utilities**:
+  - Created [`OrdinalNumberUtility.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Utilities/OrdinalNumberUtility.cs) in .NET backend.
+  - Created [`OrdinalNumberUtility.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Utilities/OrdinalNumberUtility.ts) in TypeScript frontend.
+- **Business Logic Integration**:
+  - In [`AssetInventoryService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/AssetInventory/Services/AssetInventoryService.cs):
+    - `CreateAssetAsync`: Computes `DisplayName` based on assignment state and current employee asset count or unassigned sequence.
+    - `UpdateAssetAsync`: Re-evaluates `DisplayName` whenever assignment fields or status change.
+    - `AssignAssetAsync`: Computes and assigns the spelled-out ordinal display name for the recipient employee.
+    - `MapToDTO`: Returns `DisplayName` in response.
+- **UI Visibility**:
+  - In [`DeviceServiceRequestScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/DeviceServiceRequests/DeviceServiceRequestScreenController.tsx): Formatted dropdown options with `DisplayName` (e.g. `AST-1001 - MacBook Pro 16" • First Assigned Asset (Issued: 15/08/2024)`).
+  - In [`AssetDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetDetail/AssetDetailModalController.tsx): Subtitle and ribbon badge display `DisplayName`.
+  - In [`EmployeeDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/Employees/Components/EmployeeDetailModalController.tsx): Allocated asset cards display `DisplayName` badge.
+- **Verification**:
+  - Database schema verified via Supabase SQL.
+  - Monorepo `bun run lint` & `bun run build` across all 3 packages passed with 0 errors.

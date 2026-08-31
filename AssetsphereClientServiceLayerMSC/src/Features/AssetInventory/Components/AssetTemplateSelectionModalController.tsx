@@ -3,7 +3,6 @@ import ModalSharedComponent from '../../../Shared/Components/ModalSharedComponen
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';
 import EmptyStateSharedComponent from '../../../Shared/Components/EmptyStateSharedComponent';
 import TanstackQueryClientService from '../../../Services/TanstackQueryClientService';
-import MockDataSeederService from '../../../Services/MockDataSeederService';
 import { Asset } from '../../../Types/AssetType';
 import {
   LayoutTemplate,
@@ -35,10 +34,8 @@ export default function AssetTemplateSelectionModalController({
   const { data: dbAssets = [], isLoading } =
     TanstackQueryClientService.current.assets.useAssetsQuery();
 
-  // Combine live backend assets with local seed mock data if database is initializing
-  const allAssets: Asset[] = useMemo(() => {
-    return dbAssets.length > 0 ? dbAssets : MockDataSeederService.current.getAssets();
-  }, [dbAssets]);
+  // Strictly live database assets - no mock fallback
+  const allAssets: Asset[] = dbAssets;
 
   // Filter existing assets by search query matching any hardware field
   const filteredAssets = useMemo(() => {

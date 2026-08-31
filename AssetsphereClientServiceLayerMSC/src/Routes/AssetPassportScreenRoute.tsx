@@ -2,7 +2,6 @@ import React from 'react';
 import { useSearch, useNavigate } from '@tanstack/react-router';
 import AssetPassportScreenController from '../Features/AssetPassport/AssetPassportScreenController';
 import TanstackQueryClientService from '../Services/TanstackQueryClientService';
-import MockDataSeederService from '../Services/MockDataSeederService';
 import ApplicationRouteCON from '../Constants/ApplicationRouteCON';
 import { Asset } from '../Types/AssetType';
 
@@ -13,8 +12,8 @@ export default function AssetPassportScreenRoute(): React.JSX.Element {
 
   const { data: dbAssets = [], isLoading } = TanstackQueryClientService.current.assets.useAssetsQuery();
 
-  // Combine live backend assets with local seed mock assets if DB is empty or still initializing
-  const allAssets: Asset[] = dbAssets.length > 0 ? dbAssets : MockDataSeederService.current.getAssets();
+  // Strictly live database assets
+  const allAssets: Asset[] = dbAssets;
 
   const foundAsset = targetId
     ? allAssets.find(

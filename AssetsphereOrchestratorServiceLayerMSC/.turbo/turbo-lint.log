@@ -1,12 +1,18 @@
 $ dotnet build -v q /nologo
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Data\AssetsphereDbContext.cs(176,21): warning CS0618: 'IMutableProperty.DeclaringEntityType' is obsolete: 'Use DeclaringType and cast to IMutableEntityType or IMutableComplexType' [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Features\Configuration\Services\ConfigurationConstantService.cs(216,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Features\Configuration\Services\ConfigurationConstantService.cs(217,32): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
 
 Build succeeded.
 
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
 C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj : warning NU1903: Package 'Microsoft.OpenApi' 2.0.0 has a known high severity vulnerability, https://github.com/advisories/GHSA-v5pm-xwqc-g5wc
-    2 Warning(s)
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Data\AssetsphereDbContext.cs(176,21): warning CS0618: 'IMutableProperty.DeclaringEntityType' is obsolete: 'Use DeclaringType and cast to IMutableEntityType or IMutableComplexType' [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Features\Configuration\Services\ConfigurationConstantService.cs(216,35): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
+C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\Features\Configuration\Services\ConfigurationConstantService.cs(217,32): warning CS8600: Converting null literal or possible null value to non-nullable type. [C:\Users\UddeshyaSingh\Development\AssetsphereAppCodebaseArchitecture\AssetsphereOrchestratorServiceLayerMSC\AssetsphereOrchestratorServiceLayerMSC.csproj]
+    5 Warning(s)
     0 Error(s)
 
-Time Elapsed 00:00:04.33
+Time Elapsed 00:00:03.88

@@ -3,6 +3,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Exceptions;
 using AssetsphereOrchestratorServiceLayerMSC.Features.AssetInventory.Constants;
 using AssetsphereOrchestratorServiceLayerMSC.Models.Classes;
 using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
+using AssetsphereOrchestratorServiceLayerMSC.Utilities;
 using AssetsphereOrchestratorServiceLayerMSC.Validators;
 using Microsoft.EntityFrameworkCore;
 
@@ -35,7 +36,7 @@ public sealed class AssetInventoryService
             query = query.Where(a => a.Status.ToLower() == status.Trim().ToLower());
         }
 
-        if (!string.IsNullOrWhiteSpace(location))
+        if (!string.IsNullOrWhiteSpace(location) && location != "all")
         {
             query = query.Where(a => a.Location.ToLower().Contains(location.Trim().ToLower()));
         }
@@ -48,22 +49,25 @@ public sealed class AssetInventoryService
                 a.SerialNumber.ToLower().Contains(s) ||
                 a.ModelName.ToLower().Contains(s) ||
                 a.Manufacturer.ToLower().Contains(s) ||
-                (a.AssignedEmployeeName != null && a.AssignedEmployeeName.ToLower().Contains(s)));
+                (a.AssignedEmployeeName != null && a.AssignedEmployeeName.ToLower().Contains(s)) ||
+                (a.DisplayName != null && a.DisplayName.ToLower().Contains(s)));
         }
 
-        List<AssetEntityClass> assets = await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
-        return assets.Select(MapToDTO).ToList();
+        List<AssetEntityClass> entities = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .ToListAsync();
+
+        return entities.Select(MapToDTO).ToList();
     }
 
     public async Task<AssetResponseDTO> GetAssetByIdAsync(Guid id)
     {
-        AssetEntityClass? asset = await _dbContext.Assets.FindAsync(id);
-        if (asset == null)
+        AssetEntityClass? entity = await _dbContext.Assets.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
+        if (entity == null)
         {
             throw new EntityNotFoundCException("Asset", id);
         }
-
-        return MapToDTO(asset);
+        return MapToDTO(entity);
     }
 
     public async Task<AssetResponseDTO> GetAssetByTagOrQrAsync(string tagOrQr)
@@ -82,19 +86,30 @@ public sealed class AssetInventoryService
 
     public async Task<AssetResponseDTO> CreateAssetAsync(AssetCreateDTO request, string createdBy)
     {
-        string assetTag = string.IsNullOrWhiteSpace(request.AssetTag)
-            ? $"AST-{DateTime.UtcNow.Year}-{Random.Shared.Next(1000, 9999)}"
-            : request.AssetTag.Trim().ToUpper();
-
-        if (!AssetTagSValidator.Current.Validate(assetTag))
+        if (string.IsNullOrWhiteSpace(request.SerialNumber))
         {
-            throw new ValidationCException("Asset Tag is invalid or improperly formatted.");
+            throw new ValidationCException(AssetInventoryCON.SerialNumberRequired);
         }
 
-        bool tagExists = await _dbContext.Assets.AnyAsync(a => a.AssetTag.ToLower() == assetTag.ToLower());
-        if (tagExists)
+        bool serialExists = await _dbContext.Assets.AnyAsync(a => a.SerialNumber.ToLower() == request.SerialNumber.Trim().ToLower());
+        if (serialExists)
         {
-            throw new ValidationCException(AssetInventoryCON.DuplicateAssetTag);
+            throw new ValidationCException(AssetInventoryCON.DuplicateSerialNumber);
+        }
+
+        string assetTag = request.AssetTag?.Trim().ToUpper() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(assetTag))
+        {
+            int totalAssets = await _dbContext.Assets.CountAsync();
+            assetTag = $"AST-{1000 + totalAssets + 1}";
+        }
+        else
+        {
+            bool tagExists = await _dbContext.Assets.AnyAsync(a => a.AssetTag.ToLower() == assetTag.ToLower());
+            if (tagExists)
+            {
+                throw new ValidationCException(AssetInventoryCON.DuplicateAssetTag);
+            }
         }
 
         string? specsJson = request.HardwareSpecsJson;
@@ -103,18 +118,43 @@ public sealed class AssetInventoryService
             specsJson = System.Text.Json.JsonSerializer.Serialize(request.Specs);
         }
 
-        string procurementJson = request.ProcurementInfoJson ?? System.Text.Json.JsonSerializer.Serialize(new
+        string? procurementJson = request.ProcurementInfoJson ?? System.Text.Json.JsonSerializer.Serialize(new
         {
+            cost = request.PurchasePrice,
             purchaseCost = request.PurchasePrice,
             currency = string.IsNullOrWhiteSpace(request.Currency) ? "USD" : request.Currency.Trim().ToUpper(),
             purchaseDate = DateTime.UtcNow.ToString("yyyy-MM-dd"),
             vendorName = request.Manufacturer
         });
 
+        // Compute system-generated DisplayName if not provided
+        bool isAssigned = !string.IsNullOrWhiteSpace(request.AssignedEmployeeId) || !string.IsNullOrWhiteSpace(request.AssignedEmployeeName);
+        string? displayName = request.DisplayName;
+        if (string.IsNullOrWhiteSpace(displayName))
+        {
+            if (isAssigned)
+            {
+                string empId = request.AssignedEmployeeId ?? string.Empty;
+                string empName = request.AssignedEmployeeName ?? string.Empty;
+                int currentAssignedCount = await _dbContext.Assets.CountAsync(a =>
+                    (a.Status == "Assigned" || a.Status == "In Use") &&
+                    ((!string.IsNullOrEmpty(empId) && a.AssignedEmployeeId == empId) ||
+                     (!string.IsNullOrEmpty(empName) && a.AssignedEmployeeName == empName)));
+                displayName = OrdinalNumberUtility.GenerateAssetDisplayName(true, currentAssignedCount + 1, 0);
+            }
+            else
+            {
+                int currentUnassignedCount = await _dbContext.Assets.CountAsync(a =>
+                    string.IsNullOrEmpty(a.AssignedEmployeeId) && string.IsNullOrEmpty(a.AssignedEmployeeName));
+                displayName = OrdinalNumberUtility.GenerateAssetDisplayName(false, 0, currentUnassignedCount + 1);
+            }
+        }
+
         AssetEntityClass newAsset = new AssetEntityClass
         {
             Id = Guid.NewGuid(),
             AssetTag = assetTag,
+            DisplayName = displayName,
             SerialNumber = request.SerialNumber.Trim(),
             Category = string.IsNullOrWhiteSpace(request.Category) ? "Computing" : request.Category.Trim(),
             Subtype = string.IsNullOrWhiteSpace(request.Subtype) ? "Hardware Device" : request.Subtype.Trim(),
@@ -170,6 +210,31 @@ public sealed class AssetInventoryService
         }
 
         if (request.SerialNumber != null) asset.SerialNumber = request.SerialNumber.Trim();
+        if (!string.IsNullOrWhiteSpace(request.DisplayName))
+        {
+            asset.DisplayName = request.DisplayName.Trim();
+        }
+        else if (request.AssignedEmployeeId != null || request.AssignedEmployeeName != null)
+        {
+            bool willBeAssigned = !string.IsNullOrWhiteSpace(request.AssignedEmployeeId) || !string.IsNullOrWhiteSpace(request.AssignedEmployeeName);
+            if (willBeAssigned)
+            {
+                string empId = request.AssignedEmployeeId ?? string.Empty;
+                string empName = request.AssignedEmployeeName ?? string.Empty;
+                int currentAssignedCount = await _dbContext.Assets.CountAsync(a =>
+                    a.Id != id &&
+                    (a.Status == "Assigned" || a.Status == "In Use") &&
+                    ((!string.IsNullOrEmpty(empId) && a.AssignedEmployeeId == empId) ||
+                     (!string.IsNullOrEmpty(empName) && a.AssignedEmployeeName == empName)));
+                asset.DisplayName = OrdinalNumberUtility.GenerateAssetDisplayName(true, currentAssignedCount + 1, 0);
+            }
+            else
+            {
+                int currentUnassignedCount = await _dbContext.Assets.CountAsync(a =>
+                    a.Id != id && string.IsNullOrEmpty(a.AssignedEmployeeId) && string.IsNullOrEmpty(a.AssignedEmployeeName));
+                asset.DisplayName = OrdinalNumberUtility.GenerateAssetDisplayName(false, 0, currentUnassignedCount + 1);
+            }
+        }
         if (request.Category != null) asset.Category = request.Category;
         if (request.Subtype != null) asset.Subtype = request.Subtype;
         if (request.ModelName != null) asset.ModelName = request.ModelName.Trim();
@@ -297,6 +362,21 @@ public sealed class AssetInventoryService
         if (!string.IsNullOrWhiteSpace(request.Location)) asset.Location = request.Location;
         asset.AssignedDate = request.AssignedDate ?? DateTime.UtcNow;
         asset.Status = "Assigned";
+
+        if (!string.IsNullOrWhiteSpace(request.DisplayName))
+        {
+            asset.DisplayName = request.DisplayName.Trim();
+        }
+        else
+        {
+            int currentAssignedCount = await _dbContext.Assets.CountAsync(a =>
+                a.Id != id &&
+                (a.Status == "Assigned" || a.Status == "In Use") &&
+                ((!string.IsNullOrEmpty(request.EmployeeId) && a.AssignedEmployeeId == request.EmployeeId) ||
+                 (!string.IsNullOrEmpty(request.EmployeeName) && a.AssignedEmployeeName == request.EmployeeName)));
+            asset.DisplayName = OrdinalNumberUtility.GenerateAssetDisplayName(true, currentAssignedCount + 1, 0);
+        }
+
         asset.UpdatedBy = updatedBy;
         asset.UpdatedAt = DateTime.UtcNow;
 
@@ -498,6 +578,7 @@ public sealed class AssetInventoryService
         {
             Id = asset.Id,
             AssetTag = asset.AssetTag,
+            DisplayName = asset.DisplayName,
             SerialNumber = asset.SerialNumber,
             Category = asset.Category,
             Subtype = asset.Subtype,

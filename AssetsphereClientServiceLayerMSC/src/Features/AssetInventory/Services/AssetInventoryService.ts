@@ -5,6 +5,7 @@ import { Asset } from '../../../Types/AssetType';
 export interface BackendAssetDTO {
   id: string;
   assetTag: string;
+  displayName?: string | null;
   serialNumber: string;
   category: string;
   subtype: string;
@@ -46,6 +47,7 @@ export interface BackendAssetDTO {
 
 export interface CreateAssetRequest {
   assetTag?: string;
+  displayName?: string;
   serialNumber: string;
   category: string;
   subtype?: string;
@@ -205,6 +207,7 @@ export default class AssetInventoryService {
     return {
       id: dto.id,
       assetNumber: dto.assetTag,
+      displayName: dto.displayName || undefined,
       barcodeValue: dto.serialNumber.replace(/[^0-9]/g, '') || '904100990011',
       serialNumber: dto.serialNumber,
       companyTag: dto.assetTag,

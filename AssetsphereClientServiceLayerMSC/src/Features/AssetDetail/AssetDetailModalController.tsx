@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Asset } from '../../Types/AssetType';
 import { fetchAssetDiagnostics, AIDiagnosticsResult } from '@/src/Services/aiService';
-import MockDataSeederService from '@/src/Services/MockDataSeederService';
+import TanstackQueryClientService from '@/src/Services/TanstackQueryClientService';
 import {
   QrCode,
   Sparkles,
@@ -67,8 +67,8 @@ export default function AssetDetailModalController({
   const hasCustodyHistory = displayAsset.chainOfCustody && displayAsset.chainOfCustody.length > 0;
   const hasHardwareSpecs = Boolean(displayAsset.hardwareSpecs?.cpu || displayAsset.hardwareSpecs?.ramGbs || displayAsset.hardwareSpecs?.storageGbs);
 
-  // Look up full employee record from MockDataSeederService
-  const employees = MockDataSeederService.current.getEmployees();
+  // Look up full employee record from live database employees query
+  const { data: employees = [] } = TanstackQueryClientService.current.employees.useEmployeesQuery();
   const assignedEmployee = employees.find(
     (e) => e.id === displayAsset.assignedToEmployeeId || e.name === displayAsset.assignedToEmployeeName
   );
@@ -115,7 +115,7 @@ export default function AssetDetailModalController({
       isOpen={Boolean(asset)}
       onClose={onClose}
       title={`${displayAsset.deviceName} (${displayAsset.assetNumber})`}
-      subtitle={`${displayAsset.manufacturer} ${displayAsset.model} • S/N: ${displayAsset.serialNumber}`}
+      subtitle={`${displayAsset.manufacturer} ${displayAsset.model}${displayAsset.displayName ? ` • ${displayAsset.displayName}` : ''} • S/N: ${displayAsset.serialNumber}`}
       maxWidth="5xl"
       minHeight="min-h-[540px]"
     >
@@ -130,6 +130,11 @@ export default function AssetDetailModalController({
             >
               {displayAsset.lifecycleStatus}
             </BadgeSharedComponent>
+            {displayAsset.displayName && (
+              <BadgeSharedComponent variant="info" size="md">
+                {displayAsset.displayName}
+              </BadgeSharedComponent>
+            )}
             <span className="text-xs font-mono text-slate-500 dark:text-zinc-400">
               Valuation:{' '}
               {CurrencyFormatterUtility.current.format(

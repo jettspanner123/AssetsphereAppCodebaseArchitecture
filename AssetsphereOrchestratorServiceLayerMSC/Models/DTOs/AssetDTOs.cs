@@ -29,6 +29,7 @@ public sealed class AssetCreateDTO
     public string ModelName { get; set; } = string.Empty;
     public string Manufacturer { get; set; } = string.Empty;
     public string Status { get; set; } = "In Use";
+    public string? DisplayName { get; set; }
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }
@@ -56,6 +57,7 @@ public sealed class AssetCreateDTO
 public sealed class AssetUpdateDTO
 {
     public string? AssetTag { get; set; }
+    public string? DisplayName { get; set; }
     public string? SerialNumber { get; set; }
     public string? Category { get; set; }
     public string? Subtype { get; set; }
@@ -90,6 +92,7 @@ public sealed class AssetResponseDTO
 {
     public Guid Id { get; set; }
     public string AssetTag { get; set; } = string.Empty;
+    public string? DisplayName { get; set; }
     public string SerialNumber { get; set; } = string.Empty;
     public string Category { get; set; } = string.Empty;
     public string Subtype { get; set; } = string.Empty;
@@ -136,6 +139,7 @@ public sealed class AssetAssignDTO
     public string? Department { get; set; }
     public string? Location { get; set; }
     public DateTime? AssignedDate { get; set; }
+    public string? DisplayName { get; set; }
 }
 
 public sealed class AssetBulkActionDTO

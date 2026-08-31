@@ -287,6 +287,7 @@ export interface ChainOfCustodyRecord {
 export interface Asset {
   id: string;
   assetNumber: string;
+  displayName?: string;
   qrCodeUrl?: string;
   barcodeValue: string;
   rfidTag?: string;

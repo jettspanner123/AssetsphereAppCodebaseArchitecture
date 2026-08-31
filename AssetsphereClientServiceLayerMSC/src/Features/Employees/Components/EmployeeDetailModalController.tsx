@@ -383,13 +383,20 @@ export default function EmployeeDetailModalController({
                           </div>
                         </div>
 
-                        <BadgeSharedComponent
-                          variant={asset.security?.isCompliant ? 'success' : 'warning'}
-                          size="sm"
-                          showDot
-                        >
-                          {asset.lifecycleStatus || 'In Use'}
-                        </BadgeSharedComponent>
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          <BadgeSharedComponent
+                            variant={asset.security?.isCompliant ? 'success' : 'warning'}
+                            size="sm"
+                            showDot
+                          >
+                            {asset.lifecycleStatus || 'In Use'}
+                          </BadgeSharedComponent>
+                          {asset.displayName && (
+                            <span className="text-[10px] font-mono font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded border border-indigo-200/60 dark:border-indigo-800/40">
+                              {asset.displayName}
+                            </span>
+                          )}
+                        </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-100 dark:border-zinc-800/80 text-slate-600 dark:text-zinc-300">

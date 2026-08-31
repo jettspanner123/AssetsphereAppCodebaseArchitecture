@@ -270,11 +270,12 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
       const formattedDate = formatIssuedDate(rawDate);
       const issuedSuffix = formattedDate ? ` (Issued: ${formattedDate})` : '';
       const issuedSublabel = formattedDate ? ` • Issued: ${formattedDate}` : '';
+      const displayNameTag = asset.displayName ? ` • ${asset.displayName}` : '';
 
       return {
         value: asset.id,
-        label: `${asset.assetNumber} - ${asset.model || asset.deviceName || 'Hardware Device'}${issuedSuffix}`,
-        sublabel: `${asset.category} • S/N: ${asset.serialNumber || 'N/A'}${issuedSublabel} • ${asset.currentLocation || 'Assigned'}`,
+        label: `${asset.assetNumber} - ${asset.model || asset.deviceName || 'Hardware Device'}${displayNameTag}${issuedSuffix}`,
+        sublabel: `${asset.category} • S/N: ${asset.serialNumber || 'N/A'}${displayNameTag}${issuedSublabel} • ${asset.currentLocation || 'Assigned'}`,
         icon: <Laptop className="w-3.5 h-3.5 text-blue-500 shrink-0" />,
       };
     });

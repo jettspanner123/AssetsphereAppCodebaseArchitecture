@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserCheck, ShieldAlert, CheckCircle2, RefreshCw } from 'lucide-react';
-import MockDataSeederService from '@/src/Services/MockDataSeederService';
+import TanstackQueryClientService from '@/src/Services/TanstackQueryClientService';
 import { Employee } from '../../../Types/EmployeeType';
 import InputSharedComponent from '../../../Shared/Components/InputSharedComponent';
 import ButtonSharedComponent from '../../../Shared/Components/ButtonSharedComponent';
@@ -8,7 +8,7 @@ import CardSharedComponent from '../../../Shared/Components/CardSharedComponent'
 import CustomSelectSharedComponent, { SelectOption } from '../../../Shared/Components/CustomSelectSharedComponent';
 
 export default function DevEditUserViewController(): React.JSX.Element {
-  const employees = MockDataSeederService.current.getEmployees();
+  const { data: employees = [], isLoading } = TanstackQueryClientService.current.employees.useEmployeesQuery();
 
   const employeeSelectOptions: SelectOption[] = employees.map((emp) => ({
     value: emp.id,
@@ -16,9 +16,15 @@ export default function DevEditUserViewController(): React.JSX.Element {
     sublabel: `${emp.designation} • ${emp.department}`,
   }));
 
-  const [selectedEmpId, setSelectedEmpId] = useState(employees[0]?.id || 'EMP-1001');
+  const [selectedEmpId, setSelectedEmpId] = useState<string>('');
 
-  const selectedEmployee = employees.find((e) => e.id === selectedEmpId) || employees[0];
+  useEffect(() => {
+    if (employees.length > 0 && !selectedEmpId) {
+      setSelectedEmpId(employees[0].id);
+    }
+  }, [employees, selectedEmpId]);
+
+  const selectedEmployee = employees.find((e) => e.id === selectedEmpId) || employees[0] || null;
 
   // Editable Form Inputs
   const [name, setName] = useState(selectedEmployee?.name || '');
@@ -29,6 +35,19 @@ export default function DevEditUserViewController(): React.JSX.Element {
   const [officeLocation, setOfficeLocation] = useState(selectedEmployee?.officeLocation || 'HQ - San Francisco');
   const [floor, setFloor] = useState(selectedEmployee?.floor || 'Floor 8');
   const [desk, setDesk] = useState(selectedEmployee?.desk || 'Desk 804');
+
+  useEffect(() => {
+    if (selectedEmployee) {
+      setName(selectedEmployee.name || '');
+      setEmail(selectedEmployee.email || '');
+      setPhone(selectedEmployee.phone || '');
+      setDesignation(selectedEmployee.designation || '');
+      setDepartment(selectedEmployee.department || 'Engineering');
+      setOfficeLocation(selectedEmployee.officeLocation || 'HQ - San Francisco');
+      setFloor(selectedEmployee.floor || 'Floor 8');
+      setDesk(selectedEmployee.desk || 'Desk 804');
+    }
+  }, [selectedEmployee]);
 
   const handleSelectEmployee = (id: string) => {
     setSelectedEmpId(id);

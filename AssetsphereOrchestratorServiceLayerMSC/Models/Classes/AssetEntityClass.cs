@@ -12,7 +12,8 @@ public sealed class AssetEntityClass : BaseEntityClass
     public string Manufacturer { get; set; } = string.Empty;
     public string Status { get; set; } = "In Use";
     
-    // Assignment
+    // Assignment & System Generated Display Metadata
+    public string? DisplayName { get; set; }
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }

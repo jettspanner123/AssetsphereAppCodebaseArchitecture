@@ -55,6 +55,9 @@ export default function AssetDetailModalController({
   const [aiDiagnostics, setAiDiagnostics] = useState<AIDiagnosticsResult | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
+  // Look up full employee record from live database employees query
+  const { data: employees = [] } = TanstackQueryClientService.current.employees.useEmployeesQuery();
+
   if (!displayAsset) return <React.Fragment />;
 
   const handleRunAiDiagnostics = async () => {
@@ -67,8 +70,6 @@ export default function AssetDetailModalController({
   const hasCustodyHistory = displayAsset.chainOfCustody && displayAsset.chainOfCustody.length > 0;
   const hasHardwareSpecs = Boolean(displayAsset.hardwareSpecs?.cpu || displayAsset.hardwareSpecs?.ramGbs || displayAsset.hardwareSpecs?.storageGbs);
 
-  // Look up full employee record from live database employees query
-  const { data: employees = [] } = TanstackQueryClientService.current.employees.useEmployeesQuery();
   const assignedEmployee = employees.find(
     (e) => e.id === displayAsset.assignedToEmployeeId || e.name === displayAsset.assignedToEmployeeName
   );

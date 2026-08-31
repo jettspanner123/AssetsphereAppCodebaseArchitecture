@@ -116,3 +116,15 @@
 - **Verification**:
   - Database schema verified via Supabase SQL.
   - Monorepo `bun run lint` & `bun run build` across all 3 packages passed with 0 errors.
+
+---
+
+## 6. Fixed "Rendered more hooks than during the previous render" in Asset Detail Modal
+- **Objective**: Fix React error when clicking an asset card in the Asset Inventory screen to open `AssetDetailModalController`.
+- **Root Cause**:
+  - In [`AssetDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/AssetDetail/AssetDetailModalController.tsx), `useEmployeesQuery()` was positioned after the early return statement `if (!displayAsset) return <React.Fragment />;`.
+  - When the modal was closed (`asset === null`), the component returned early before calling `useEmployeesQuery`. When the user clicked an asset card (`asset !== null`), `useEmployeesQuery` was called, altering the hook execution count between renders and violating the React Rules of Hooks.
+- **Solution**:
+  - Moved `const { data: employees = [] } = TanstackQueryClientService.current.employees.useEmployeesQuery();` to the top level of `AssetDetailModalController` before any early returns or conditional statements.
+- **Verification**:
+  - Monorepo `bun run lint` & `bun run build` completed with 0 errors.

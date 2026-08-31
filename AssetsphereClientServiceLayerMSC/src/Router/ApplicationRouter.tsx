@@ -626,9 +626,7 @@ export function DashboardShell(): React.JSX.Element {
   };
 
   const handleDeleteAsset = (asset: Asset) => {
-    if (window.confirm(`Are you sure you want to delete asset "${asset.deviceName}" (${asset.assetNumber})?`)) {
-      deleteAssetMutation.mutate(asset.id);
-    }
+    deleteAssetMutation.mutate(asset.id);
   };
 
   // Selected entities for modals derived from search params
@@ -709,6 +707,7 @@ export function DashboardShell(): React.JSX.Element {
           onEditAsset={(ast) => {
             handleOpenEditAsset(ast);
           }}
+          onDeleteAsset={handleDeleteAsset}
         />
 
         {/* Global Employee Detail Modal (Synchronized with URL search params) */}
@@ -1139,8 +1138,7 @@ const softwareLicensesRoute = createRoute({
   getParentRoute: () => dashboardLayoutRoute,
   path: 'software-licenses',
   component: function SoftwareLicensesComponent() {
-    const { licenses } = useDashboard();
-    return <SoftwareLicensesScreenRoute licenses={licenses} />;
+    return <SoftwareLicensesScreenRoute />;
   },
 });
 

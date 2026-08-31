@@ -819,14 +819,26 @@ export default function AssetInventoryScreenController({
                           <span className="font-semibold text-slate-900 dark:text-white">
                             {asset.deviceName}
                           </span>
+                          {asset.displayName && (
+                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0">
+                              {asset.displayName}
+                            </span>
+                          )}
                           <span className="text-[11px] text-slate-400 dark:text-zinc-500 font-mono">
                             (S/N: {asset.serialNumber} • {asset.subtype || asset.category})
                           </span>
                         </div>
                       ) : (
                         <div>
-                          <div className="font-semibold text-slate-900 dark:text-white">
-                            {asset.deviceName}
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-900 dark:text-white">
+                              {asset.deviceName}
+                            </span>
+                            {asset.displayName && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0">
+                                {asset.displayName}
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">
                             S/N: {asset.serialNumber} • {asset.subtype || asset.category}
@@ -918,11 +930,18 @@ export default function AssetInventoryScreenController({
               onContextMenu={(e) => handleContextMenu(e, asset)}
               className="p-6 flex flex-col justify-between space-y-6"
             >
-              {/* 1. Header: Device Name & Manufacturer/Category */}
-              <div className="min-w-0">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                  {asset.deviceName}
-                </h3>
+              {/* 1. Header: Device Name & Manufacturer/Category + Prominent DisplayName Badge */}
+              <div className="min-w-0 space-y-1">
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+                    {asset.deviceName}
+                  </h3>
+                  {asset.displayName && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0 shadow-2xs">
+                      {asset.displayName}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate">
                   {asset.manufacturer} {asset.model} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{asset.category}</span>
                 </p>

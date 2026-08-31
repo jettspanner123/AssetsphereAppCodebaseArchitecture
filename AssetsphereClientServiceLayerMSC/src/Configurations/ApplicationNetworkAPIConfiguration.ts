@@ -51,6 +51,14 @@ export interface NetworkAPIEndpoints {
     update: (id: string) => string;
     updateStatus: (id: string) => string;
   };
+  softwareLicenses: {
+    base: string;
+    getAll: string;
+    getById: (id: string) => string;
+    create: string;
+    update: (id: string) => string;
+    delete: (id: string) => string;
+  };
 }
 
 export interface ApplicationNetworkAPIConfigurationDetails {
@@ -151,6 +159,14 @@ export default class ApplicationNetworkAPIConfiguration {
           create: `${activeBaseUrl}/Api/V1/DeviceServiceRequests`,
           update: (id: string) => `${activeBaseUrl}/Api/V1/DeviceServiceRequests/${id}`,
           updateStatus: (id: string) => `${activeBaseUrl}/Api/V1/DeviceServiceRequests/${id}/Status`,
+        },
+        softwareLicenses: {
+          base: `${activeBaseUrl}/Api/V1/SoftwareLicenses`,
+          getAll: `${activeBaseUrl}/Api/V1/SoftwareLicenses`,
+          getById: (id: string) => `${activeBaseUrl}/Api/V1/SoftwareLicenses/${id}`,
+          create: `${activeBaseUrl}/Api/V1/SoftwareLicenses`,
+          update: (id: string) => `${activeBaseUrl}/Api/V1/SoftwareLicenses/${id}`,
+          delete: (id: string) => `${activeBaseUrl}/Api/V1/SoftwareLicenses/${id}`,
         },
       },
     };

@@ -9,10 +9,14 @@ public sealed class SoftwareLicenseCreateDTO
     public string LicenseKey { get; set; } = string.Empty;
     public int TotalSeats { get; set; } = 100;
     public int AssignedSeats { get; set; } = 0;
+    public decimal CostPerSeat { get; set; } = 0.0m;
     public decimal AnnualCost { get; set; } = 0.0m;
+    public string Currency { get; set; } = "USD";
+    public DateTime PurchaseDate { get; set; } = DateTime.UtcNow;
     public DateTime ExpiryDate { get; set; } = DateTime.UtcNow.AddYears(1);
     public string ComplianceStatus { get; set; } = "Compliant";
     public string? AssignedUsersJson { get; set; }
+    public string? AssignedDepartmentsJson { get; set; }
     public string? Category { get; set; } = "Productivity";
 }
 
@@ -25,10 +29,14 @@ public sealed class SoftwareLicenseUpdateDTO
     public string? LicenseKey { get; set; }
     public int? TotalSeats { get; set; }
     public int? AssignedSeats { get; set; }
+    public decimal? CostPerSeat { get; set; }
     public decimal? AnnualCost { get; set; }
+    public string? Currency { get; set; }
+    public DateTime? PurchaseDate { get; set; }
     public DateTime? ExpiryDate { get; set; }
     public string? ComplianceStatus { get; set; }
     public string? AssignedUsersJson { get; set; }
+    public string? AssignedDepartmentsJson { get; set; }
     public string? Category { get; set; }
 }
 
@@ -42,10 +50,14 @@ public sealed class SoftwareLicenseResponseDTO
     public string LicenseKey { get; set; } = string.Empty;
     public int TotalSeats { get; set; }
     public int AssignedSeats { get; set; }
+    public decimal CostPerSeat { get; set; }
     public decimal AnnualCost { get; set; }
+    public string Currency { get; set; } = "USD";
+    public DateTime PurchaseDate { get; set; }
     public DateTime ExpiryDate { get; set; }
     public string ComplianceStatus { get; set; } = string.Empty;
     public string? AssignedUsersJson { get; set; }
+    public string? AssignedDepartmentsJson { get; set; }
     public string? Category { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }

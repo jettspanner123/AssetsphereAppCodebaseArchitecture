@@ -55,6 +55,35 @@ public sealed class SoftwareLicensesService
 
     public async Task<SoftwareLicenseResponseDTO> CreateLicenseAsync(SoftwareLicenseCreateDTO request, string createdBy)
     {
+        decimal costPerSeat = request.CostPerSeat;
+        decimal annualCost = request.AnnualCost;
+
+        if (annualCost <= 0 && costPerSeat > 0 && request.TotalSeats > 0)
+        {
+            annualCost = costPerSeat * request.TotalSeats;
+        }
+        else if (costPerSeat <= 0 && annualCost > 0 && request.TotalSeats > 0)
+        {
+            costPerSeat = Math.Round(annualCost / request.TotalSeats, 2);
+        }
+
+        string complianceStatus = request.ComplianceStatus;
+        if (string.IsNullOrWhiteSpace(complianceStatus))
+        {
+            if (request.ExpiryDate <= DateTime.UtcNow.AddDays(30))
+            {
+                complianceStatus = "Expiring Soon";
+            }
+            else if (request.AssignedSeats > request.TotalSeats)
+            {
+                complianceStatus = "Over Allocated";
+            }
+            else
+            {
+                complianceStatus = "Compliant";
+            }
+        }
+
         SoftwareLicenseEntityClass newLic = new SoftwareLicenseEntityClass
         {
             Id = Guid.NewGuid(),
@@ -65,10 +94,14 @@ public sealed class SoftwareLicensesService
             LicenseKey = request.LicenseKey.Trim(),
             TotalSeats = request.TotalSeats,
             AssignedSeats = request.AssignedSeats,
-            AnnualCost = request.AnnualCost,
+            CostPerSeat = costPerSeat,
+            AnnualCost = annualCost,
+            Currency = string.IsNullOrWhiteSpace(request.Currency) ? "USD" : request.Currency.Trim().ToUpper(),
+            PurchaseDate = request.PurchaseDate != default ? request.PurchaseDate : DateTime.UtcNow,
             ExpiryDate = request.ExpiryDate,
-            ComplianceStatus = request.ComplianceStatus,
+            ComplianceStatus = complianceStatus,
             AssignedUsersJson = request.AssignedUsersJson,
+            AssignedDepartmentsJson = request.AssignedDepartmentsJson,
             Category = request.Category,
             CreatedBy = createdBy,
             CreatedAt = DateTime.UtcNow
@@ -95,10 +128,14 @@ public sealed class SoftwareLicensesService
         if (request.LicenseKey != null) lic.LicenseKey = request.LicenseKey.Trim();
         if (request.TotalSeats.HasValue) lic.TotalSeats = request.TotalSeats.Value;
         if (request.AssignedSeats.HasValue) lic.AssignedSeats = request.AssignedSeats.Value;
+        if (request.CostPerSeat.HasValue) lic.CostPerSeat = request.CostPerSeat.Value;
         if (request.AnnualCost.HasValue) lic.AnnualCost = request.AnnualCost.Value;
+        if (request.Currency != null) lic.Currency = request.Currency.Trim().ToUpper();
+        if (request.PurchaseDate.HasValue) lic.PurchaseDate = request.PurchaseDate.Value;
         if (request.ExpiryDate.HasValue) lic.ExpiryDate = request.ExpiryDate.Value;
         if (request.ComplianceStatus != null) lic.ComplianceStatus = request.ComplianceStatus;
         if (request.AssignedUsersJson != null) lic.AssignedUsersJson = request.AssignedUsersJson;
+        if (request.AssignedDepartmentsJson != null) lic.AssignedDepartmentsJson = request.AssignedDepartmentsJson;
         if (request.Category != null) lic.Category = request.Category;
 
         lic.UpdatedBy = updatedBy;
@@ -136,10 +173,14 @@ public sealed class SoftwareLicensesService
             LicenseKey = lic.LicenseKey,
             TotalSeats = lic.TotalSeats,
             AssignedSeats = lic.AssignedSeats,
+            CostPerSeat = lic.CostPerSeat,
             AnnualCost = lic.AnnualCost,
+            Currency = lic.Currency,
+            PurchaseDate = lic.PurchaseDate,
             ExpiryDate = lic.ExpiryDate,
             ComplianceStatus = lic.ComplianceStatus,
             AssignedUsersJson = lic.AssignedUsersJson,
+            AssignedDepartmentsJson = lic.AssignedDepartmentsJson,
             Category = lic.Category,
             CreatedAt = lic.CreatedAt,
             UpdatedAt = lic.UpdatedAt

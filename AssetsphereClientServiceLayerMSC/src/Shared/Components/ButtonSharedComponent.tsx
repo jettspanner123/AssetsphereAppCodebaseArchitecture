@@ -8,6 +8,7 @@ export interface ButtonSharedComponentProps {
   variant?: 'primary' | 'ghost' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
   fullWidth?: boolean;
   disabled?: boolean;
   isLoading?: boolean;
@@ -22,6 +23,7 @@ export default function ButtonSharedComponent({
   variant = 'primary',
   size = 'md',
   icon,
+  rightIcon,
   fullWidth = false,
   disabled = false,
   isLoading = false,
@@ -30,7 +32,7 @@ export default function ButtonSharedComponent({
   className = '',
 }: ButtonSharedComponentProps): React.JSX.Element {
   let baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none';
+    'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none whitespace-nowrap';
 
   let sizeStyles = '';
   if (size === 'sm') {
@@ -72,9 +74,12 @@ export default function ButtonSharedComponent({
       {isLoading ? (
         <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 text-current" />
       ) : (
-        icon && <span className="flex items-center shrink-0">{icon}</span>
+        icon && <span className="inline-flex items-center shrink-0">{icon}</span>
       )}
-      <span>{isLoading && loadingText ? loadingText : children}</span>
+      <span className="inline-flex items-center whitespace-nowrap">{isLoading && loadingText ? loadingText : children}</span>
+      {!isLoading && rightIcon && (
+        <span className="inline-flex items-center shrink-0">{rightIcon}</span>
+      )}
     </motion.button>
   );
 }

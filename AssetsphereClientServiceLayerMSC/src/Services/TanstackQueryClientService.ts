@@ -18,6 +18,11 @@ import {
 } from '../Features/AssetInventory/Services/AssetInventoryService';
 import { Employee } from '../Types/EmployeeType';
 import { CreateEmployeeRequest } from '../Features/Employees/Services/EmployeesDirectoryService';
+import {
+  SoftwareLicense,
+  CreateSoftwareLicenseRequest,
+  UpdateSoftwareLicenseRequest,
+} from '../Types/SoftwareLicenseType';
 import TanstackQueryKeysCON from '../Constants/TanstackQueryKeysCON';
 
 import { PendingUserType, UserProfileType } from '../Types/AuthType';
@@ -767,6 +772,94 @@ export class DeviceServiceRequestsQueryService {
   }
 }
 
+export class SoftwareLicensesQueryService {
+  constructor(private readonly getClient: () => QueryClient) {}
+
+  public useSoftwareLicensesQuery(
+    category?: string,
+    complianceStatus?: string,
+    search?: string,
+    options?: Omit<
+      UseQueryOptions<SoftwareLicense[], Error, SoftwareLicense[], readonly unknown[]>,
+      'queryKey' | 'queryFn'
+    >
+  ): UseQueryResult<SoftwareLicense[], Error> {
+    return useQuery({
+      queryKey:
+        category || complianceStatus || search
+          ? [...TanstackQueryKeysCON.SOFTWARE_LICENSES, { category, complianceStatus, search }]
+          : TanstackQueryKeysCON.SOFTWARE_LICENSES,
+      queryFn: async () => {
+        const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
+        return await SoftwareLicensesService.current.getAllLicenses(category, complianceStatus, search);
+      },
+      refetchInterval: 30000,
+      ...options,
+    });
+  }
+
+  public useSoftwareLicenseDetailQuery(
+    id: string,
+    options?: Omit<UseQueryOptions<SoftwareLicense, Error, SoftwareLicense, readonly unknown[]>, 'queryKey' | 'queryFn'>
+  ): UseQueryResult<SoftwareLicense, Error> {
+    return useQuery({
+      queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(id),
+      queryFn: async () => {
+        const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
+        return await SoftwareLicensesService.current.getLicenseById(id);
+      },
+      enabled: Boolean(id),
+      ...options,
+    });
+  }
+
+  public useCreateSoftwareLicenseMutation(
+    options?: Omit<UseMutationOptions<SoftwareLicense, Error, CreateSoftwareLicenseRequest>, 'mutationFn'>
+  ): UseMutationResult<SoftwareLicense, Error, CreateSoftwareLicenseRequest> {
+    return useMutation({
+      mutationFn: async (request: CreateSoftwareLicenseRequest) => {
+        const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
+        return await SoftwareLicensesService.current.createLicense(request);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+      },
+      ...options,
+    });
+  }
+
+  public useUpdateSoftwareLicenseMutation(
+    options?: Omit<UseMutationOptions<SoftwareLicense, Error, { id: string; request: UpdateSoftwareLicenseRequest }>, 'mutationFn'>
+  ): UseMutationResult<SoftwareLicense, Error, { id: string; request: UpdateSoftwareLicenseRequest }> {
+    return useMutation({
+      mutationFn: async ({ id, request }) => {
+        const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
+        return await SoftwareLicensesService.current.updateLicense(id, request);
+      },
+      onSuccess: (_data, variables) => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(variables.id) });
+      },
+      ...options,
+    });
+  }
+
+  public useDeleteSoftwareLicenseMutation(
+    options?: Omit<UseMutationOptions<boolean, Error, string>, 'mutationFn'>
+  ): UseMutationResult<boolean, Error, string> {
+    return useMutation({
+      mutationFn: async (id: string) => {
+        const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
+        return await SoftwareLicensesService.current.deleteLicense(id);
+      },
+      onSuccess: () => {
+        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+      },
+      ...options,
+    });
+  }
+}
+
 export default class TanstackQueryClientService {
   public static current: TanstackQueryClientService = new TanstackQueryClientService();
 
@@ -786,4 +879,5 @@ export default class TanstackQueryClientService {
   public readonly configuration: ConfigurationQueryService = new ConfigurationQueryService(() => this.client);
   public readonly notifications: NotificationQueryService = new NotificationQueryService(() => this.client);
   public readonly deviceServiceRequests: DeviceServiceRequestsQueryService = new DeviceServiceRequestsQueryService(() => this.client);
+  public readonly softwareLicenses: SoftwareLicensesQueryService = new SoftwareLicensesQueryService(() => this.client);
 }

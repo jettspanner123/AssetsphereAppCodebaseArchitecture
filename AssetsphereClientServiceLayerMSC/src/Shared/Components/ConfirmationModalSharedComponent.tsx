@@ -33,6 +33,30 @@ export default function ConfirmationModalSharedComponent({
   maxWidth = 'md',
   additionalContent,
 }: ConfirmationModalSharedComponentProps): React.JSX.Element {
+  const [exitDirection, setExitDirection] = React.useState<'down' | 'up'>('down');
+  const prevIsOpenRef = React.useRef(isOpen);
+
+  React.useEffect(() => {
+    if (isOpen && !prevIsOpenRef.current) {
+      setExitDirection('down');
+    }
+    prevIsOpenRef.current = isOpen;
+  }, [isOpen]);
+
+  const handleCancel = () => {
+    setExitDirection('up');
+    setTimeout(() => {
+      onClose();
+    }, 0);
+  };
+
+  const handleConfirm = async () => {
+    setExitDirection('up');
+    setTimeout(async () => {
+      await onConfirm();
+    }, 0);
+  };
+
   const getConfirmButtonClasses = () => {
     if (variant === 'danger') {
       return '!bg-rose-600 hover:!bg-rose-700 active:!bg-rose-800 !text-white border-none shadow-sm font-semibold';
@@ -47,6 +71,7 @@ export default function ConfirmationModalSharedComponent({
     <ModalSharedComponent
       isOpen={isOpen}
       onClose={onClose}
+      exitDirection={exitDirection}
       title={title}
       subtitle={subtitle}
       maxWidth={maxWidth}
@@ -67,7 +92,7 @@ export default function ConfirmationModalSharedComponent({
           <ButtonSharedComponent
             variant="outline"
             size="sm"
-            onClick={onClose}
+            onClick={handleCancel}
             disabled={isLoading}
           >
             {cancelText}
@@ -77,7 +102,7 @@ export default function ConfirmationModalSharedComponent({
             variant={variant === 'danger' ? 'danger' : 'primary'}
             size="sm"
             disabled={isLoading}
-            onClick={() => onConfirm()}
+            onClick={handleConfirm}
             className={getConfirmButtonClasses()}
             icon={
               isLoading ? (

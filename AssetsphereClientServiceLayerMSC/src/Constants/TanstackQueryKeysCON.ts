@@ -15,4 +15,6 @@ export default class TanstackQueryKeysCON {
   public static readonly NOTIFICATIONS = ['notifications'] as const;
   public static readonly DEVICE_SERVICE_REQUESTS = ['device-service-requests'] as const;
   public static readonly MY_DEVICE_SERVICE_REQUESTS = ['device-service-requests', 'my-requests'] as const;
+  public static readonly SOFTWARE_LICENSES = ['software-licenses'] as const;
+  public static readonly SOFTWARE_LICENSE_DETAIL = (id: string) => ['software-licenses', id] as const;
 }

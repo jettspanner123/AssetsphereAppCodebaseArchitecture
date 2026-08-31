@@ -11,6 +11,7 @@ import {
   User,
   Activity,
   Edit,
+  Trash2,
   GitCommit,
   ArrowRight,
   Warehouse,
@@ -23,17 +24,22 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import ModalSharedComponent from '../../Shared/Components/ModalSharedComponent';
+import ConfirmationModalSharedComponent from '../../Shared/Components/ConfirmationModalSharedComponent';
 import ButtonSharedComponent from '../../Shared/Components/ButtonSharedComponent';
 import BadgeSharedComponent from '../../Shared/Components/BadgeSharedComponent';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import EmptyStateSharedComponent from '../../Shared/Components/EmptyStateSharedComponent';
+import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
+import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import CurrencyFormatterUtility from '../../Utilities/CurrencyFormatterUtility';
+import { toast } from 'sonner';
 
 export interface AssetDetailModalControllerProps {
   asset: Asset | null;
   onClose: () => void;
   onOpenQRBadgeModal: (asset: Asset) => void;
   onEditAsset: (asset: Asset) => void;
+  onDeleteAsset?: (asset: Asset) => void | Promise<void>;
 }
 
 export default function AssetDetailModalController({
@@ -41,6 +47,7 @@ export default function AssetDetailModalController({
   onClose,
   onOpenQRBadgeModal,
   onEditAsset,
+  onDeleteAsset,
 }: AssetDetailModalControllerProps): React.JSX.Element {
   const lastAssetRef = useRef<Asset | null>(asset);
   if (asset) {
@@ -51,12 +58,28 @@ export default function AssetDetailModalController({
   type AssetDetailTab = 'specs' | 'procurement' | 'warranty' | 'security' | 'timeline' | 'ai_diagnostics';
 
   const [activeTab, setActiveTab] = useState<AssetDetailTab>('specs');
+  const [isDeleteConfirmationOpen, setIsDeleteConfirmationOpen] = useState(false);
 
   const [aiDiagnostics, setAiDiagnostics] = useState<AIDiagnosticsResult | null>(null);
   const [loadingAi, setLoadingAi] = useState(false);
 
   // Look up full employee record from live database employees query
   const { data: employees = [] } = TanstackQueryClientService.current.employees.useEmployeesQuery();
+
+  const deleteAssetMutation = TanstackQueryClientService.current.assets.useDeleteAssetMutation({
+    onSuccess: () => {
+      toast.success('Asset Deleted Successfully', {
+        description: `${displayAsset?.deviceName || 'Asset'} (${displayAsset?.assetNumber || ''}) has been removed from inventory.`,
+      });
+      setIsDeleteConfirmationOpen(false);
+      onClose();
+    },
+    onError: (err: Error) => {
+      toast.error('Failed to Delete Asset', {
+        description: err.message || 'An error occurred while deleting the asset from the database.',
+      });
+    },
+  });
 
   if (!displayAsset) return <React.Fragment />;
 
@@ -154,6 +177,17 @@ export default function AssetDetailModalController({
             >
               Print Badge
             </ButtonSharedComponent>
+            <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
+              <ButtonSharedComponent
+                variant="outline"
+                size="sm"
+                onClick={() => setIsDeleteConfirmationOpen(true)}
+                icon={<Trash2 className="w-3.5 h-3.5 text-rose-500" />}
+                className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60"
+              >
+                Delete Asset
+              </ButtonSharedComponent>
+            </PermissionGuardSharedComponent>
             <ButtonSharedComponent
               variant="outline"
               size="sm"
@@ -584,6 +618,40 @@ export default function AssetDetailModalController({
           </div>
         )}
       </div>
+
+      {/* Delete Asset Confirmation Modal */}
+      <ConfirmationModalSharedComponent
+        isOpen={isDeleteConfirmationOpen}
+        onClose={() => setIsDeleteConfirmationOpen(false)}
+        onConfirm={async () => {
+          if (onDeleteAsset) {
+            await onDeleteAsset(displayAsset);
+            setIsDeleteConfirmationOpen(false);
+            onClose();
+          } else {
+            deleteAssetMutation.mutate(displayAsset.id);
+          }
+        }}
+        isLoading={deleteAssetMutation.isPending}
+        title="Delete Hardware IT Asset"
+        subtitle={`Asset Tag: ${displayAsset.assetNumber}`}
+        variant="danger"
+        confirmText="Delete Asset"
+        description={
+          <div className="space-y-2">
+            <p>
+              Are you sure you want to permanently delete{' '}
+              <strong className="text-slate-900 dark:text-white font-semibold">
+                {displayAsset.deviceName} ({displayAsset.assetNumber})
+              </strong>
+              {displayAsset.displayName ? ` • ${displayAsset.displayName}` : ''}?
+            </p>
+            <p className="text-slate-500 dark:text-zinc-400 text-xs">
+              This action will permanently remove the asset record, telemetry metrics, and custody history from the central database.
+            </p>
+          </div>
+        }
+      />
     </ModalSharedComponent>
   );
 }

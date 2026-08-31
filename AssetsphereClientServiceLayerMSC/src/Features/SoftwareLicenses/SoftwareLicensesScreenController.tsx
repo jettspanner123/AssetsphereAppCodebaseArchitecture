@@ -21,7 +21,7 @@ import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryA
 import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGuardSharedComponent';
 import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
-import { toast } from 'sonner';
+import SoftwareLicenseFormModalController from './Components/SoftwareLicenseFormModalController';
 
 export interface SoftwareLicensesScreenControllerProps {
   licenses: SoftwareLicense[];
@@ -43,6 +43,7 @@ const LICENSE_TYPE_FILTER_OPTIONS: SelectOption[] = [
   { value: 'Named User', label: 'Named User' },
   { value: 'Floating', label: 'Floating' },
   { value: 'Per Core', label: 'Per Core' },
+  { value: 'Perpetual', label: 'Perpetual' },
 ];
 
 export default function SoftwareLicensesScreenController({
@@ -50,6 +51,8 @@ export default function SoftwareLicensesScreenController({
   isLoading = false,
   onOpenAddModal,
 }: SoftwareLicensesScreenControllerProps): React.JSX.Element {
+  const [isInternalAddModalOpen, setIsInternalAddModalOpen] = useState(false);
+
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
     UserPreferencesUtility.current.getSoftwareViewMode('grid')
   );
@@ -78,6 +81,14 @@ export default function SoftwareLicensesScreenController({
     UserPreferencesUtility.current.setSoftwareSingleLine(val);
   };
 
+  const handleOpenAddModal = () => {
+    if (onOpenAddModal) {
+      onOpenAddModal();
+    } else {
+      setIsInternalAddModalOpen(true);
+    }
+  };
+
   const filteredLicenses = licenses.filter((lic) => {
     if (complianceFilter !== 'ALL' && lic.complianceStatus !== complianceFilter) return false;
     if (licenseTypeFilter !== 'ALL' && lic.licenseType !== licenseTypeFilter) return false;
@@ -87,12 +98,13 @@ export default function SoftwareLicensesScreenController({
       lic.softwareName.toLowerCase().includes(q) ||
       lic.publisher.toLowerCase().includes(q) ||
       lic.licenseKey.toLowerCase().includes(q) ||
-      lic.licenseType.toLowerCase().includes(q)
+      lic.licenseType.toLowerCase().includes(q) ||
+      (lic.category && lic.category.toLowerCase().includes(q))
     );
   });
 
   const totalSpend = filteredLicenses.reduce(
-    (acc, l) => acc + (l.costPerSeat || 0) * (l.totalSeats || 0),
+    (acc, l) => acc + (l.annualCost || (l.costPerSeat || 0) * (l.totalSeats || 0)),
     0
   );
   const totalAllocatedSeats = filteredLicenses.reduce(
@@ -151,7 +163,7 @@ export default function SoftwareLicensesScreenController({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by software name, publisher, key..."
+              placeholder="Search by software name, publisher, key, category..."
               className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
@@ -161,13 +173,7 @@ export default function SoftwareLicensesScreenController({
           >
             <PrimaryActionButtonSharedComponent
               label="Add Subscription"
-              onClick={
-                onOpenAddModal ||
-                (() =>
-                  toast.info('Add Subscription', {
-                    description: 'License registration wizard is coming soon.',
-                  }))
-              }
+              onClick={handleOpenAddModal}
             />
           </PermissionGuardSharedComponent>
         </div>
@@ -296,7 +302,7 @@ export default function SoftwareLicensesScreenController({
           description={
             searchQuery || complianceFilter !== 'ALL' || licenseTypeFilter !== 'ALL'
               ? `No enterprise software licenses or SaaS subscriptions match your search "${searchQuery}" or filter settings.`
-              : 'There are no active software licenses or SaaS subscriptions registered in the directory.'
+              : 'There are no active software licenses or SaaS subscriptions registered in the directory. Click "Add Subscription" above to register your first enterprise contract.'
           }
         />
       )}
@@ -314,7 +320,7 @@ export default function SoftwareLicensesScreenController({
             const utilPct = Math.round(
               (lic.allocatedSeats / (lic.totalSeats || 1)) * 100
             );
-            const annualCost = lic.costPerSeat * lic.totalSeats;
+            const annualCost = lic.annualCost || (lic.costPerSeat * lic.totalSeats);
 
             return (
               <CardSharedComponent
@@ -323,11 +329,24 @@ export default function SoftwareLicensesScreenController({
               >
                 {/* Header */}
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate">
-                    {lic.softwareName}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    {lic.publisher} • <span className="font-mono text-slate-400">{lic.licenseType}</span>
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate">
+                      {lic.softwareName}
+                    </h3>
+                    <span
+                      className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold shrink-0 ${
+                        lic.complianceStatus === 'Compliant'
+                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60'
+                          : lic.complianceStatus === 'Expiring Soon'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60'
+                          : 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-800/60'
+                      }`}
+                    >
+                      {lic.complianceStatus}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
+                    {lic.publisher} {lic.version ? `• ${lic.version}` : ''} • <span className="font-mono text-slate-400">{lic.licenseType}</span>
                   </p>
                 </div>
 
@@ -335,10 +354,11 @@ export default function SoftwareLicensesScreenController({
                 <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3">
                   <div className="flex items-baseline justify-between">
                     <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-                      ${annualCost.toLocaleString()}
+                      {lic.currency === 'INR' ? '₹' : lic.currency === 'EUR' ? '€' : lic.currency === 'GBP' ? '£' : '$'}
+                      {annualCost.toLocaleString()}
                     </span>
                     <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
-                      / year
+                      {lic.costPerSeat > 0 ? `@ $${lic.costPerSeat}/seat • ` : ''}/ year
                     </span>
                   </div>
 
@@ -398,7 +418,7 @@ export default function SoftwareLicensesScreenController({
                   const utilPct = Math.round(
                     (lic.allocatedSeats / (lic.totalSeats || 1)) * 100
                   );
-                  const annualCost = lic.costPerSeat * lic.totalSeats;
+                  const annualCost = lic.annualCost || (lic.costPerSeat * lic.totalSeats);
 
                   return (
                     <tr
@@ -406,7 +426,20 @@ export default function SoftwareLicensesScreenController({
                       className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors"
                     >
                       <td className="py-4 px-5 font-bold text-slate-900 dark:text-white font-serif-headline text-sm">
-                        {lic.softwareName}
+                        <div className="flex items-center gap-2">
+                          <span>{lic.softwareName}</span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold ${
+                              lic.complianceStatus === 'Compliant'
+                                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400'
+                                : lic.complianceStatus === 'Expiring Soon'
+                                ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400'
+                                : 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400'
+                            }`}
+                          >
+                            {lic.complianceStatus}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-4 px-5 text-slate-500 dark:text-zinc-400 font-mono">
                         {lic.publisher} • <span className="text-slate-400">{lic.licenseType}</span>
@@ -433,7 +466,8 @@ export default function SoftwareLicensesScreenController({
                         {lic.expirationDate}
                       </td>
                       <td className="py-4 px-5 text-right font-mono font-bold text-slate-900 dark:text-white">
-                        ${annualCost.toLocaleString()}
+                        {lic.currency === 'INR' ? '₹' : lic.currency === 'EUR' ? '€' : lic.currency === 'GBP' ? '£' : '$'}
+                        {annualCost.toLocaleString()}
                       </td>
                     </tr>
                   );
@@ -443,6 +477,12 @@ export default function SoftwareLicensesScreenController({
           </div>
         </CardSharedComponent>
       )}
+
+      {/* Add Subscription Modal Controller */}
+      <SoftwareLicenseFormModalController
+        isOpen={isInternalAddModalOpen}
+        onClose={() => setIsInternalAddModalOpen(false)}
+      />
     </div>
   );
 }

@@ -10,8 +10,16 @@ namespace AssetsphereOrchestratorServiceLayerMSC.Utilities;
 
 public static class DatabaseSeederUtility
 {
+    // Seeder disabled per user directive; full seeder code preserved below for future reference
+    private static readonly bool _isSeedingEnabled = false;
+
     public static async Task SeedInitialDataAsync(AssetsphereDbContext context)
     {
+        if (!_isSeedingEnabled)
+        {
+            return;
+        }
+
         // 1. Seed Configuration Constants (WORK_LOCATIONS)
         try
         {

@@ -124,6 +124,7 @@ public sealed class AssetInventoryService
             AssignedEmployeeId = request.AssignedEmployeeId,
             AssignedEmployeeName = request.AssignedEmployeeName,
             AssignedDepartment = request.AssignedDepartment,
+            AssignedDate = request.AssignedDate ?? (!string.IsNullOrWhiteSpace(request.AssignedEmployeeId) || !string.IsNullOrWhiteSpace(request.AssignedEmployeeName) ? DateTime.UtcNow : null),
             Location = string.IsNullOrWhiteSpace(request.Location) ? "HQ Warehouse" : request.Location.Trim(),
             PurchasePrice = request.PurchasePrice,
             CurrentBookValue = request.CurrentBookValue > 0 ? request.CurrentBookValue : request.PurchasePrice,
@@ -177,6 +178,18 @@ public sealed class AssetInventoryService
         if (request.AssignedEmployeeId != null) asset.AssignedEmployeeId = request.AssignedEmployeeId;
         if (request.AssignedEmployeeName != null) asset.AssignedEmployeeName = request.AssignedEmployeeName;
         if (request.AssignedDepartment != null) asset.AssignedDepartment = request.AssignedDepartment;
+        if (request.AssignedDate.HasValue)
+        {
+            asset.AssignedDate = request.AssignedDate;
+        }
+        else if (!string.IsNullOrWhiteSpace(request.AssignedEmployeeId) && string.IsNullOrWhiteSpace(asset.AssignedEmployeeId))
+        {
+            asset.AssignedDate = DateTime.UtcNow;
+        }
+        else if (string.IsNullOrWhiteSpace(request.AssignedEmployeeId) && request.AssignedEmployeeId != null)
+        {
+            asset.AssignedDate = null;
+        }
         if (request.Location != null) asset.Location = request.Location;
         if (request.PurchasePrice.HasValue)
         {
@@ -282,6 +295,7 @@ public sealed class AssetInventoryService
         asset.AssignedEmployeeName = request.EmployeeName;
         if (!string.IsNullOrWhiteSpace(request.Department)) asset.AssignedDepartment = request.Department;
         if (!string.IsNullOrWhiteSpace(request.Location)) asset.Location = request.Location;
+        asset.AssignedDate = request.AssignedDate ?? DateTime.UtcNow;
         asset.Status = "Assigned";
         asset.UpdatedBy = updatedBy;
         asset.UpdatedAt = DateTime.UtcNow;
@@ -493,6 +507,7 @@ public sealed class AssetInventoryService
             AssignedEmployeeId = asset.AssignedEmployeeId,
             AssignedEmployeeName = asset.AssignedEmployeeName,
             AssignedDepartment = asset.AssignedDepartment,
+            AssignedDate = asset.AssignedDate,
             Location = asset.Location,
             PurchasePrice = asset.PurchasePrice,
             Currency = currency,

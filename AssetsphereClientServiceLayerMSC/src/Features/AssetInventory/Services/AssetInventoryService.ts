@@ -14,6 +14,7 @@ export interface BackendAssetDTO {
   assignedEmployeeId?: string | null;
   assignedEmployeeName?: string | null;
   assignedDepartment?: string | null;
+  assignedDate?: string | null;
   location: string;
   purchasePrice: number;
   currentBookValue: number;
@@ -224,6 +225,28 @@ export default class AssetInventoryService {
       costCenter: 'CC-100-GEN',
       assignedToEmployeeId: dto.assignedEmployeeId || undefined,
       assignedToEmployeeName: dto.assignedEmployeeName || undefined,
+      assignedDate: (() => {
+        if (dto.assignedDate) return dto.assignedDate;
+        if (dto.timelineEventsJson) {
+          try {
+            const events = JSON.parse(dto.timelineEventsJson);
+            if (Array.isArray(events)) {
+              const assignedEvt = events.find((e: any) =>
+                e.eventType === 'Assigned' ||
+                e.type === 'Assigned' ||
+                (e.title && typeof e.title === 'string' && e.title.toLowerCase().includes('assign'))
+              );
+              if (assignedEvt?.timestamp) {
+                return assignedEvt.timestamp.split('T')[0];
+              }
+            }
+          } catch {}
+        }
+        if (dto.assignedEmployeeId || dto.assignedEmployeeName) {
+          return (dto.updatedAt || dto.createdAt || '').split('T')[0] || undefined;
+        }
+        return undefined;
+      })(),
       currentValue: dto.currentBookValue || dto.purchasePrice,
       depreciationMethod: (dto.depreciationMethod as any) || 'Straight Line',
       usefulLifeYears: Math.round(dto.usefulLifeMonths / 12) || 3,

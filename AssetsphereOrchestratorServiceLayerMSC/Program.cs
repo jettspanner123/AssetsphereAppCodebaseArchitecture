@@ -224,7 +224,8 @@ using (IServiceScope scope = app.Services.CreateScope())
             logger.LogInformation("Raw SQL column addition note: {Message}", rawEx.Message);
         }
 
-        await DatabaseSeederUtility.SeedInitialDataAsync(dbContext);
+        // Database seeding bypassed per user directive - code preserved in DatabaseSeederUtility
+        // await DatabaseSeederUtility.SeedInitialDataAsync(dbContext);
     }
     catch (Exception ex)
     {

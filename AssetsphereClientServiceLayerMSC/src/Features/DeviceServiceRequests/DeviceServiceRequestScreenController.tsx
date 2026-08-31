@@ -251,12 +251,33 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
       return false;
     });
 
-    return userAssets.map((asset) => ({
-      value: asset.id,
-      label: `${asset.assetNumber} - ${asset.model || asset.deviceName || 'Hardware Device'}`,
-      sublabel: `${asset.category} • S/N: ${asset.serialNumber || 'N/A'} • ${asset.currentLocation || 'Assigned'}`,
-      icon: <Laptop className="w-3.5 h-3.5 text-blue-500" />,
-    }));
+    const formatIssuedDate = (dateStr?: string): string | null => {
+      if (!dateStr) return null;
+      try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return null;
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+      } catch {
+        return null;
+      }
+    };
+
+    return userAssets.map((asset) => {
+      const rawDate = asset.assignedDate || asset.procurement?.purchaseDate || (asset as any).createdAt;
+      const formattedDate = formatIssuedDate(rawDate);
+      const issuedSuffix = formattedDate ? ` (Issued: ${formattedDate})` : '';
+      const issuedSublabel = formattedDate ? ` • Issued: ${formattedDate}` : '';
+
+      return {
+        value: asset.id,
+        label: `${asset.assetNumber} - ${asset.model || asset.deviceName || 'Hardware Device'}${issuedSuffix}`,
+        sublabel: `${asset.category} • S/N: ${asset.serialNumber || 'N/A'}${issuedSublabel} • ${asset.currentLocation || 'Assigned'}`,
+        icon: <Laptop className="w-3.5 h-3.5 text-blue-500 shrink-0" />,
+      };
+    });
   }, [allAssets, selectedTargetUser]);
 
   // Work Location Options

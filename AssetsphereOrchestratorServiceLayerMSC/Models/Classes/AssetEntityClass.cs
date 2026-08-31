@@ -16,6 +16,7 @@ public sealed class AssetEntityClass : BaseEntityClass
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }
+    public DateTime? AssignedDate { get; set; }
     public string Location { get; set; } = "HQ Floor 4";
 
     // Financials

@@ -32,6 +32,7 @@ public sealed class AssetCreateDTO
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }
+    public DateTime? AssignedDate { get; set; }
     public string Location { get; set; } = "HQ Floor 4";
     public decimal PurchasePrice { get; set; } = 0.0m;
     public string Currency { get; set; } = "USD";
@@ -64,6 +65,7 @@ public sealed class AssetUpdateDTO
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }
+    public DateTime? AssignedDate { get; set; }
     public string? Location { get; set; }
     public decimal? PurchasePrice { get; set; }
     public string? Currency { get; set; }
@@ -97,6 +99,7 @@ public sealed class AssetResponseDTO
     public string? AssignedEmployeeId { get; set; }
     public string? AssignedEmployeeName { get; set; }
     public string? AssignedDepartment { get; set; }
+    public DateTime? AssignedDate { get; set; }
     public string Location { get; set; } = string.Empty;
     public decimal PurchasePrice { get; set; }
     public string Currency { get; set; } = "USD";
@@ -132,6 +135,7 @@ public sealed class AssetAssignDTO
     public string EmployeeName { get; set; } = string.Empty;
     public string? Department { get; set; }
     public string? Location { get; set; }
+    public DateTime? AssignedDate { get; set; }
 }
 
 public sealed class AssetBulkActionDTO

@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "dev": "tsx watch src/Main.ts",
+    "start:dev": "tsx watch src/Main.ts",
     "start": "node dist/Main.js",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
     "lint": "tsc --noEmit",

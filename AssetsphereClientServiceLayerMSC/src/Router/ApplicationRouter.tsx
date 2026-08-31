@@ -173,8 +173,13 @@ export function DashboardShell(): React.JSX.Element {
   const handleSignOut = () => {
     LoginScreenService.current.clearSession();
     setAuthSession(null);
-    navigate({ to: ApplicationRouteCON.LOGIN });
+    navigate({ to: ApplicationRouteCON.LOGIN, replace: true });
   };
+
+  // If session is invalidated/logged out, prevent rendering shell and immediately navigate to login
+  if (!authSession && !LoginScreenService.current.getSavedSession()) {
+    return <Navigate to={ApplicationRouteCON.LOGIN} replace />;
+  }
 
   // Deployment Mode
   const [deploymentMode, setDeploymentMode] = useState<
@@ -251,15 +256,28 @@ export function DashboardShell(): React.JSX.Element {
   else if (pathname.includes('settings')) activeTab = 'settings';
 
   const handleSelectTab = (tab: TabType) => {
+    const currentSession = LoginScreenService.current.getSavedSession();
+    if (!currentSession) {
+      navigate({ to: ApplicationRouteCON.LOGIN, replace: true });
+      return;
+    }
+
     // Validate module permissions
     if (!ApplicationPermissionService.current.canAccessTab(tab)) {
-      const fallbackTab: TabType = ApplicationPermissionService.current.canAccessTab('dashboard')
-        ? 'dashboard'
-        : 'inventory';
+      const canAccessDashboard = ApplicationPermissionService.current.canAccessTab('dashboard');
+      const canAccessInventory = ApplicationPermissionService.current.canAccessTab('inventory');
+
       toast.error('Access Denied', {
-        description: `You do not have permission to access this module. Redirecting.`,
+        description: `You do not have permission to access this module.`,
       });
-      handleSelectTab(fallbackTab);
+
+      if (canAccessDashboard && tab !== 'dashboard') {
+        navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW, search: (prev: any) => prev });
+      } else if (canAccessInventory && tab !== 'inventory') {
+        navigate({ to: ApplicationRouteCON.DASHBOARD_INVENTORY, search: (prev: any) => prev });
+      } else {
+        navigate({ to: ApplicationRouteCON.LOGIN, replace: true });
+      }
       return;
     }
 
@@ -288,14 +306,24 @@ export function DashboardShell(): React.JSX.Element {
 
   // Guard activeTab on route changes or direct URL deep-links
   useEffect(() => {
+    const currentSession = LoginScreenService.current.getSavedSession();
+    if (!currentSession) return;
+
     if (!ApplicationPermissionService.current.canAccessTab(activeTab)) {
-      const fallbackTab: TabType = ApplicationPermissionService.current.canAccessTab('dashboard')
-        ? 'dashboard'
-        : 'inventory';
+      const canAccessDashboard = ApplicationPermissionService.current.canAccessTab('dashboard');
+      const canAccessInventory = ApplicationPermissionService.current.canAccessTab('inventory');
+
       toast.error('Access Denied', {
         description: 'You do not have permission to access this module.',
       });
-      handleSelectTab(fallbackTab);
+
+      if (canAccessDashboard && activeTab !== 'dashboard') {
+        navigate({ to: ApplicationRouteCON.DASHBOARD_OVERVIEW });
+      } else if (canAccessInventory && activeTab !== 'inventory') {
+        navigate({ to: ApplicationRouteCON.DASHBOARD_INVENTORY });
+      } else {
+        navigate({ to: ApplicationRouteCON.LOGIN, replace: true });
+      }
     }
   }, [activeTab]);
 
@@ -1284,7 +1312,7 @@ const devDashboardRoute = createRoute({
         onNavigateSettings={() => navigate({ to: ApplicationRouteCON.DASHBOARD_SETTINGS })}
         onSignOut={() => {
           LoginScreenService.current.clearSession();
-          navigate({ to: ApplicationRouteCON.LOGIN });
+          navigate({ to: ApplicationRouteCON.LOGIN, replace: true });
         }}
       />
     );

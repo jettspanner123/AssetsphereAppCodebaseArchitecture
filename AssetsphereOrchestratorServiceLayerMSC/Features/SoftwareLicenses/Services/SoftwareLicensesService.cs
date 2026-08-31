@@ -84,6 +84,18 @@ public sealed class SoftwareLicensesService
             }
         }
 
+        DateTime purchaseDateUtc = request.PurchaseDate != default
+            ? (request.PurchaseDate.Kind == DateTimeKind.Utc
+                ? request.PurchaseDate
+                : DateTime.SpecifyKind(request.PurchaseDate, DateTimeKind.Utc))
+            : DateTime.UtcNow;
+
+        DateTime expiryDateUtc = request.ExpiryDate != default
+            ? (request.ExpiryDate.Kind == DateTimeKind.Utc
+                ? request.ExpiryDate
+                : DateTime.SpecifyKind(request.ExpiryDate, DateTimeKind.Utc))
+            : DateTime.UtcNow.AddYears(1);
+
         SoftwareLicenseEntityClass newLic = new SoftwareLicenseEntityClass
         {
             Id = Guid.NewGuid(),
@@ -97,8 +109,8 @@ public sealed class SoftwareLicensesService
             CostPerSeat = costPerSeat,
             AnnualCost = annualCost,
             Currency = string.IsNullOrWhiteSpace(request.Currency) ? "USD" : request.Currency.Trim().ToUpper(),
-            PurchaseDate = request.PurchaseDate != default ? request.PurchaseDate : DateTime.UtcNow,
-            ExpiryDate = request.ExpiryDate,
+            PurchaseDate = purchaseDateUtc,
+            ExpiryDate = expiryDateUtc,
             ComplianceStatus = complianceStatus,
             AssignedUsersJson = request.AssignedUsersJson,
             AssignedDepartmentsJson = request.AssignedDepartmentsJson,
@@ -131,8 +143,18 @@ public sealed class SoftwareLicensesService
         if (request.CostPerSeat.HasValue) lic.CostPerSeat = request.CostPerSeat.Value;
         if (request.AnnualCost.HasValue) lic.AnnualCost = request.AnnualCost.Value;
         if (request.Currency != null) lic.Currency = request.Currency.Trim().ToUpper();
-        if (request.PurchaseDate.HasValue) lic.PurchaseDate = request.PurchaseDate.Value;
-        if (request.ExpiryDate.HasValue) lic.ExpiryDate = request.ExpiryDate.Value;
+        if (request.PurchaseDate.HasValue)
+        {
+            lic.PurchaseDate = request.PurchaseDate.Value.Kind == DateTimeKind.Utc
+                ? request.PurchaseDate.Value
+                : DateTime.SpecifyKind(request.PurchaseDate.Value, DateTimeKind.Utc);
+        }
+        if (request.ExpiryDate.HasValue)
+        {
+            lic.ExpiryDate = request.ExpiryDate.Value.Kind == DateTimeKind.Utc
+                ? request.ExpiryDate.Value
+                : DateTime.SpecifyKind(request.ExpiryDate.Value, DateTimeKind.Utc);
+        }
         if (request.ComplianceStatus != null) lic.ComplianceStatus = request.ComplianceStatus;
         if (request.AssignedUsersJson != null) lic.AssignedUsersJson = request.AssignedUsersJson;
         if (request.AssignedDepartmentsJson != null) lic.AssignedDepartmentsJson = request.AssignedDepartmentsJson;

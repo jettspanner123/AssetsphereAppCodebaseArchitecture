@@ -817,14 +817,17 @@ export class SoftwareLicensesQueryService {
     options?: Omit<UseMutationOptions<SoftwareLicense, Error, CreateSoftwareLicenseRequest>, 'mutationFn'>
   ): UseMutationResult<SoftwareLicense, Error, CreateSoftwareLicenseRequest> {
     return useMutation({
+      ...options,
       mutationFn: async (request: CreateSoftwareLicenseRequest) => {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.createLicense(request);
       },
-      onSuccess: () => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+      onSuccess: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        if (options?.onSuccess) {
+          options.onSuccess(...args);
+        }
       },
-      ...options,
     });
   }
 
@@ -832,15 +835,19 @@ export class SoftwareLicensesQueryService {
     options?: Omit<UseMutationOptions<SoftwareLicense, Error, { id: string; request: UpdateSoftwareLicenseRequest }>, 'mutationFn'>
   ): UseMutationResult<SoftwareLicense, Error, { id: string; request: UpdateSoftwareLicenseRequest }> {
     return useMutation({
+      ...options,
       mutationFn: async ({ id, request }) => {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.updateLicense(id, request);
       },
-      onSuccess: (_data, variables) => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(variables.id) });
+      onSuccess: async (...args) => {
+        const [, variables] = args;
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(variables.id) });
+        if (options?.onSuccess) {
+          options.onSuccess(...args);
+        }
       },
-      ...options,
     });
   }
 
@@ -848,14 +855,17 @@ export class SoftwareLicensesQueryService {
     options?: Omit<UseMutationOptions<boolean, Error, string>, 'mutationFn'>
   ): UseMutationResult<boolean, Error, string> {
     return useMutation({
+      ...options,
       mutationFn: async (id: string) => {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.deleteLicense(id);
       },
-      onSuccess: () => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+      onSuccess: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        if (options?.onSuccess) {
+          options.onSuccess(...args);
+        }
       },
-      ...options,
     });
   }
 }

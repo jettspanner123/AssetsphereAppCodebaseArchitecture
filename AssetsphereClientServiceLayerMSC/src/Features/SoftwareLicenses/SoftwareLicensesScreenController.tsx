@@ -22,11 +22,13 @@ import PermissionGuardSharedComponent from '../../Shared/Components/PermissionGu
 import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import SoftwareLicenseFormModalController from './Components/SoftwareLicenseFormModalController';
+import SoftwareLicenseDetailModalController from './Components/SoftwareLicenseDetailModalController';
 
 export interface SoftwareLicensesScreenControllerProps {
   licenses: SoftwareLicense[];
   isLoading?: boolean;
   onOpenAddModal?: () => void;
+  onSelectLicense?: (license: SoftwareLicense) => void;
 }
 
 const COMPLIANCE_FILTER_OPTIONS: SelectOption[] = [
@@ -50,8 +52,10 @@ export default function SoftwareLicensesScreenController({
   licenses,
   isLoading = false,
   onOpenAddModal,
+  onSelectLicense,
 }: SoftwareLicensesScreenControllerProps): React.JSX.Element {
   const [isInternalAddModalOpen, setIsInternalAddModalOpen] = useState(false);
+  const [selectedLicenseForDetail, setSelectedLicenseForDetail] = useState<SoftwareLicense | null>(null);
 
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
     UserPreferencesUtility.current.getSoftwareViewMode('grid')
@@ -325,7 +329,15 @@ export default function SoftwareLicensesScreenController({
             return (
               <CardSharedComponent
                 key={lic.id}
-                className="p-6 flex flex-col justify-between space-y-5"
+                hoverable
+                onClick={() => {
+                  if (onSelectLicense) {
+                    onSelectLicense(lic);
+                  } else {
+                    setSelectedLicenseForDetail(lic);
+                  }
+                }}
+                className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
               >
                 {/* Header */}
                 <div>
@@ -423,7 +435,14 @@ export default function SoftwareLicensesScreenController({
                   return (
                     <tr
                       key={lic.id}
-                      className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors"
+                      onClick={() => {
+                        if (onSelectLicense) {
+                          onSelectLicense(lic);
+                        } else {
+                          setSelectedLicenseForDetail(lic);
+                        }
+                      }}
+                      className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors cursor-pointer"
                     >
                       <td className="py-4 px-5 font-bold text-slate-900 dark:text-white font-serif-headline text-sm">
                         <div className="flex items-center gap-2">
@@ -482,6 +501,12 @@ export default function SoftwareLicensesScreenController({
       <SoftwareLicenseFormModalController
         isOpen={isInternalAddModalOpen}
         onClose={() => setIsInternalAddModalOpen(false)}
+      />
+
+      {/* Software License Detail Modal Controller */}
+      <SoftwareLicenseDetailModalController
+        license={selectedLicenseForDetail}
+        onClose={() => setSelectedLicenseForDetail(null)}
       />
     </div>
   );

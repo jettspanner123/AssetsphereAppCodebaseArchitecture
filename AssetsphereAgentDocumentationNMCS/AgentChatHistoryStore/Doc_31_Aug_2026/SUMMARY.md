@@ -275,3 +275,54 @@
     - Added `exitDirection` state setting `'up'` on `handleCancel` and `handleConfirm`.
 - **Verification**:
   - Client lint & build completed with 0 errors.
+
+---
+
+## 15. Software Subscription Detail Modal Controller
+- **Objective**: Create a comprehensive details modal for software subscriptions that opens on card click in Grid View or row click in List View.
+- **Design & Invariant Standards**:
+  - 100% pure database data grounding (0 mock filler).
+  - Action Header Ribbon with Live Compliance Status badge, Annual Valuation metric, and a Destructive "Delete Subscription" button (guarded by `CAN_WRITE_CORE_LICENSES` permission, opening `ConfirmationModalSharedComponent`).
+  - **Tab 1 ("Overview & Specs")**: 4 database cards (Software Specs, License Key with copy-to-clipboard, Seat Capacity Utilization Progress Bar, and Target Department badges).
+  - **Tab 2 ("Assigned Employees Roster")**: Searchable assigned employee cards with initials avatar, name, email, department, designation, and clean empty state when 0 assigned.
+  - **Tab 3 ("Commercials & Terms")**: Unit economics, contract lifecycle countdown (days remaining/expired), and valuation summary.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx) [NEW]
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/SoftwareLicensesScreenController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/SoftwareLicensesScreenController.tsx)
+- **Verification**:
+  - Client lint & build completed with 0 errors.
+
+---
+
+## 16. Guaranteed TanStack Query Cache Invalidation & Automatic Refetching
+- **Objective**: Ensure that deleting, creating, or updating software subscriptions automatically invalidates the `['software-licenses']` and `['software-license-detail']` query caches and triggers an instant background refetch, even when custom `options.onSuccess` callbacks are supplied by UI controllers.
+- **Solution**:
+  - Refactored `useCreateSoftwareLicenseMutation`, `useUpdateSoftwareLicenseMutation`, and `useDeleteSoftwareLicenseMutation` in [`TanstackQueryClientService.ts`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Services/TanstackQueryClientService.ts) to execute base `invalidateQueries` asynchronously within `onSuccess` before delegating to `options?.onSuccess`.
+- **Verification**:
+  - Client lint & build completed with 0 errors.
+
+---
+
+## 17. Fixed PostgreSQL Timestamptz DateTimeKind Exception on Subscription Registration
+- **Objective**: Resolve 500 Internal Server Error (`"An error occurred while saving the entity changes. See the inner exception for details."`) when saving new or updated software subscriptions.
+- **Root Cause**:
+  - Deserializing ISO date strings (e.g., `"2026-08-31"`) in ASP.NET Core assigned `DateTimeKind.Unspecified` to `PurchaseDate` and `ExpiryDate`.
+  - Npgsql / PostgreSQL strictly rejects `Kind=Unspecified` for `timestamptz` columns with `InvalidCastException`.
+- **Solution**:
+  - Updated [`SoftwareLicensesService.cs`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereOrchestratorServiceLayerMSC/Features/SoftwareLicenses/Services/SoftwareLicensesService.cs):
+    - Converted `PurchaseDate` and `ExpiryDate` to `DateTimeKind.Utc` using `DateTime.SpecifyKind` across both `CreateLicenseAsync` and `UpdateLicenseAsync`.
+- **Verification**:
+  - Backend rebuilt with `dotnet build` (0 errors) and live server restarted.
+  - Client verified with `bun run lint` (0 errors).
+
+---
+
+## 18. Aligned Modal Tab Switcher Design System
+- **Objective**: Standardize tab switcher in [`SoftwareLicenseDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx) to match the canonical design system established in `AssetDetailModalController` and `EmployeeDetailModalController`.
+- **Implementation**:
+  - Replaced pill button style with underlined border (`border-b-2 font-medium transition-colors`).
+  - Active: `border-zinc-900 text-slate-900 dark:border-white dark:text-white font-semibold`.
+  - Inactive: `border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white`.
+  - Dynamic count badges matching the dark/light mono pill format.
+- **Verification**:
+  - Monorepo client lint & production build passed with 0 errors.

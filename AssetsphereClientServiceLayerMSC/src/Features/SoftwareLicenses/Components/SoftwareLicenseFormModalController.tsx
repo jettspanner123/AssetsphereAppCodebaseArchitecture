@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Check,
   X,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -168,11 +169,54 @@ export default function SoftwareLicenseFormModalController({
     return 'Compliant';
   }, [expiryDate, assignedSeatsCount, totalSeats]);
 
-  const handleSetExpiryYears = (years: number) => {
+  const handleSetExpiryOffset = (months: number) => {
     const base = purchaseDate ? new Date(purchaseDate) : new Date();
-    base.setFullYear(base.getFullYear() + years);
-    setExpiryDate(base.toISOString().split('T')[0]);
+    if (isNaN(base.getTime())) return;
+    base.setMonth(base.getMonth() + months);
+    const newDateStr = base.toISOString().split('T')[0];
+    setExpiryDate(newDateStr);
+    if (errors.expiryDate) {
+      setErrors((prev) => ({ ...prev, expiryDate: '' }));
+    }
   };
+
+  const handlePurchaseDateChange = (newDate: string) => {
+    setPurchaseDate(newDate);
+    if (errors.purchaseDate) {
+      setErrors((prev) => ({ ...prev, purchaseDate: '' }));
+    }
+    // If expiryDate is set and falls on or before new purchase date, auto-adjust forward by 1 year
+    if (newDate && expiryDate) {
+      const pTime = new Date(newDate).getTime();
+      const eTime = new Date(expiryDate).getTime();
+      if (!isNaN(pTime) && !isNaN(eTime) && eTime <= pTime) {
+        const adjustedExpiry = new Date(newDate);
+        adjustedExpiry.setFullYear(adjustedExpiry.getFullYear() + 1);
+        setExpiryDate(adjustedExpiry.toISOString().split('T')[0]);
+      }
+    }
+  };
+
+  const contractDurationInfo = useMemo(() => {
+    if (!purchaseDate || !expiryDate) return null;
+    const pDate = new Date(purchaseDate);
+    const eDate = new Date(expiryDate);
+    if (isNaN(pDate.getTime()) || isNaN(eDate.getTime())) return null;
+    const diffTime = eDate.getTime() - pDate.getTime();
+    if (diffTime <= 0) return null;
+    const totalDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+    const months = Math.round((totalDays / 30.4375) * 10) / 10;
+    const years = Math.round((totalDays / 365.25) * 10) / 10;
+
+    let summary = `${totalDays} Days`;
+    if (totalDays >= 365) {
+      summary = `${years === 1 ? '1 Year' : `${years} Years`} (${totalDays} Days)`;
+    } else if (totalDays >= 30) {
+      summary = `${months === 1 ? '1 Month' : `${months} Months`} (${totalDays} Days)`;
+    }
+
+    return { totalDays, summary };
+  }, [purchaseDate, expiryDate]);
 
   const handleToggleDepartment = (dept: string) => {
     setSelectedDepartments((prev) =>
@@ -216,8 +260,17 @@ export default function SoftwareLicenseFormModalController({
     if (costPerSeat < 0 || isNaN(costPerSeat)) {
       errs.costPerSeat = 'Cost per seat cannot be negative.';
     }
+    if (!purchaseDate) {
+      errs.purchaseDate = 'Purchase / start date is required.';
+    }
     if (!expiryDate) {
       errs.expiryDate = 'Expiration / renewal date is required.';
+    } else if (purchaseDate) {
+      const pTime = new Date(purchaseDate).getTime();
+      const eTime = new Date(expiryDate).getTime();
+      if (!isNaN(pTime) && !isNaN(eTime) && eTime <= pTime) {
+        errs.expiryDate = 'Expiration date must be strictly after the start date.';
+      }
     }
 
     setErrors(errs);
@@ -676,15 +729,18 @@ export default function SoftwareLicenseFormModalController({
                 <label className="text-xs font-medium text-slate-700 dark:text-zinc-300 flex items-center justify-between gap-1 mb-1.5 h-4.5">
                   <span className="flex items-center gap-1.5">
                     <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    Purchase / Start Date
+                    Purchase / Start Date <span className="text-red-500">*</span>
                   </span>
                 </label>
                 <input
                   type="date"
                   value={purchaseDate}
-                  onChange={(e) => setPurchaseDate(e.target.value)}
-                  className="w-full h-10 bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                  onChange={(e) => handlePurchaseDateChange(e.target.value)}
+                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                    errors.purchaseDate ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
+                  } rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
+                {errors.purchaseDate && <p className="text-[11px] text-red-500 mt-1">{errors.purchaseDate}</p>}
               </div>
 
               <div>
@@ -698,22 +754,49 @@ export default function SoftwareLicenseFormModalController({
                   <div className="flex items-center gap-1">
                     <button
                       type="button"
-                      onClick={() => handleSetExpiryYears(1)}
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 cursor-pointer"
+                      onClick={() => handleSetExpiryOffset(1)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+1 Month from start date"
+                    >
+                      +1m
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetExpiryOffset(3)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+3 Months from start date"
+                    >
+                      +3m
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetExpiryOffset(6)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+6 Months from start date"
+                    >
+                      +6m
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleSetExpiryOffset(12)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+1 Year from start date"
                     >
                       +1y
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSetExpiryYears(2)}
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 cursor-pointer"
+                      onClick={() => handleSetExpiryOffset(24)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+2 Years from start date"
                     >
                       +2y
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleSetExpiryYears(3)}
-                      className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 cursor-pointer"
+                      onClick={() => handleSetExpiryOffset(36)}
+                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      title="+3 Years from start date"
                     >
                       +3y
                     </button>
@@ -722,6 +805,7 @@ export default function SoftwareLicenseFormModalController({
                 <input
                   type="date"
                   value={expiryDate}
+                  min={purchaseDate || undefined}
                   onChange={(e) => {
                     setExpiryDate(e.target.value);
                     if (errors.expiryDate) setErrors((prev) => ({ ...prev, expiryDate: '' }));
@@ -733,6 +817,19 @@ export default function SoftwareLicenseFormModalController({
                 {errors.expiryDate && <p className="text-[11px] text-red-500 mt-1">{errors.expiryDate}</p>}
               </div>
             </div>
+
+            {/* Live Contract Duration & Renewal Summary Badge */}
+            {contractDurationInfo && (
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-slate-100/70 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 text-xs font-mono">
+                <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-sky-500" />
+                  Contract Term:
+                </span>
+                <span className="font-bold text-slate-900 dark:text-white">
+                  {contractDurationInfo.summary}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* Section 4: Organizational Allocation */}
@@ -785,10 +882,11 @@ export default function SoftwareLicenseFormModalController({
           </div>
 
           {/* Modal Action Buttons (Step 1 -> Step 2) */}
-          <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-zinc-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6 shrink-0">
             <ButtonSharedComponent
               type="button"
               variant="outline"
+              size="sm"
               onClick={handleModalClose}
             >
               Cancel
@@ -796,8 +894,9 @@ export default function SoftwareLicenseFormModalController({
             <ButtonSharedComponent
               type="submit"
               variant="primary"
-              rightIcon={<ArrowRight className="w-4 h-4" />}
-              className="font-semibold !bg-[#0C2086] hover:!bg-[#081765] !text-white"
+              size="sm"
+              rightIcon={<ArrowRight className="w-3.5 h-3.5 !text-white" />}
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
             >
               Next: Assign Employees
             </ButtonSharedComponent>
@@ -993,20 +1092,22 @@ export default function SoftwareLicenseFormModalController({
           </div>
 
           {/* Modal Action Buttons (Step 2 Back / Finish) */}
-          <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-zinc-800">
+          <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6 shrink-0">
             <ButtonSharedComponent
               type="button"
               variant="outline"
+              size="sm"
               onClick={() => setCurrentStep(1)}
-              icon={<ArrowLeft className="w-4 h-4" />}
+              icon={<ArrowLeft className="w-3.5 h-3.5" />}
             >
               Back to Software Terms
             </ButtonSharedComponent>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               <ButtonSharedComponent
                 type="button"
-                variant="ghost"
+                variant="outline"
+                size="sm"
                 onClick={handleModalClose}
                 disabled={createLicenseMutation.isPending}
               >
@@ -1015,8 +1116,9 @@ export default function SoftwareLicenseFormModalController({
               <ButtonSharedComponent
                 type="submit"
                 variant="primary"
+                size="sm"
                 isLoading={createLicenseMutation.isPending}
-                className="font-semibold !bg-[#0C2086] hover:!bg-[#081765] !text-white"
+                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
               >
                 Register Subscription ({selectedEmployeeIds.length} seats)
               </ButtonSharedComponent>

@@ -357,3 +357,32 @@
   - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseDetailModalController.tsx)
 - **Verification**:
   - Monorepo client lint & production build passed with 0 errors.
+
+---
+
+## 21. Flexible Expiration Date Picker with SaaS Presets & Strict Validation
+- **Objective**: Allow users to select any arbitrary date in the "Add Subscription" wizard modal with SaaS duration presets, HTML calendar constraints (`min`), strict start/end date validation, and a live contract duration summary.
+- **Implementation Highlights**:
+  - **SaaS Presets**: `+1m`, `+3m`, `+6m`, `+1y`, `+2y`, `+3y` calculated dynamically relative to the current `purchaseDate`.
+  - **Custom Arbitrary Selection**: Native calendar date input with `min={purchaseDate}` constraint.
+  - **Auto-Adjustment**: Changing the purchase date automatically shifts the expiration date forward if the previous expiration falls on or before the new start date.
+  - **Strict Validation**: Displays inline errors if `purchaseDate` is missing or if `expiryDate <= purchaseDate`.
+  - **Live Duration Badge**: Displays computed contract duration (e.g. `Contract Term: 1 Year (365 Days)` or `Contract Term: 3 Months (90 Days)`).
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseFormModalController.tsx)
+- **Verification**:
+  - Monorepo client lint & production build passed with 0 errors.
+
+---
+
+## 22. Standardized Modal Footer Buttons in Add Subscription Wizard
+- **Objective**: Standardize footer button sizing, styles, colors, and divider borders across Step 1 and Step 2 in [`SoftwareLicenseFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseFormModalController.tsx) to match the canonical design system established in `AssetFormModalController` and `EmployeeFormModalController`.
+- **Implementation Highlights**:
+  - Standardized size to `size="sm"` across all footer buttons (`Cancel`, `Next: Assign Employees`, `Back to Software Terms`, and `Register Subscription`).
+  - Standardized primary buttons: `!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold`.
+  - Standardized outline buttons: `variant="outline" size="sm"`.
+  - Standardized footer divider: `pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6 shrink-0`.
+- **Files Modified**:
+  - [`AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseFormModalController.tsx`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereClientServiceLayerMSC/src/Features/SoftwareLicenses/Components/SoftwareLicenseFormModalController.tsx)
+- **Verification**:
+  - Monorepo client lint & production build passed with 0 errors.

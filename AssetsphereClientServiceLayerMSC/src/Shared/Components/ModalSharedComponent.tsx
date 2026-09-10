@@ -41,6 +41,7 @@ export default function ModalSharedComponent({
   const dialogCardRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const [internalExitDirection, setInternalExitDirection] = useState<'down' | 'up'>(exitDirectionProp);
+  const [lockedViewportHeight, setLockedViewportHeight] = useState<number | null>(null);
   const prevOpenRef = useRef(isOpen);
   const titleId = useId();
 
@@ -127,24 +128,39 @@ export default function ModalSharedComponent({
     };
   }, [isOpen]);
 
-  // Focus management: move focus into the dialog on open, restore it to the trigger on close
+  // Capture the trigger element on open (focus is moved into the dialog once the
+  // enter animation finishes, via onAnimationComplete - not on a fixed timer, since
+  // focusing an element while the sheet is still sliding in can make a real mobile
+  // browser try to scroll/settle the focused element into view mid-animation, which
+  // reads as the sheet "glitching" partway through its entrance).
   useEffect(() => {
     if (isOpen) {
       previouslyFocusedElementRef.current = document.activeElement as HTMLElement | null;
-      const focusTimer = setTimeout(() => {
-        const firstFocusable = dialogCardRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
-        if (firstFocusable) {
-          firstFocusable.focus();
-        } else {
-          dialogCardRef.current?.focus();
-        }
-      }, 50);
-      return () => clearTimeout(focusTimer);
-    }
-
-    if (previouslyFocusedElementRef.current) {
+    } else if (previouslyFocusedElementRef.current) {
       previouslyFocusedElementRef.current.focus();
       previouslyFocusedElementRef.current = null;
+    }
+  }, [isOpen]);
+
+  const handleEnterAnimationComplete = (definition: string) => {
+    if (definition !== 'animate') return;
+    const firstFocusable = dialogCardRef.current?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    if (firstFocusable) {
+      firstFocusable.focus();
+    } else {
+      dialogCardRef.current?.focus();
+    }
+  };
+
+  // Snapshot the viewport height once per open, rather than letting the bottom sheet
+  // continuously track a live `dvh` value - on real mobile browsers the address bar
+  // can collapse/expand right as the sheet opens, and a live dvh recalculation mid-animation
+  // is what produces the "opens floating, then snaps into the bottom sheet" glitch.
+  useEffect(() => {
+    if (isOpen && typeof window !== 'undefined') {
+      setLockedViewportHeight(window.visualViewport?.height || window.innerHeight);
+    } else {
+      setLockedViewportHeight(null);
     }
   }, [isOpen]);
 
@@ -187,6 +203,12 @@ export default function ModalSharedComponent({
   const isForcedDownBottomSheetExit = (): boolean =>
     isSlideUp && typeof window !== 'undefined' && window.innerWidth < 640;
 
+  const isMobileBottomSheetViewport =
+    typeof window !== 'undefined' && window.innerWidth < 640;
+  const mobileLockedViewportPx =
+    lockedViewportHeight && isMobileBottomSheetViewport ? lockedViewportHeight : null;
+  const mobileLockedMaxHeightPx = mobileLockedViewportPx ? mobileLockedViewportPx * 0.92 : null;
+
   const modalVariants = {
     initial: {
       y: isSlideUp ? (typeof window !== 'undefined' ? window.innerHeight + 1000 : '150vh') : 8,
@@ -225,7 +247,7 @@ export default function ModalSharedComponent({
         <motion.div
           key="modal-portal-container"
           ref={scrollContainerRef}
-          style={{ zIndex }}
+          style={{ zIndex, height: mobileLockedViewportPx ? `${mobileLockedViewportPx}px` : undefined }}
           className="fixed inset-0 flex items-end sm:items-start justify-center p-0 sm:p-6 overflow-y-auto overflow-x-hidden w-[100dvw] h-[100dvh]"
           initial={{ opacity: 1 }}
           animate={{ opacity: 1 }}
@@ -256,6 +278,8 @@ export default function ModalSharedComponent({
             initial="initial"
             animate="animate"
             exit="exit"
+            onAnimationComplete={handleEnterAnimationComplete}
+            style={{ maxHeight: mobileLockedMaxHeightPx ? `${mobileLockedMaxHeightPx}px` : undefined }}
             className={`relative w-[100dvw] sm:w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-t-2xl rounded-b-none sm:rounded-2xl shadow-2xl z-10 my-0 sm:my-8 max-h-[92dvh] sm:max-h-[90vh] flex flex-col shrink-0 focus:outline-none`}
           >
             {/* Header */}
@@ -284,7 +308,10 @@ export default function ModalSharedComponent({
             )}
 
             {/* Body */}
-            <div className={`p-5 sm:p-6 flex-1 overflow-y-auto max-h-[calc(92dvh-130px)] sm:max-h-none ${scrollMode === 'body' ? '' : ''} ${minHeight ? minHeight : ''}`}>
+            <div
+              style={{ maxHeight: mobileLockedMaxHeightPx ? `${mobileLockedMaxHeightPx - 130}px` : undefined }}
+              className={`p-5 sm:p-6 flex-1 overflow-y-auto max-h-[calc(92dvh-130px)] sm:max-h-none ${scrollMode === 'body' ? '' : ''} ${minHeight ? minHeight : ''}`}
+            >
               {children}
             </div>
 

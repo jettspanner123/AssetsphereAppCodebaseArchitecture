@@ -445,6 +445,152 @@ export default function AssetInventoryScreenController({
     { value: 'NON_COMPLIANT', label: 'Non-Compliant Only' },
   ];
 
+  // Shared asset card renderer - `compact` produces the tighter mobile-forced 2-per-row variant
+  const renderAssetCard = (asset: Asset, compact: boolean = false) => (
+    <CardSharedComponent
+      key={asset.id}
+      hoverable
+      onClick={() => onSelectAsset(asset)}
+      onContextMenu={(e) => handleContextMenu(e, asset)}
+      className={
+        compact
+          ? 'p-3 flex flex-col justify-between space-y-3'
+          : 'p-6 flex flex-col justify-between space-y-6'
+      }
+    >
+      {/* 1. Header: Device Name & Manufacturer/Category + Prominent DisplayName Badge */}
+      <div className="min-w-0 space-y-1">
+        <div className="flex items-start justify-between gap-2">
+          <h3
+            className={
+              compact
+                ? 'text-sm font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight'
+                : 'text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight'
+            }
+          >
+            {asset.deviceName}
+          </h3>
+          {asset.displayName && (
+            <span
+              className={
+                compact
+                  ? 'inline-flex items-center px-1.5 py-0.5 text-[10px] rounded-md font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0 shadow-2xs'
+                  : 'inline-flex items-center px-2 py-0.5 text-[11px] rounded-md font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0 shadow-2xs'
+              }
+            >
+              {asset.displayName}
+            </span>
+          )}
+        </div>
+        <p
+          className={
+            compact
+              ? 'text-[10px] text-slate-400 dark:text-zinc-500 font-mono truncate'
+              : 'text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate'
+          }
+        >
+          {asset.manufacturer} {asset.model} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{asset.category}</span>
+        </p>
+      </div>
+
+      {/* 2. Hero Metric: Valuation & Asset Tag */}
+      <div
+        className={
+          compact
+            ? 'py-2 border-y border-slate-100 dark:border-zinc-800/80 space-y-2'
+            : 'py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3'
+        }
+      >
+        <div className="flex items-baseline justify-between">
+          <span
+            className={
+              compact
+                ? 'text-base font-bold tracking-tight text-slate-900 dark:text-white font-mono'
+                : 'text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono'
+            }
+          >
+            {CurrencyFormatterUtility.current.format(
+              asset.currentValue,
+              asset.procurement?.currency || asset.currency
+            )}
+          </span>
+          <span
+            className={
+              compact
+                ? 'text-[10px] text-slate-400 dark:text-zinc-500 font-mono'
+                : 'text-xs text-slate-400 dark:text-zinc-500 font-mono'
+            }
+          >
+            {asset.assetNumber}
+          </span>
+        </div>
+
+        {/* Assigned Owner Row */}
+        <div
+          className={
+            compact
+              ? 'flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400 font-medium'
+              : 'flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium'
+          }
+        >
+          <span className="flex items-center gap-1">
+            <User className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Owner
+          </span>
+          <span
+            className={
+              compact
+                ? 'font-semibold text-slate-900 dark:text-white truncate max-w-[90px]'
+                : 'font-semibold text-slate-900 dark:text-white truncate max-w-[150px]'
+            }
+          >
+            {asset.assignedToEmployeeName || 'Unassigned'}
+          </span>
+        </div>
+      </div>
+
+      {/* 3. Footer Metadata: Repositioned Badge Tag, Compliance & QR Action */}
+      <div
+        className={
+          compact
+            ? 'flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400 pt-1 gap-2'
+            : 'flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-1 gap-2'
+        }
+      >
+        <div className="flex items-center gap-2 truncate">
+          <span className="font-mono font-medium text-slate-500 dark:text-zinc-400 text-xs">
+            {asset.lifecycleStatus}
+          </span>
+
+          <div
+            className={
+              compact
+                ? 'flex items-center gap-1 text-[10px] font-mono text-slate-400 truncate'
+                : 'hidden sm:flex items-center gap-1 text-[11px] font-mono text-slate-400 truncate'
+            }
+          >
+            {asset.security?.isCompliant ? (
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+            ) : (
+              <ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+            )}
+            <span className="truncate">{asset.security?.isCompliant ? 'Encrypted' : 'Alert'}</span>
+          </div>
+        </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenQRBadgeModal(asset);
+          }}
+          className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
+          title="View / Print QR Asset Tag"
+        >
+          <QrCode className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </CardSharedComponent>
+  );
+
   return (
     <div
       className="space-y-6 min-h-[calc(100vh-140px)]"
@@ -456,10 +602,10 @@ export default function AssetInventoryScreenController({
         className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800"
       >
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             {isStandardUser ? 'My Assigned Devices & Assets' : AssetInventoryCON.TITLE}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             {isStandardUser
               ? 'View and inspect enterprise hardware and computing equipment assigned directly to your custody.'
               : AssetInventoryCON.SUBTITLE}
@@ -506,37 +652,42 @@ export default function AssetInventoryScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by ID, serial, user..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          <div className="flex items-center gap-2.5 shrink-0">
-            <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">
+            <div className="flex items-stretch gap-2.5 w-full sm:w-auto">
+              <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
+                <ButtonSharedComponent
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsImportModalOpen(true)}
+                  icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
+                  className="flex-1 sm:flex-none justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
+                >
+                  Import CSV
+                </ButtonSharedComponent>
+              </PermissionGuardSharedComponent>
+
               <ButtonSharedComponent
                 variant="outline"
                 size="sm"
-                onClick={() => setIsImportModalOpen(true)}
-                icon={<Upload className="w-3.5 h-3.5 text-slate-500 dark:text-zinc-400" />}
+                onClick={onExportCSV}
+                icon={<Download className="w-3.5 h-3.5" />}
+                className="flex-1 sm:flex-none justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
               >
-                Import CSV
+                Export CSV
               </ButtonSharedComponent>
-            </PermissionGuardSharedComponent>
-
-            <ButtonSharedComponent
-              variant="outline"
-              size="sm"
-              onClick={onExportCSV}
-              icon={<Download className="w-3.5 h-3.5" />}
-            >
-              Export CSV
-            </ButtonSharedComponent>
+            </div>
 
             <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
-              <div className="relative" ref={registerDropdownRef}>
+              <div className="relative w-full sm:w-auto" ref={registerDropdownRef}>
                 <PrimaryActionButtonSharedComponent
                   label="Register Device"
                   onClick={() => setIsRegisterDropdownOpen((prev) => !prev)}
                   icon={<ChevronDown className={`w-3.5 h-3.5 !text-white transition-transform duration-200 ${isRegisterDropdownOpen ? 'rotate-180' : ''}`} />}
+                  className="w-full sm:w-auto justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
                 />
 
                 <AnimatePresence>
@@ -603,8 +754,8 @@ export default function AssetInventoryScreenController({
           </div>
         </div>
 
-        {/* Row 2: Horizontally Scrollable Category Tags */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs border-t border-slate-200/60 dark:border-zinc-800/60 pt-3">
+        {/* Row 2: Horizontally Scrollable Category Tags (hidden on mobile) */}
+        <div className="hidden sm:flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar text-xs border-t border-slate-200/60 dark:border-zinc-800/60 pt-3">
           {AssetInventoryCON.CATEGORIES_LIST.map((cat) => (
             <button
               key={cat}
@@ -621,34 +772,36 @@ export default function AssetInventoryScreenController({
         </div>
 
         {/* Row 3: Secondary Dropdowns & Uniform View Switchers */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center sm:justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
           {/* Left: Secondary Dropdown Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Lifecycle:</span>
               <CustomSelectSharedComponent
                 value={selectedLifecycle}
                 options={lifecycleOptions}
                 onChange={(val) => setSelectedLifecycle(val)}
                 size="sm"
-                className="w-36 sm:w-40"
+                className="w-full sm:w-40"
+                triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Security:</span>
               <CustomSelectSharedComponent
                 value={complianceFilter}
                 options={securityOptions}
                 onChange={(val) => setComplianceFilter(val)}
                 size="sm"
-                className="w-40 sm:w-44"
+                className="w-full sm:w-44"
+                triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
               />
             </div>
           </div>
 
-          {/* Right: Uniform Switchers */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/* Right: Uniform Switchers (hidden on mobile - mobile is grid-only, 2 per row) */}
+          <div className="hidden sm:flex flex-wrap items-center gap-3">
             {/* Grid Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -786,9 +939,19 @@ export default function AssetInventoryScreenController({
         />
       )}
 
-      {/* Main Content Area View Modes */}
+      {/* Mobile-Forced Grid View: 2 per row, compact cards, ignores the table/grid & column-density preference below sm */}
+      {!isLoading && filteredAssets.length > 0 && (
+        <div
+          onContextMenu={(e) => handleContainerContextMenu(e)}
+          className="sm:hidden grid grid-cols-2 gap-3"
+        >
+          {filteredAssets.map((asset) => renderAssetCard(asset, true))}
+        </div>
+      )}
+
+      {/* Main Content Area View Modes (sm and up - respects the user's table/grid & column-density preference) */}
       {!isLoading && viewMode === 'table' && filteredAssets.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[1100px] whitespace-nowrap' : ''}`}>
               <thead>
@@ -916,92 +1079,13 @@ export default function AssetInventoryScreenController({
       {!isLoading && viewMode === 'grid' && filteredAssets.length > 0 && (
         <div
           onContextMenu={(e) => handleContainerContextMenu(e)}
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredAssets.map((asset) => (
-            <CardSharedComponent
-              key={asset.id}
-              hoverable
-              onClick={() => onSelectAsset(asset)}
-              onContextMenu={(e) => handleContextMenu(e, asset)}
-              className="p-6 flex flex-col justify-between space-y-6"
-            >
-              {/* 1. Header: Device Name & Manufacturer/Category + Prominent DisplayName Badge */}
-              <div className="min-w-0 space-y-1">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                    {asset.deviceName}
-                  </h3>
-                  {asset.displayName && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-semibold bg-indigo-50 text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/80 font-mono shrink-0 shadow-2xs">
-                      {asset.displayName}
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate">
-                  {asset.manufacturer} {asset.model} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{asset.category}</span>
-                </p>
-              </div>
-
-              {/* 2. Hero Metric: Valuation & Asset Tag */}
-              <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-                    {CurrencyFormatterUtility.current.format(
-                      asset.currentValue,
-                      asset.procurement?.currency || asset.currency
-                    )}
-                  </span>
-                  <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
-                    {asset.assetNumber}
-                  </span>
-                </div>
-
-                {/* Assigned Owner Row */}
-                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                  <span className="flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-slate-400 shrink-0" /> Owner
-                  </span>
-                  <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
-                    {asset.assignedToEmployeeName || 'Unassigned'}
-                  </span>
-                </div>
-              </div>
-
-              {/* 3. Footer Metadata: Repositioned Badge Tag, Compliance & QR Action */}
-              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 pt-1 gap-2">
-                <div className="flex items-center gap-2 truncate">
-                  <span className="font-mono font-medium text-slate-500 dark:text-zinc-400 text-xs">
-                    {asset.lifecycleStatus}
-                  </span>
-
-                  <div className="hidden sm:flex items-center gap-1 text-[11px] font-mono text-slate-400 truncate">
-                    {asset.security?.isCompliant ? (
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                    ) : (
-                      <ShieldAlert className="w-3.5 h-3.5 text-rose-500 shrink-0" />
-                    )}
-                    <span className="truncate">{asset.security?.isCompliant ? 'Encrypted' : 'Alert'}</span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenQRBadgeModal(asset);
-                  }}
-                  className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
-                  title="View / Print QR Asset Tag"
-                >
-                  <QrCode className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </CardSharedComponent>
-          ))}
+          {filteredAssets.map((asset) => renderAssetCard(asset, false))}
         </div>
       )}
 

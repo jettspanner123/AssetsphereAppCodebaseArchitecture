@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, LogOut } from 'lucide-react';
+import { X, LogOut, Smartphone } from 'lucide-react';
 import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../Types/NavigationType';
 import BadgeSharedComponent from '../../../../Shared/Components/BadgeSharedComponent';
+import PrimaryActionButtonSharedComponent from '../../../../Shared/Components/PrimaryActionButtonSharedComponent';
 import ApplicationPermissionService from '@/src/Services/ApplicationPermissionService';
 import useAuthenticationStateStore from '@/src/Store/AuthenticationStateStore';
 import TanstackQueryClientService from '@/src/Services/TanstackQueryClientService';
+import PWAService from '@/src/Services/PWAService';
 import weplmLogo from '../../../../assets/weplm.jpeg';
 
 export interface MobileNavigationDrawerStaticComponentProps {
@@ -29,6 +31,29 @@ export default function MobileNavigationDrawerStaticComponent({
 }: MobileNavigationDrawerStaticComponentProps): React.JSX.Element | null {
   // Subscribe to user role to re-render when auth changes
   useAuthenticationStateStore((state) => state.user?.role);
+
+  const [canInstall, setCanInstall] = useState<boolean>(false);
+
+  useEffect(() => {
+    const unsubscribe = PWAService.current.subscribe((installable) => {
+      setCanInstall(installable);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const handleInstallApp = async () => {
+    if (canInstall) {
+      const installed = await PWAService.current.promptInstall();
+      if (installed) {
+        onClose();
+      }
+    } else {
+      // Fallback instruction for iOS Safari / already installed
+      alert(
+        'To install AssetSphere on your phone:\n\n1. In Safari / Chrome, tap the Share or Menu button.\n2. Tap "Add to Home Screen".'
+      );
+    }
+  };
 
   const canAccessUserRequests = ApplicationPermissionService.current.canAccessTab('user_requests');
   const { data: pendingUsers = [] } =
@@ -181,8 +206,17 @@ export default function MobileNavigationDrawerStaticComponent({
               );
             })}
 
-            {/* Footer: Sign Out */}
+            {/* Footer: Install App & Sign Out */}
             <div className="pt-2 space-y-2 border-t border-slate-100 dark:border-zinc-800/80">
+              {!PWAService.current.isStandalone() && (
+                <PrimaryActionButtonSharedComponent
+                  label="Install AssetSphere App"
+                  icon={<Smartphone className="w-4 h-4 !text-white" />}
+                  className="w-full justify-center !h-11 text-xs font-bold shadow-md"
+                  onClick={handleInstallApp}
+                />
+              )}
+
               <button
                 type="button"
                 onClick={() => {

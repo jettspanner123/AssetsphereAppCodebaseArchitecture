@@ -459,6 +459,7 @@ export default function AssetFormModalController({
                 onChange={(e) => setDeviceName(e.target.value)}
                 placeholder="e.g. MacBook Pro 16 M3 Max"
                 required
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
               <InputSharedComponent
                 label="Serial Number (S/N) *"
@@ -466,6 +467,7 @@ export default function AssetFormModalController({
                 onChange={(e) => setSerialNumber(e.target.value)}
                 placeholder="e.g. C02G4109MD6N"
                 required
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
             </div>
 
@@ -475,6 +477,8 @@ export default function AssetFormModalController({
                 value={category}
                 options={CATEGORY_OPTIONS}
                 onChange={(val) => setCategory(val as AssetCategory)}
+                triggerClassName="!h-12 sm:!h-10 !text-base sm:!text-sm"
+                optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
               />
 
               <InputSharedComponent
@@ -482,6 +486,7 @@ export default function AssetFormModalController({
                 value={manufacturer}
                 onChange={(e) => setManufacturer(e.target.value)}
                 placeholder="e.g. Apple / Dell / Cisco"
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
             </div>
 
@@ -494,6 +499,7 @@ export default function AssetFormModalController({
                 step="any"
                 value={purchaseCost}
                 onChange={(e) => setPurchaseCost(Number(e.target.value))}
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
 
               <CustomSelectSharedComponent
@@ -501,6 +507,8 @@ export default function AssetFormModalController({
                 value={currency}
                 options={CURRENCY_OPTIONS}
                 onChange={(val) => setCurrency(val as 'USD' | 'INR')}
+                triggerClassName="!h-12 sm:!h-10 !text-base sm:!text-sm"
+                optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
               />
             </div>
           </div>
@@ -521,6 +529,7 @@ export default function AssetFormModalController({
                 value={processor}
                 onChange={(e) => setProcessor(e.target.value)}
                 placeholder="e.g. Apple M3 Max / Intel Core i9-14900HX"
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
               <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                 {PROCESSOR_PRESETS.map((item) => (
@@ -528,7 +537,7 @@ export default function AssetFormModalController({
                     key={item}
                     type="button"
                     onClick={() => setProcessor(item)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
+                    className={`px-4 py-2 sm:px-3.5 sm:py-1 rounded-full text-sm sm:text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       processor === item
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -554,7 +563,7 @@ export default function AssetFormModalController({
                   value={ramGbs || ''}
                   onChange={(e) => setRamGbs(Math.max(1, Number(e.target.value)))}
                   placeholder="e.g. 32"
-                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 pr-12 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                  className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-3 sm:py-2 pr-12 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                 />
                 <div className="absolute right-2.5 px-2 py-0.5 bg-slate-200 dark:bg-zinc-700 rounded text-[10px] font-semibold text-slate-700 dark:text-zinc-300 pointer-events-none select-none">
                   GB
@@ -567,7 +576,7 @@ export default function AssetFormModalController({
                     key={val}
                     type="button"
                     onClick={() => setRamGbs(val)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
+                    className={`px-4 py-2 sm:px-3.5 sm:py-1 rounded-full text-sm sm:text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       ramGbs === val
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -631,7 +640,7 @@ export default function AssetFormModalController({
                             value={drive.sizeNumber || ''}
                             onChange={(e) => handleUpdateDriveNumber(drive.id, Math.max(1, Number(e.target.value)))}
                             placeholder="e.g. 512"
-                            className="w-full h-10 text-sm px-3 py-2 rounded-md bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong focus:outline-hidden focus:border-zinc-900 dark:focus:border-white font-mono transition-colors duration-200"
+                            className="w-full h-12 sm:h-10 text-base sm:text-sm px-3 py-2 rounded-md bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 hairline-border-strong focus:outline-hidden focus:border-zinc-900 dark:focus:border-white font-mono transition-colors duration-200"
                           />
                           <CustomSelectSharedComponent
                             value={drive.unit}
@@ -639,6 +648,8 @@ export default function AssetFormModalController({
                             onChange={(val) => handleUpdateDriveUnit(drive.id, val as 'GB' | 'TB')}
                             className="w-24 shrink-0"
                             dropdownClassName="!min-w-[90px]"
+                            triggerClassName="!h-12 sm:!h-10 !text-base sm:!text-sm"
+                            optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
                           />
                         </div>
                       </div>
@@ -648,6 +659,8 @@ export default function AssetFormModalController({
                         value={drive.type}
                         options={DRIVE_TYPE_OPTIONS}
                         onChange={(val) => handleUpdateDriveType(drive.id, val)}
+                        triggerClassName="!h-12 sm:!h-10 !text-base sm:!text-sm"
+                        optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
                       />
                     </div>
 
@@ -660,7 +673,7 @@ export default function AssetFormModalController({
                             key={preset.label}
                             type="button"
                             onClick={() => handleApplyDrivePreset(drive.id, preset.sizeNumber, preset.unit)}
-                            className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
+                            className={`px-4 py-2 sm:px-3.5 sm:py-1 rounded-full text-sm sm:text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                               isSelected
                                 ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                                 : 'bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-700'
@@ -685,6 +698,7 @@ export default function AssetFormModalController({
                 value={screenSize}
                 onChange={(e) => setScreenSize(e.target.value)}
                 placeholder="e.g. 16.0-inch Liquid Retina XDR"
+                className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
               <div className="flex items-center gap-2 overflow-x-auto custom-horizontal-scrollbar pb-1.5 pt-0.5">
                 {SCREEN_SIZE_PRESETS.map((item) => (
@@ -692,7 +706,7 @@ export default function AssetFormModalController({
                     key={item}
                     type="button"
                     onClick={() => setScreenSize(item)}
-                    className={`px-3.5 py-1 rounded-full text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
+                    className={`px-4 py-2 sm:px-3.5 sm:py-1 rounded-full text-sm sm:text-xs font-medium whitespace-nowrap shrink-0 border transition-all ${
                       screenSize === item
                         ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-xs'
                         : 'bg-slate-100 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-200 dark:hover:bg-zinc-700'
@@ -725,6 +739,8 @@ export default function AssetFormModalController({
                 searchPlaceholder="Search employee by name, ID, or department..."
                 size="md"
                 placeholder="Select an employee or leave unassigned..."
+                triggerClassName="!h-12 sm:!h-10 !text-base sm:!text-sm"
+                optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
               />
               <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-1">
                 Assigning an employee will automatically update the device lifecycle status to <span className="font-semibold text-indigo-600 dark:text-indigo-400 font-mono">Assigned</span>.
@@ -741,6 +757,8 @@ export default function AssetFormModalController({
                   options={locationSelectOptions}
                   onChange={setAssignedLocation}
                   size="sm"
+                  triggerClassName="!h-12 sm:!h-9 !text-base sm:!text-xs"
+                  optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
                 />
               </div>
 
@@ -755,6 +773,8 @@ export default function AssetFormModalController({
                   searchable={true}
                   searchPlaceholder="Search departments..."
                   size="sm"
+                  triggerClassName="!h-12 sm:!h-9 !text-base sm:!text-xs"
+                  optionClassName="!py-3 !text-sm sm:!py-2 sm:!text-xs"
                   footerAction={{
                     label: '+ Create New Department',
                     icon: <Plus className="w-3.5 h-3.5" />,
@@ -783,15 +803,20 @@ export default function AssetFormModalController({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Add special provisioning instructions, warranty exceptions, vendor RMA references, or custom configuration tags..."
                 rows={3}
-                className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg p-3 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all resize-y"
+                className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg p-4 sm:p-3 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all resize-y"
               />
             </div>
           </div>
         </div>
 
         {/* Modal Action Buttons */}
-        <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0">
-          <ButtonSharedComponent variant="outline" size="sm" onClick={handleCancel}>
+        <div className="flex items-stretch sm:items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0 w-full">
+          <ButtonSharedComponent
+            variant="outline"
+            size="sm"
+            onClick={handleCancel}
+            className="flex-1 sm:flex-none justify-center !h-12 sm:!h-9 text-sm sm:text-xs"
+          >
             Cancel
           </ButtonSharedComponent>
           <ButtonSharedComponent
@@ -800,7 +825,7 @@ export default function AssetFormModalController({
             size="sm"
             isLoading={isLoading}
             loadingText={initialAsset ? 'Saving Specs...' : 'Registering Device...'}
-            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+            className="flex-1 sm:flex-none justify-center !h-12 sm:!h-9 text-sm sm:text-xs !bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
             icon={<Plus className="w-3.5 h-3.5 !text-white" />}
           >
             <span className="!text-white font-medium">{initialAsset ? 'Update Asset' : 'Register Device'}</span>

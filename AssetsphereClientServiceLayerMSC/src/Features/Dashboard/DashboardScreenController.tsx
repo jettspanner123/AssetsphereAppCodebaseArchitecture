@@ -226,7 +226,7 @@ export default function DashboardScreenController({
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Category Breakdown */}
-        <CardSharedComponent>
+        <CardSharedComponent className="max-md:!p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
@@ -237,7 +237,7 @@ export default function DashboardScreenController({
               </p>
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center">
+          <div className="h-72 md:h-64 flex items-center justify-center">
             {categoryChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -273,14 +273,14 @@ export default function DashboardScreenController({
                 icon={<PieChartIcon className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
                 title="No Category Distribution Data"
                 description="Hardware and virtual asset categories are unindexed. Enable mock data mode or register devices to populate category metrics."
-                className="w-full h-full py-4"
+                className="w-full h-full py-4 max-md:!border-slate-200/60 max-md:!shadow-xs"
               />
             )}
           </div>
         </CardSharedComponent>
 
         {/* Department Valuation Bar Chart */}
-        <CardSharedComponent>
+        <CardSharedComponent className="max-md:!p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h3 className="text-sm font-semibold text-slate-900 dark:text-white font-serif-headline">
@@ -291,7 +291,7 @@ export default function DashboardScreenController({
               </p>
             </div>
           </div>
-          <div className="h-64 flex items-center justify-center">
+          <div className="h-72 md:h-64 flex items-center justify-center">
             {deptChartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={deptChartData}>
@@ -327,7 +327,7 @@ export default function DashboardScreenController({
                 icon={<BarChart3 className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
                 title="No Departmental Valuation Data"
                 description="Financial capital allocation across departments is unindexed. Connect procurement ledgers or enable mock data mode."
-                className="w-full h-full py-4"
+                className="w-full h-full py-4 max-md:!border-slate-200/60 max-md:!shadow-xs"
               />
             )}
           </div>
@@ -335,7 +335,7 @@ export default function DashboardScreenController({
       </div>
 
       {/* Critical Failure Risk Devices Table */}
-      <CardSharedComponent>
+      <CardSharedComponent className="max-md:!p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-base sm:text-lg font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
@@ -424,7 +424,7 @@ export default function DashboardScreenController({
             icon={<Box className="w-5 h-5 text-slate-400 dark:text-zinc-500" />}
             title="No Active Asset Records"
             description="There are currently no assets registered or indexed requiring physical verification or maintenance."
-            className="w-full py-8"
+            className="w-full py-8 max-md:!border-slate-200/60 max-md:!shadow-xs"
           />
         )}
       </CardSharedComponent>

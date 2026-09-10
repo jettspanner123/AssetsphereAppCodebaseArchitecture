@@ -51,3 +51,23 @@
   - **Module 5 (Theming & View Transitions)**: `ThemeToggleSharedComponent.tsx`, `AnimatedThemeToggleSharedComponent.tsx` (with CSS View Transitions API polygon clip paths: circle, square, triangle, diamond, hexagon, rectangle, star).
 - **Verification**:
   - Monorepo client lint (`tsc --noEmit`) completed with 0 errors.
+
+---
+
+## 4. Creation of Canonical Client Coding Style Specification (`CODING_STYLE.md`)
+- **Objective**: Author a comprehensive, definitive coding style and architectural specification document for the AssetSphere frontend client capturing folder hierarchy, file naming invariants, singleton services, constant classes, TypeScript standards, TanStack Query integration, Zustand stores, and zero-mock data invariants.
+- **Document Created**:
+  - [`AssetsphereAgentDocumentationNMCS/ExportItems/CODING_STYLE.md`](file:///c:/Users/UddeshyaSingh/Development/AssetsphereAppCodebaseArchitecture/AssetsphereAgentDocumentationNMCS/ExportItems/CODING_STYLE.md)
+- **Key Specifications Codified**:
+  1. **MSC Architectural Pattern**: Strict separation between Models (`src/Types/*Type.ts`), Services (`src/Services/*Service.ts`), and Controllers (`src/Features/*/*Controller.tsx`).
+  2. **Directory Topology & Folder Hierarchy**: Exact map of all `src/` subdirectories (`Configurations`, `Constants`, `Features`, `Routes`, `Router`, `Services`, `Shared/Components`, `Store`, `Types`, `Utilities`).
+  3. **Strict Suffix & Naming Invariants**: Standardized suffixes (`*ScreenController`, `*ModalController`, `*ScreenRoute`, `*SharedComponent`, `*CON`, `*Service`, `*Utility`, `*Type`, `*Store`).
+  4. **Class-Based Singleton Service Architecture**: `public static current = new ClassName();` across all services and utilities.
+  5. **Constant Classes (`*CON.ts`)**: `public static readonly CONSTANT_NAME: Type = Value;` with strict prohibition of inline magic strings or static arrays in components.
+  6. **TypeScript & Typing Standards**: Mandatory `React.JSX.Element` return types, exported `Props` interfaces, isolated `*Type.ts` files with barrel export in `src/Types/index.ts`, and strict zero-`any` prohibition.
+  7. **Component Layer Responsibilities**: Clear division of labor between Screen Controllers, Modal Controllers, Screen Routes, and Shared UI Components.
+  8. **TanStack Query Hub**: Centralized queries and mutations in `TanstackQueryClientService.current` with automatic cache invalidation patterns on mutations.
+  9. **Zustand Reactive State Stores**: Pure client session and auth store patterns in `src/Store/*Store.ts`.
+  10. **Operational & Zero-Mock Invariants**: Pure 100% database-grounded state, `EmptyStateSharedComponent` empty handling, `lastRef.current` anti-disappearance caching during 600ms exit animations, and 10-point pre-delivery developer checklist.
+- **Verification**:
+  - Monorepo client TypeScript compile check (`tsc --noEmit`) passed with 0 errors.

@@ -105,7 +105,7 @@ export default function HeaderStaticComponent({
   }, []);
 
   return (
-    <header className="h-16 border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-black/50 backdrop-blur-lg sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
+    <header className="h-16 border-b border-slate-200/80 dark:border-zinc-800/80 bg-white dark:bg-black md:bg-white/50 md:dark:bg-black/50 md:backdrop-blur-lg sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
       {/* Brand logo / Mobile title - 1:1 SignForge sizing */}
       <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <img

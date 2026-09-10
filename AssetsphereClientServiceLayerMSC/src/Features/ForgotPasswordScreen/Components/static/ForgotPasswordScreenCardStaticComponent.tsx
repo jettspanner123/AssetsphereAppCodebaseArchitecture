@@ -29,7 +29,7 @@ export default function ForgotPasswordScreenCardStaticComponent({
   return (
     <div
       style={{ viewTransitionName: 'auth-card' }}
-      className="w-full max-w-md bg-white dark:bg-[#0a0a0c] border border-slate-200 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 transition-colors"
+      className="w-full max-w-md bg-transparent sm:bg-white sm:dark:bg-[#0a0a0c] border-0 sm:border border-slate-200 dark:border-zinc-800/90 rounded-none sm:rounded-2xl p-4 sm:p-8 shadow-none sm:shadow-2xl backdrop-blur-none sm:backdrop-blur-xl relative z-10 transition-colors"
     >
       {/* Header */}
       <div className="text-center mb-6">
@@ -84,7 +84,7 @@ export default function ForgotPasswordScreenCardStaticComponent({
               type="button"
               disabled={isLoading}
               onClick={onResend}
-              className="w-full justify-center text-xs font-semibold py-2.5 rounded-xl cursor-pointer"
+              className="w-full justify-center !h-11 sm:!h-9 text-sm sm:text-xs font-semibold rounded-xl cursor-pointer"
             >
               {isLoading ? ForgotPasswordScreenCON.SUBMIT_BUTTON_LOADING : ForgotPasswordScreenCON.RESEND_BUTTON_LABEL}
             </ButtonSharedComponent>
@@ -118,7 +118,7 @@ export default function ForgotPasswordScreenCardStaticComponent({
                 onChange={(e) => onEmailChange(e.target.value)}
                 placeholder={ForgotPasswordScreenCON.EMAIL_PLACEHOLDER}
                 autoComplete="email"
-                className={`w-full pl-10 pr-3.5 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
+                className={`w-full !h-11 sm:!h-9 pl-10 pr-3.5 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
                   errors.email
                     ? 'border-rose-400 dark:border-rose-600'
                     : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
@@ -139,7 +139,7 @@ export default function ForgotPasswordScreenCardStaticComponent({
               size="md"
               type="submit"
               disabled={isLoading}
-              className="w-full justify-center !bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-md font-semibold py-2.5 rounded-xl cursor-pointer"
+              className="w-full justify-center !h-11 sm:!h-9 !bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-md font-semibold text-sm sm:text-xs rounded-xl cursor-pointer"
             >
               <span className="!text-white font-medium">
                 {isLoading ? ForgotPasswordScreenCON.SUBMIT_BUTTON_LOADING : ForgotPasswordScreenCON.SUBMIT_BUTTON_LABEL}

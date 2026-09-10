@@ -697,7 +697,7 @@ export default function AssetInventoryScreenController({
                       animate={{ opacity: 1, y: 0, scale: 1 }}
                       exit={{ opacity: 0, y: 6, scale: 0.96 }}
                       transition={{ duration: 0.15, ease: 'easeOut' }}
-                      className="absolute right-0 top-full mt-2 w-72 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 p-1.5 space-y-1 divide-y divide-slate-100 dark:divide-zinc-800/60 font-sans"
+                      className="absolute right-0 top-full mt-2 w-full sm:w-72 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-xl z-50 p-1.5 space-y-1 divide-y divide-slate-100 dark:divide-zinc-800/60 font-sans"
                     >
                       <div className="p-1 space-y-1">
                         {/* Option 1: Create From Scratch */}
@@ -709,14 +709,14 @@ export default function AssetInventoryScreenController({
                           }}
                           className="w-full flex items-start gap-3 p-2.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group cursor-pointer"
                         >
-                          <div className="p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
-                            <FilePlus2 className="w-4 h-4" />
+                          <div className="p-2.5 sm:p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
+                            <FilePlus2 className="w-5 h-5 sm:w-4 sm:h-4" />
                           </div>
                           <div className="space-y-0.5 min-w-0 flex-1">
-                            <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
+                            <div className="text-sm sm:text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
                               Create From Scratch
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
+                            <div className="text-xs sm:text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
                               Start with an empty registration form to manually configure all specifications.
                             </div>
                           </div>
@@ -733,14 +733,14 @@ export default function AssetInventoryScreenController({
                           }}
                           className="w-full flex items-start gap-3 p-2.5 rounded-lg text-left hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group cursor-pointer"
                         >
-                          <div className="p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
-                            <LayoutTemplate className="w-4 h-4" />
+                          <div className="p-2.5 sm:p-2 bg-slate-100 dark:bg-zinc-900 rounded-lg text-slate-400 dark:text-zinc-500 group-hover:text-slate-700 dark:group-hover:text-zinc-300 transition-colors shrink-0 mt-0.5">
+                            <LayoutTemplate className="w-5 h-5 sm:w-4 sm:h-4" />
                           </div>
                           <div className="space-y-0.5 min-w-0 flex-1">
-                            <div className="text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
+                            <div className="text-sm sm:text-xs font-semibold text-slate-800 dark:text-zinc-200 group-hover:text-[#0C2086] dark:group-hover:text-indigo-400 transition-colors">
                               Create From Template
                             </div>
-                            <div className="text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
+                            <div className="text-xs sm:text-[11px] text-slate-500 dark:text-zinc-400 leading-tight">
                               Pre-fill specifications using enterprise hardware presets and configurations.
                             </div>
                           </div>
@@ -784,6 +784,7 @@ export default function AssetInventoryScreenController({
                 size="sm"
                 className="w-full sm:w-40"
                 triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
 
@@ -796,6 +797,7 @@ export default function AssetInventoryScreenController({
                 size="sm"
                 className="w-full sm:w-44"
                 triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
           </div>

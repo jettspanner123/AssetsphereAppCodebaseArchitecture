@@ -24,6 +24,7 @@ export interface CustomSelectSharedComponentProps {
   className?: string;
   triggerClassName?: string;
   dropdownClassName?: string;
+  optionClassName?: string;
   size?: 'sm' | 'md';
   searchable?: boolean;
   searchPlaceholder?: string;
@@ -39,6 +40,7 @@ export default function CustomSelectSharedComponent({
   className = 'w-full',
   triggerClassName,
   dropdownClassName,
+  optionClassName = '',
   size = 'md',
   searchable = false,
   searchPlaceholder = 'Search options...',
@@ -167,7 +169,7 @@ export default function CustomSelectSharedComponent({
                       isSelected
                         ? 'bg-slate-100 dark:bg-zinc-800/90 text-slate-900 dark:text-white font-bold'
                         : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900/60'
-                    }`}
+                    } ${optionClassName}`}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">
                       {option.icon}

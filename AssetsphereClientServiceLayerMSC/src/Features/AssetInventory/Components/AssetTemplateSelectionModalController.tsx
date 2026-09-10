@@ -120,7 +120,7 @@ export default function AssetTemplateSelectionModalController({
             variant="outline"
             size="sm"
             onClick={onClose}
-            className="w-full sm:w-auto justify-center"
+            className="w-full sm:w-auto justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
           >
             Dismiss
           </ButtonSharedComponent>

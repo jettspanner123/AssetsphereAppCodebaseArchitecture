@@ -280,7 +280,7 @@ export default function ModalSharedComponent({
             exit="exit"
             onAnimationComplete={handleEnterAnimationComplete}
             style={{ maxHeight: mobileLockedMaxHeightPx ? `${mobileLockedMaxHeightPx}px` : undefined }}
-            className={`relative w-[100dvw] sm:w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong rounded-t-2xl rounded-b-none sm:rounded-2xl shadow-2xl z-10 my-0 sm:my-8 max-h-[92dvh] sm:max-h-[90vh] flex flex-col shrink-0 focus:outline-none`}
+            className={`relative w-[100dvw] sm:w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong max-sm:!border-b-0 rounded-t-2xl rounded-b-none sm:rounded-2xl shadow-2xl z-10 my-0 sm:my-8 max-h-[92dvh] sm:max-h-[90vh] flex flex-col shrink-0 focus:outline-none`}
           >
             {/* Header */}
             {(title || subtitle) && (

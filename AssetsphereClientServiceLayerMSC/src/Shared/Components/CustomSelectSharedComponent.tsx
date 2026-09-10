@@ -59,7 +59,11 @@ export default function CustomSelectSharedComponent({
       return;
     }
 
-    if (searchable && searchInputRef.current) {
+    // Skip auto-focus on mobile - focusing the search input immediately pops the
+    // on-screen keyboard and shoves the option list out of view before the user
+    // has even seen what's in the dropdown. Desktop keeps the convenience auto-focus.
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 640;
+    if (searchable && searchInputRef.current && !isMobileViewport) {
       searchInputRef.current.focus();
     }
 
@@ -135,14 +139,14 @@ export default function CustomSelectSharedComponent({
             {searchable && (
               <div className="p-1.5 border-b border-slate-100 dark:border-zinc-800/80 mb-1">
                 <div className="relative flex items-center">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 text-slate-400 dark:text-zinc-500 pointer-events-none" />
+                  <Search className="w-4 h-4 sm:w-3.5 sm:h-3.5 absolute left-2.5 text-slate-400 dark:text-zinc-500 pointer-events-none" />
                   <input
                     ref={searchInputRef}
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder={searchPlaceholder}
-                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                    className="w-full bg-slate-50 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 rounded-lg pl-8 pr-2.5 py-3 sm:py-1.5 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
                     onClick={(e) => e.stopPropagation()}
                     onKeyDown={(e) => e.stopPropagation()}
                   />

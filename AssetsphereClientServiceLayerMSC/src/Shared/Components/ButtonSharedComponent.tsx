@@ -34,7 +34,7 @@ export default function ButtonSharedComponent({
   title,
 }: ButtonSharedComponentProps): React.JSX.Element {
   let baseStyles =
-    'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none whitespace-nowrap';
+    'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none whitespace-nowrap max-sm:active:opacity-80';
 
   let sizeStyles = '';
   if (size === 'sm') {
@@ -48,15 +48,15 @@ export default function ButtonSharedComponent({
   let variantStyles = '';
   if (variant === 'primary') {
     variantStyles =
-      'bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-sm';
+      'bg-zinc-900 text-white hover:bg-zinc-800 max-sm:active:bg-zinc-700 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white dark:max-sm:active:bg-zinc-300 shadow-sm';
   } else if (variant === 'ghost') {
     variantStyles =
-      'bg-slate-100 text-slate-800 hover:bg-slate-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 hairline-border';
+      'bg-slate-100 text-slate-800 hover:bg-slate-200 max-sm:active:bg-slate-300 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700 dark:max-sm:active:bg-zinc-600 hairline-border';
   } else if (variant === 'outline') {
     variantStyles =
-      'bg-transparent text-slate-700 hover:bg-slate-100 dark:text-zinc-300 dark:hover:bg-zinc-800/60 hairline-border-strong';
+      'bg-transparent text-slate-700 hover:bg-slate-100 max-sm:active:bg-slate-200 dark:text-zinc-300 dark:hover:bg-zinc-800/60 dark:max-sm:active:bg-zinc-700/70 hairline-border-strong';
   } else if (variant === 'danger') {
-    variantStyles = 'bg-red-600 text-white hover:bg-red-700 shadow-sm';
+    variantStyles = 'bg-red-600 text-white hover:bg-red-700 max-sm:active:bg-red-800 shadow-sm';
   }
 
   const widthStyle = fullWidth ? 'w-full' : '';

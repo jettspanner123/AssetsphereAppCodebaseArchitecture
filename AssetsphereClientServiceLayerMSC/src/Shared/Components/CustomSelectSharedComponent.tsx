@@ -110,7 +110,7 @@ export default function CustomSelectSharedComponent({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`${className.includes('w-') ? 'w-full' : ''} ${heightClass} rounded-lg bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-colors focus:outline-none text-xs flex items-center justify-between gap-2 cursor-pointer select-none ${triggerClassName || ''}`}
+        className={`${className.includes('w-') ? 'w-full' : ''} ${heightClass} rounded-lg bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-900 max-sm:active:opacity-80 transition-colors focus:outline-none text-xs flex items-center justify-between gap-2 cursor-pointer select-none ${triggerClassName || ''}`}
       >
         <div className="flex items-center gap-2 truncate font-medium">
           {selectedOption?.icon}
@@ -169,10 +169,10 @@ export default function CustomSelectSharedComponent({
                       onChange(option.value);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-left ${
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors cursor-pointer text-left max-sm:active:opacity-70 ${
                       isSelected
-                        ? 'bg-slate-100 dark:bg-zinc-800/90 text-slate-900 dark:text-white font-bold'
-                        : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900/60'
+                        ? 'bg-slate-100 dark:bg-zinc-800/90 text-slate-900 dark:text-white font-bold max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
+                        : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900/60 max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
                     } ${optionClassName}`}
                   >
                     <div className="flex items-center gap-2 min-w-0 flex-1 pr-2">

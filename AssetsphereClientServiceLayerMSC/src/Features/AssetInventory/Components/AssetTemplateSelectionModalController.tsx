@@ -110,13 +110,18 @@ export default function AssetTemplateSelectionModalController({
       maxWidth="2xl"
       scrollMode="backdrop"
       footer={
-        <div className="flex items-center justify-between w-full text-xs text-slate-500 font-mono">
-          <span>
+        <div className="flex items-center justify-between w-full text-xs text-slate-500 font-mono gap-3">
+          <span className="hidden sm:inline">
             {activeTab === 'existing_assets'
               ? `${filteredAssets.length} hardware blueprint${filteredAssets.length === 1 ? '' : 's'} available`
               : 'Enterprise Catalog'}
           </span>
-          <ButtonSharedComponent variant="outline" size="sm" onClick={onClose}>
+          <ButtonSharedComponent
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="w-full sm:w-auto justify-center"
+          >
             Dismiss
           </ButtonSharedComponent>
         </div>

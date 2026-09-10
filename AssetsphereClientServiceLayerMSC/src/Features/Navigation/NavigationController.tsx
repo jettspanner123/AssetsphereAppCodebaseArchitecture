@@ -33,7 +33,7 @@ export default function NavigationController({
   // Global 15-second polling notification sound listener
   useNotificationSoundWatcher();
   return (
-    <div className="min-h-screen flex flex-col bg-white dark:bg-black text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200">
+    <div className="min-h-dvh flex flex-col bg-white dark:bg-black text-slate-900 dark:text-zinc-100 font-sans transition-colors duration-200">
       <HeaderStaticComponent
         globalSearch={globalSearch}
         onSearchChange={onSearchChange}
@@ -48,6 +48,8 @@ export default function NavigationController({
         onToggleNotifications={onToggleNotifications}
         nonCompliantCount={nonCompliantCount}
         openTicketCount={openTicketCount}
+        activeTab={activeTab}
+        unreadAlertCount={unreadAlertCount}
         onNavigateTab={onSelectTab}
         onNavigateSettings={() => onSelectTab('settings')}
         onNavigateDevDashboard={onNavigateDevDashboard}

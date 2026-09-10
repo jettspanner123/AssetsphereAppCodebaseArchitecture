@@ -52,7 +52,7 @@ export default function SidebarStaticComponent({
     <motion.aside
       animate={{ width: isCollapsed ? 68 : 240 }}
       transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-      className="shrink-0 border-r border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-black/60 hidden md:flex flex-col sticky top-16 h-[calc(100vh-64px)] overflow-y-auto p-3 select-none z-20 overflow-x-hidden"
+      className="shrink-0 border-r border-slate-200 dark:border-zinc-800/80 bg-slate-50/50 dark:bg-black/60 hidden md:flex flex-col sticky top-16 h-[calc(100dvh-64px)] overflow-y-auto p-3 select-none z-20 overflow-x-hidden"
     >
       {/* Collapse Toggle Header */}
       <div className={`flex items-center mb-4 ${isCollapsed ? 'justify-center' : 'justify-between px-2'}`}>

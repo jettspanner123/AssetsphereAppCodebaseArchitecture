@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Plus, Bell } from 'lucide-react';
+import { Search, Plus, Bell, Menu } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
 import ProfileDropdownStaticComponent from './ProfileDropdownStaticComponent';
 import NotificationsDropdownStaticComponent from './NotificationsDropdownStaticComponent';
+import MobileNavigationDrawerStaticComponent from './MobileNavigationDrawerStaticComponent';
 import NavigationCON from '../../Constants/NavigationCON';
 import { TabType } from '../../../../Types/NavigationType';
 import weplmLogo from '../../../../assets/weplm.jpeg';
@@ -23,6 +24,8 @@ export interface HeaderStaticComponentProps {
   onToggleNotifications: () => void;
   nonCompliantCount?: number;
   openTicketCount?: number;
+  activeTab: TabType;
+  unreadAlertCount: number;
   onNavigateTab?: (tab: TabType) => void;
   onNavigateSettings?: () => void;
   onNavigateDevDashboard?: () => void;
@@ -43,12 +46,15 @@ export default function HeaderStaticComponent({
   onToggleNotifications,
   nonCompliantCount = 0,
   openTicketCount = 0,
+  activeTab,
+  unreadAlertCount,
   onNavigateTab,
   onNavigateSettings,
   onNavigateDevDashboard,
   onSignOut,
 }: HeaderStaticComponentProps): React.JSX.Element {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
   const user = useAuthenticationStateStore((state) => state.user);
@@ -100,27 +106,27 @@ export default function HeaderStaticComponent({
 
   return (
     <header className="h-16 border-b border-slate-200/80 dark:border-zinc-800/80 bg-white/50 dark:bg-black/50 backdrop-blur-lg sticky top-0 z-30 px-4 sm:px-6 flex items-center justify-between gap-4">
-      {/* Brand logo / Mobile title */}
-      <div className="flex items-center gap-3 shrink-0">
+      {/* Brand logo / Mobile title - 1:1 SignForge sizing */}
+      <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
         <img
           src={weplmLogo}
           alt="We.PLM Logo"
-          className="w-8 h-8 rounded-sm object-cover shrink-0 shadow-sm border border-slate-200/80 dark:border-zinc-800"
+          className="w-10 h-10 sm:w-8 sm:h-8 rounded-lg sm:rounded-sm object-cover shrink-0 shadow-sm border border-slate-200/80 dark:border-zinc-800"
         />
-        <div className="hidden sm:block">
-          <h1 className="text-base font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline leading-none">
+        <div className="flex flex-col justify-center">
+          <h1 className="text-sm sm:text-base font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline leading-tight">
             {NavigationCON.BRAND_TITLE}
           </h1>
-          <p className="text-[11px] text-slate-500 dark:text-zinc-400 font-mono">
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-zinc-400 font-mono mt-0.5 leading-none">
             {NavigationCON.BRAND_SUBTITLE}
           </p>
         </div>
       </div>
 
       {/* Right Controls & Search Bar Grouped Together */}
-      <div className="flex items-center gap-2.5 shrink-0">
-        {/* Global Search Bar with Ctrl + K Indicator */}
-        <div className="relative w-48 sm:w-64">
+      <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+        {/* Global Search Bar with Ctrl + K Indicator - hidden below md, matches Sidebar's mobile breakpoint */}
+        <div className="relative hidden md:block md:w-64">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-400" />
           <input
             ref={searchInputRef}
@@ -135,8 +141,8 @@ export default function HeaderStaticComponent({
           </kbd>
         </div>
 
-        {/* Notifications Popover Dropdown Button */}
-        <div className="relative">
+        {/* Notifications Popover Dropdown Button - hidden below md */}
+        <div className="relative hidden md:block">
           <button
             onClick={onToggleNotifications}
             className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative flex items-center justify-center"
@@ -164,17 +170,17 @@ export default function HeaderStaticComponent({
         <div className="relative">
           <button
             onClick={() => setIsProfileOpen(!isProfileOpen)}
-            className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative flex items-center justify-center"
+            className="h-10 w-10 sm:h-9 sm:w-9 rounded-xl sm:rounded-lg bg-slate-100 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hairline-border hover:bg-slate-200 dark:hover:bg-zinc-700/80 transition-colors cursor-pointer relative flex items-center justify-center"
             title={`${displayName} - Profile & Settings`}
           >
             {user?.avatarUrl ? (
               <img
                 src={user.avatarUrl}
                 alt={displayName}
-                className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
+                className="w-7 h-7 sm:w-6 sm:h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-zinc-700"
               />
             ) : (
-              <div className="w-6 h-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold text-[10px] font-mono">
+              <div className="w-7 h-7 sm:w-6 sm:h-6 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold text-xs sm:text-[10px] font-mono">
                 {initials}
               </div>
             )}
@@ -194,7 +200,27 @@ export default function HeaderStaticComponent({
             onSignOut={onSignOut}
           />
         </div>
+
+        {/* Mobile Menu Button (<md) - opens bottom drawer, 1:1 SignForge */}
+        <button
+          type="button"
+          onClick={() => setIsMobileDrawerOpen(true)}
+          aria-label="Open Navigation Menu"
+          className="md:hidden h-10 w-10 sm:h-9 sm:w-9 rounded-xl sm:rounded-lg flex items-center justify-center text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200/80 dark:border-zinc-800 cursor-pointer"
+        >
+          <Menu className="w-5 h-5 sm:w-4 sm:h-4" />
+        </button>
       </div>
+
+      {/* Mobile Bottom Drawer Navigation */}
+      <MobileNavigationDrawerStaticComponent
+        isOpen={isMobileDrawerOpen}
+        onClose={() => setIsMobileDrawerOpen(false)}
+        activeTab={activeTab}
+        onSelectTab={(tab) => onNavigateTab?.(tab)}
+        unreadAlertCount={unreadAlertCount}
+        onSignOut={onSignOut}
+      />
     </header>
   );
 }

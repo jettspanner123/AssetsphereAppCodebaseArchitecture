@@ -48,6 +48,9 @@ export default function DevDashboardScreenController({
         unreadCount={0}
         isNotificationsOpen={false}
         onToggleNotifications={() => {}}
+        activeTab="dashboard"
+        unreadAlertCount={0}
+        onNavigateTab={onNavigateAppDashboard}
         onNavigateDevDashboard={() => setActiveDevTab('overview')}
         onNavigateSettings={onNavigateSettings}
         onSignOut={onSignOut}

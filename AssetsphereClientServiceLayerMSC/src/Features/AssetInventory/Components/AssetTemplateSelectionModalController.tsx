@@ -124,31 +124,33 @@ export default function AssetTemplateSelectionModalController({
     >
       <div className="space-y-4">
         {/* Full-Width Segmented View Switcher */}
-        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 h-10 w-full">
+        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 h-12 sm:h-10 w-full">
           <button
             type="button"
             onClick={() => setActiveTab('standard_templates')}
-            className={`flex-1 flex items-center justify-center gap-2 py-1.5 h-8 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-1.5 h-10 sm:h-8 rounded-lg text-sm sm:text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'standard_templates'
                 ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-bold'
                 : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium'
             }`}
           >
-            <LayoutTemplate className="w-3.5 h-3.5" />
-            <span>Choose Standard Template</span>
+            <LayoutTemplate className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <span className="sm:hidden">Standard Template</span>
+            <span className="hidden sm:inline">Choose Standard Template</span>
           </button>
 
           <button
             type="button"
             onClick={() => setActiveTab('existing_assets')}
-            className={`flex-1 flex items-center justify-center gap-2 py-1.5 h-8 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 sm:py-1.5 h-10 sm:h-8 rounded-lg text-sm sm:text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'existing_assets'
                 ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs font-bold'
                 : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white font-medium'
             }`}
           >
-            <Copy className="w-3.5 h-3.5" />
-            <span>Choose from Existing Assets</span>
+            <Copy className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+            <span className="sm:hidden">Existing Assets</span>
+            <span className="hidden sm:inline">Choose from Existing Assets</span>
           </button>
         </div>
 
@@ -178,15 +180,15 @@ export default function AssetTemplateSelectionModalController({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by device name, manufacturer, CPU, RAM, storage, GPU, display, or WiFi..."
-                className="w-full pl-9.5 pr-8 py-2 text-xs bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-xl text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086] dark:focus:ring-indigo-500 transition-all font-sans"
+                className="w-full pl-9.5 pr-8 py-3 sm:py-2 text-sm sm:text-xs bg-white dark:bg-zinc-950 border border-slate-300 dark:border-zinc-800 rounded-xl text-slate-800 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086] dark:focus:ring-indigo-500 transition-all font-sans"
               />
               {searchQuery && (
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 p-0.5 rounded cursor-pointer"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 p-1.5 sm:p-0.5 rounded cursor-pointer"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                 </button>
               )}
             </div>

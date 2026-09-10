@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Sun, Moon } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
 import VerificationPendingCardSharedComponent from '../../../../Shared/Components/VerificationPendingCardSharedComponent';
 import LoginScreenCON from '../../Constants/LoginScreenCON';
 import { LoginCredentials, LoginFormErrors } from '../../Models/LoginScreenModel';
 import weplmLogo from '../../../../assets/weplm.jpeg';
+import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
+import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 
 export interface LoginScreenCardStaticComponentProps {
   credentials: LoginCredentials;
@@ -13,6 +15,8 @@ export interface LoginScreenCardStaticComponentProps {
   isMicrosoftLoading: boolean;
   isPendingApproval?: boolean;
   pendingEmail?: string;
+  currentTheme: string;
+  onToggleTheme: () => void;
   onFieldChange: (field: keyof LoginCredentials, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
@@ -28,6 +32,8 @@ export default function LoginScreenCardStaticComponent({
   isMicrosoftLoading,
   isPendingApproval,
   pendingEmail,
+  currentTheme,
+  onToggleTheme,
   onFieldChange,
   onSubmit,
   onMicrosoftLogin,
@@ -36,6 +42,7 @@ export default function LoginScreenCardStaticComponent({
   onResetPendingView,
 }: LoginScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
+  const isDark = currentTheme === ApplicationThemeCON.DARK;
 
   if (isPendingApproval) {
     return (
@@ -51,7 +58,7 @@ export default function LoginScreenCardStaticComponent({
   return (
     <div
       style={{ viewTransitionName: 'auth-card' }}
-      className="w-full max-w-md bg-white dark:bg-[#0a0a0c] border border-slate-200 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 transition-colors"
+      className="w-full max-w-md bg-transparent sm:bg-white sm:dark:bg-[#0a0a0c] border-0 sm:border border-slate-200 dark:border-zinc-800/90 rounded-none sm:rounded-2xl p-4 sm:p-8 shadow-none sm:shadow-2xl backdrop-blur-none sm:backdrop-blur-xl relative z-10 transition-colors"
     >
       {/* Header */}
       <div className="text-center mb-6">
@@ -92,13 +99,55 @@ export default function LoginScreenCardStaticComponent({
         )
       )}
 
+      {/* Segmented Theme Mode Toggle (Above Microsoft SSO) */}
+      <div className="mb-3">
+        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 h-11 sm:h-9 w-full">
+          <button
+            type="button"
+            onClick={(e) =>
+              isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              !isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5" />
+            <span>Light Mode</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) =>
+              !isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span>Dark Mode</span>
+          </button>
+        </div>
+      </div>
+
       {/* Microsoft SSO Action */}
       <div className="mb-5">
         <button
           type="button"
           onClick={onMicrosoftLogin}
           disabled={isLoading || isMicrosoftLoading}
-          className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 text-xs font-semibold transition-all shadow-2xs hover:shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full !h-11 sm:!h-9 flex items-center justify-center gap-3 px-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-slate-50 hover:bg-slate-100 dark:bg-zinc-900/60 dark:hover:bg-zinc-800/80 text-slate-700 dark:text-zinc-200 text-sm sm:text-xs font-semibold transition-all shadow-2xs hover:shadow-xs cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {/* Microsoft 4-Color Tile Icon */}
           <svg className="w-4 h-4 shrink-0" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -116,7 +165,7 @@ export default function LoginScreenCardStaticComponent({
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-slate-200 dark:border-zinc-800" />
         </div>
-        <span className="relative px-3 bg-white dark:bg-[#0a0a0c] text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-zinc-500">
+        <span className="relative px-3 bg-white dark:bg-black sm:dark:bg-[#0a0a0c] text-[10px] uppercase font-mono tracking-wider text-slate-400 dark:text-zinc-500">
           {LoginScreenCON.DIVIDER_TEXT}
         </span>
       </div>
@@ -138,7 +187,7 @@ export default function LoginScreenCardStaticComponent({
               onChange={(e) => onFieldChange('email', e.target.value)}
               placeholder={LoginScreenCON.EMAIL_PLACEHOLDER}
               autoComplete="email"
-              className={`w-full pl-10 pr-3.5 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
+              className={`w-full !h-11 sm:!h-9 pl-10 pr-3.5 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
                 errors.email
                   ? 'border-rose-400 dark:border-rose-600'
                   : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
@@ -176,7 +225,7 @@ export default function LoginScreenCardStaticComponent({
               onChange={(e) => onFieldChange('password', e.target.value)}
               placeholder={LoginScreenCON.PASSWORD_PLACEHOLDER}
               autoComplete="current-password"
-              className={`w-full pl-10 pr-10 py-2.5 text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
+              className={`w-full !h-11 sm:!h-9 pl-10 pr-10 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-900/60 border rounded-xl text-slate-900 dark:text-zinc-100 placeholder-slate-400 dark:placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-[#0C2086]/50 transition-all font-sans ${
                 errors.password
                   ? 'border-rose-400 dark:border-rose-600'
                   : 'border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
@@ -218,7 +267,7 @@ export default function LoginScreenCardStaticComponent({
             size="md"
             type="submit"
             disabled={isLoading || isMicrosoftLoading}
-            className="w-full justify-center !bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-md font-semibold py-2.5 rounded-xl cursor-pointer"
+            className="w-full justify-center !h-11 sm:!h-9 !bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-md font-semibold text-sm sm:text-xs rounded-xl cursor-pointer"
             icon={<ArrowRight className="w-4 h-4 !text-white" />}
           >
             <span className="!text-white font-medium">

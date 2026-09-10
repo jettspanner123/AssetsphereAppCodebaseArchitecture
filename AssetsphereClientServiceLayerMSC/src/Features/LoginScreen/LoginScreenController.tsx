@@ -4,7 +4,6 @@ import LoginScreenCON from './Constants/LoginScreenCON';
 import { LoginCredentials, LoginFormErrors, LoginAuthState } from './Models/LoginScreenModel';
 import LoginScreenService from './Services/LoginScreenService';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
-import AnimatedThemeToggleSharedComponent from '../../Shared/Components/AnimatedThemeToggleSharedComponent';
 
 export interface LoginScreenControllerProps {
   currentTheme: string;
@@ -96,22 +95,13 @@ export default function LoginScreenController({
   };
 
   return (
-    <div className="min-h-screen w-full bg-slate-50 dark:bg-[#000000] text-slate-900 dark:text-zinc-100 flex flex-col justify-between relative overflow-hidden transition-colors selection:bg-[#0C2086]/20">
+    <div className="min-h-screen w-full bg-white dark:bg-black sm:bg-slate-50 sm:dark:bg-[#000000] text-slate-900 dark:text-zinc-100 flex flex-col justify-between relative overflow-hidden transition-colors selection:bg-[#0C2086]/20">
       {/* Ambient background glow effects matching DESIGN.md */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#0C2086]/10 dark:from-[#0C2086]/20 to-transparent blur-3xl pointer-events-none -z-0" />
       <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-sky-500/5 dark:from-indigo-900/10 to-transparent blur-3xl pointer-events-none -z-0" />
 
-      {/* Magic UI Animated Theme Toggle */}
-      <AnimatedThemeToggleSharedComponent
-        currentTheme={currentTheme}
-        onToggleTheme={onToggleTheme}
-        variant="circle"
-        duration={450}
-        className="absolute top-5 right-5 z-20"
-      />
-
       {/* Main Centered Form Container */}
-      <main className="relative z-10 flex-1 flex items-center justify-center p-4 sm:p-6">
+      <main className="relative z-10 flex-1 flex items-center justify-center p-0 sm:p-6">
         <LoginScreenCardStaticComponent
           credentials={credentials}
           errors={errors}
@@ -119,6 +109,8 @@ export default function LoginScreenController({
           isMicrosoftLoading={microsoftLoginMutation.isPending}
           isPendingApproval={isPendingApproval}
           pendingEmail={pendingEmail}
+          currentTheme={currentTheme}
+          onToggleTheme={onToggleTheme}
           onFieldChange={handleFieldChange}
           onSubmit={handleSubmit}
           onMicrosoftLogin={handleMicrosoftLogin}

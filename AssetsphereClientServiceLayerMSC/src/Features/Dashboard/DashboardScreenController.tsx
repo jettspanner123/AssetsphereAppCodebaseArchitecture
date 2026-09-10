@@ -92,16 +92,16 @@ export default function DashboardScreenController({
     <div className="space-y-6">
       {/* Title Header */}
       <div className="pb-4 border-b border-slate-300 dark:border-zinc-800">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
           {DashboardCON.TITLE}
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
           {DashboardCON.SUBTITLE}
         </p>
       </div>
 
       {/* KPI Cards Grid - Simple, Crisp & Un-cluttered */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Metric 1 */}
         <CardSharedComponent hoverable onClick={() => onNavigateTab('assets')}>
           <div className="flex items-center justify-between">

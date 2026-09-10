@@ -3,7 +3,6 @@ import ForgotPasswordScreenCardStaticComponent from './Components/static/ForgotP
 import ForgotPasswordScreenCON from './Constants/ForgotPasswordScreenCON';
 import { ForgotPasswordFormData, ForgotPasswordFormErrors, ForgotPasswordState } from './Models/ForgotPasswordScreenModel';
 import ForgotPasswordScreenService from './Services/ForgotPasswordScreenService';
-import AnimatedThemeToggleSharedComponent from '../../Shared/Components/AnimatedThemeToggleSharedComponent';
 
 export interface ForgotPasswordScreenControllerProps {
   currentTheme: string;
@@ -72,15 +71,6 @@ export default function ForgotPasswordScreenController({
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-gradient-to-b from-[#0C2086]/10 dark:from-[#0C2086]/20 to-transparent blur-3xl pointer-events-none -z-0" />
       <div className="absolute -bottom-32 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-sky-500/5 dark:from-indigo-900/10 to-transparent blur-3xl pointer-events-none -z-0" />
 
-      {/* Magic UI Animated Theme Toggle */}
-      <AnimatedThemeToggleSharedComponent
-        currentTheme={currentTheme}
-        onToggleTheme={onToggleTheme}
-        variant="circle"
-        duration={450}
-        className="absolute top-5 right-5 z-20"
-      />
-
       {/* Main Centered Form Container */}
       <main className="relative z-10 flex-1 flex items-center justify-center p-0 sm:p-6">
         <ForgotPasswordScreenCardStaticComponent
@@ -88,6 +78,8 @@ export default function ForgotPasswordScreenController({
           errors={errors}
           statusState={statusState}
           isLoading={isLoading}
+          currentTheme={currentTheme}
+          onToggleTheme={onToggleTheme}
           onEmailChange={handleEmailChange}
           onSubmit={handleSubmit}
           onResend={handleResend}

@@ -1,15 +1,19 @@
 import React from 'react';
-import { Mail, ShieldCheck, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, ShieldCheck, ArrowLeft, CheckCircle2, Sun, Moon } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
 import ForgotPasswordScreenCON from '../../Constants/ForgotPasswordScreenCON';
 import { ForgotPasswordFormData, ForgotPasswordFormErrors, ForgotPasswordState } from '../../Models/ForgotPasswordScreenModel';
 import weplmLogo from '../../../../assets/weplm.jpeg';
+import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
+import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 
 export interface ForgotPasswordScreenCardStaticComponentProps {
   formData: ForgotPasswordFormData;
   errors: ForgotPasswordFormErrors;
   statusState: ForgotPasswordState;
   isLoading: boolean;
+  currentTheme: string;
+  onToggleTheme: () => void;
   onEmailChange: (value: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onResend: () => void;
@@ -21,11 +25,14 @@ export default function ForgotPasswordScreenCardStaticComponent({
   errors,
   statusState,
   isLoading,
+  currentTheme,
+  onToggleTheme,
   onEmailChange,
   onSubmit,
   onResend,
   onNavigateLogin,
 }: ForgotPasswordScreenCardStaticComponentProps): React.JSX.Element {
+  const isDark = currentTheme === ApplicationThemeCON.DARK;
   return (
     <div
       style={{ viewTransitionName: 'auth-card' }}
@@ -61,6 +68,48 @@ export default function ForgotPasswordScreenCardStaticComponent({
           {errors.general}
         </div>
       )}
+
+      {/* Segmented Theme Mode Toggle */}
+      <div style={{ viewTransitionName: 'auth-theme-toggle' }} className="mb-5">
+        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 h-11 sm:h-9 w-full">
+          <button
+            type="button"
+            onClick={(e) =>
+              isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              !isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5" />
+            <span>Light Mode</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) =>
+              !isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span>Dark Mode</span>
+          </button>
+        </div>
+      </div>
 
       {/* Success Confirmation or Reset Form */}
       {statusState.isSubmitted ? (

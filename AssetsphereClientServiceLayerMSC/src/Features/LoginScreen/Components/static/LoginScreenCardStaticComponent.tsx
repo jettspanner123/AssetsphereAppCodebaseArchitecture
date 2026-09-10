@@ -100,7 +100,7 @@ export default function LoginScreenCardStaticComponent({
       )}
 
       {/* Segmented Theme Mode Toggle (Above Microsoft SSO) */}
-      <div className="mb-3">
+      <div style={{ viewTransitionName: 'auth-theme-toggle' }} className="mb-3">
         <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 h-11 sm:h-9 w-full">
           <button
             type="button"

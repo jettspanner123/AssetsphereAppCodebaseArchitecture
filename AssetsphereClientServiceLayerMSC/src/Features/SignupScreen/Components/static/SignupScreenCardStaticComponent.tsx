@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { User, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, ShieldCheck, ArrowRight, Sun, Moon } from 'lucide-react';
 import ButtonSharedComponent from '../../../../Shared/Components/ButtonSharedComponent';
 import VerificationPendingCardSharedComponent from '../../../../Shared/Components/VerificationPendingCardSharedComponent';
 import SignupScreenCON from '../../Constants/SignupScreenCON';
 import { SignupFormData, SignupFormErrors } from '../../Models/SignupScreenModel';
 import { UserProfileType } from '@/src/Types';
 import weplmLogo from '../../../../assets/weplm.jpeg';
+import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
+import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 
 export interface SignupScreenCardStaticComponentProps {
   formData: SignupFormData;
@@ -14,6 +16,8 @@ export interface SignupScreenCardStaticComponentProps {
   isMicrosoftLoading: boolean;
   isPendingApproval?: boolean;
   submittedUser?: UserProfileType | null;
+  currentTheme: string;
+  onToggleTheme: () => void;
   onFieldChange: (field: keyof SignupFormData, value: string | boolean) => void;
   onSubmit: (e: React.FormEvent) => void;
   onMicrosoftLogin: () => void;
@@ -27,6 +31,8 @@ export default function SignupScreenCardStaticComponent({
   isMicrosoftLoading,
   isPendingApproval,
   submittedUser,
+  currentTheme,
+  onToggleTheme,
   onFieldChange,
   onSubmit,
   onMicrosoftLogin,
@@ -34,6 +40,7 @@ export default function SignupScreenCardStaticComponent({
 }: SignupScreenCardStaticComponentProps): React.JSX.Element {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+  const isDark = currentTheme === ApplicationThemeCON.DARK;
 
   if (isPendingApproval) {
     return (
@@ -80,6 +87,48 @@ export default function SignupScreenCardStaticComponent({
           {errors.general}
         </div>
       )}
+
+      {/* Segmented Theme Mode Toggle (Above Microsoft SSO) */}
+      <div style={{ viewTransitionName: 'auth-theme-toggle' }} className="mb-3">
+        <div className="flex items-center p-1 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200/80 dark:border-zinc-800 h-11 sm:h-9 w-full">
+          <button
+            type="button"
+            onClick={(e) =>
+              isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              !isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5" />
+            <span>Light Mode</span>
+          </button>
+          <button
+            type="button"
+            onClick={(e) =>
+              !isDark &&
+              ApplicationThemeUtility.current.executeAnimatedThemeToggle(
+                e.currentTarget,
+                onToggleTheme
+              )
+            }
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 h-9 sm:h-7 rounded-lg sm:rounded-md text-xs font-bold transition-all cursor-pointer ${
+              isDark
+                ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+            }`}
+          >
+            <Moon className="w-3.5 h-3.5" />
+            <span>Dark Mode</span>
+          </button>
+        </div>
+      </div>
 
       {/* Microsoft SSO Action */}
       <div className="mb-5">

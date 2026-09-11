@@ -459,10 +459,10 @@ export default function SoftwareLicensesScreenController({
         />
       )}
 
-      {/* Mobile-Forced Grid View: 2 per row, compact cards, ignores the grid/list & column-density preference below sm */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
       {filteredLicenses.length > 0 && (
-        <div className="sm:hidden grid grid-cols-2 gap-3">
-          {filteredLicenses.map((lic) => renderLicenseCard(lic, true))}
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredLicenses.map((lic) => renderLicenseCard(lic, false))}
         </div>
       )}
 

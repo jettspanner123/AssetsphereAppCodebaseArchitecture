@@ -93,10 +93,10 @@ export default function UserRequestsScreenController(): React.JSX.Element {
         className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800"
       >
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             User Registration Requests
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Operator Access Approval & Directory Verification
           </p>
         </div>
@@ -134,7 +134,7 @@ export default function UserRequestsScreenController(): React.JSX.Element {
       {/* Control Toolbar Card */}
       <CardSharedComponent className="p-3 space-y-3">
         {/* Row 1: Search Bar (No Primary Action Button as requested) */}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
             <input
@@ -142,7 +142,7 @@ export default function UserRequestsScreenController(): React.JSX.Element {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, email, department..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
@@ -155,23 +155,25 @@ export default function UserRequestsScreenController(): React.JSX.Element {
         </div>
 
         {/* Row 2: Status Dropdown Filter + View Switchers */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
           {/* Left: Status Dropdown Filter */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Status:</span>
               <CustomSelectSharedComponent
                 value={statusFilter}
                 options={statusOptions}
                 onChange={(val) => setStatusFilter(val)}
                 size="sm"
-                className="w-44 sm:w-52"
+                className="w-full sm:w-52"
+                triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
           </div>
 
-          {/* Right: View Switchers */}
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          {/* Right: View Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -389,12 +391,12 @@ export default function UserRequestsScreenController(): React.JSX.Element {
                     <PermissionGuardSharedComponent
                       permission={ApplicationPermissionCON.CAN_WRITE_ORGANIZATION}
                     >
-                      <div className="inline-flex items-center justify-end gap-1.5">
+                      <div className="flex items-center justify-end gap-1.5 w-full sm:w-auto">
                         <ButtonSharedComponent
                           variant="outline"
                           size="sm"
                           onClick={() => handleOpenRejectModal(user)}
-                          className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border-rose-200 dark:border-rose-900/50"
+                          className="text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 border-rose-200 dark:border-rose-900/50 max-sm:flex-1 max-sm:!h-10 max-sm:justify-center max-sm:text-sm"
                           icon={<X className="w-3.5 h-3.5" />}
                         >
                           Reject
@@ -403,7 +405,7 @@ export default function UserRequestsScreenController(): React.JSX.Element {
                           variant="primary"
                           size="sm"
                           onClick={() => handleOpenApproveModal(user)}
-                          className="!bg-emerald-600 hover:!bg-emerald-700 !text-white border-none shadow-xs font-semibold"
+                          className="!bg-emerald-600 hover:!bg-emerald-700 !text-white border-none shadow-xs font-semibold max-sm:flex-1 max-sm:!h-10 max-sm:justify-center max-sm:text-sm"
                           icon={<Check className="w-3.5 h-3.5 !text-white" />}
                         >
                           <span className="!text-white font-medium">Approve</span>

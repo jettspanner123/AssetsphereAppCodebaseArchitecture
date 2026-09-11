@@ -108,15 +108,104 @@ export default function EmployeesScreenController({
     (a) => a.assignedToEmployeeId || a.assignedToEmployeeName
   ).length;
 
+  const renderEmployeeCard = (emp: Employee) => {
+    const empAssets = assets.filter(
+      (a) => a.assignedToEmployeeId === emp.id || a.assignedToEmployeeName === emp.name
+    );
+
+    return (
+      <CardSharedComponent
+        key={emp.id}
+        hoverable
+        onClick={() => onSelectEmployee?.(emp)}
+        className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
+      >
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-mono text-xs shrink-0">
+              {(emp.name || 'EM').slice(0, 2).toUpperCase()}
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+                {emp.name}
+              </h3>
+              <p className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate">
+                {emp.designation} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{emp.department}</span>
+              </p>
+            </div>
+          </div>
+
+          <span className="text-[11px] font-mono text-slate-400 dark:text-zinc-500 shrink-0">
+            {emp.employeeCode || 'EMP'}
+          </span>
+        </div>
+
+        {/* Email & Location */}
+        <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
+          <div className="flex items-center justify-between text-slate-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              Email
+            </span>
+            <span className="font-mono text-slate-900 dark:text-zinc-100 truncate max-w-[200px]">
+              {emp.email}
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between text-slate-500 dark:text-zinc-400">
+            <span className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              Location
+            </span>
+            <span className="text-slate-900 dark:text-zinc-100 font-medium">
+              {emp.officeLocation || 'HQ Bangalore'}
+            </span>
+          </div>
+        </div>
+
+        {/* Allocated Hardware Devices */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium text-slate-500 dark:text-zinc-400 flex items-center gap-1">
+              <Laptop className="w-3.5 h-3.5 text-slate-400" />
+              Allocated Assets
+            </span>
+            <span className="font-mono font-semibold text-slate-900 dark:text-white">
+              {empAssets.length} Devices
+            </span>
+          </div>
+
+          {empAssets.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {empAssets.map((ast) => (
+                <span
+                  key={ast.id}
+                  className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-mono text-[11px] border border-slate-200/60 dark:border-zinc-700/60"
+                >
+                  {ast.deviceName} ({ast.assetNumber})
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-slate-400 dark:text-zinc-500 italic">
+              No active hardware assets assigned
+            </p>
+          )}
+        </div>
+      </CardSharedComponent>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Employees & People Directory
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Personnel profiles, hardware allocations, and department seat usage
           </p>
         </div>
@@ -150,8 +239,8 @@ export default function EmployeesScreenController({
 
       {/* Control Toolbar Card */}
       <CardSharedComponent className="p-3 space-y-3">
-        {/* Row 1: Search + Add Employee */}
-        <div className="flex items-center justify-between gap-3">
+        {/* Row 1: Search + Add Employee (stacked, full-width on mobile) */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
             <input
@@ -159,7 +248,7 @@ export default function EmployeesScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by name, email, department, code..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
@@ -169,26 +258,29 @@ export default function EmployeesScreenController({
             <PrimaryActionButtonSharedComponent
               label="Add Employee"
               onClick={onOpenAddModal}
+              className="w-full sm:w-auto justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
             />
           </PermissionGuardSharedComponent>
         </div>
 
         {/* Row 2: Location Filter + View Options (with divider) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
           {/* Left: Location Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
             <span className="text-slate-500 dark:text-zinc-400 font-medium">Location:</span>
             <CustomSelectSharedComponent
               value={locationFilter}
               options={locationOptions}
               onChange={(val) => setLocationFilter(val)}
               size="sm"
-              className="w-40 sm:w-48"
+              className="w-full sm:w-48"
+              triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+              optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
             />
           </div>
 
-          {/* Right: View Switchers */}
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          {/* Right: View Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -309,109 +401,29 @@ export default function EmployeesScreenController({
         />
       )}
 
-      {/* Grid View Mode */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
+      {!isLoading && filteredEmployees.length > 0 && (
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredEmployees.map((emp) => renderEmployeeCard(emp))}
+        </div>
+      )}
+
+      {/* Grid View Mode - sm and up */}
       {!isLoading && viewMode === 'grid' && filteredEmployees.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredEmployees.map((emp) => {
-            const empAssets = assets.filter(
-              (a) => a.assignedToEmployeeId === emp.id || a.assignedToEmployeeName === emp.name
-            );
-
-            return (
-              <CardSharedComponent
-                key={emp.id}
-                hoverable
-                onClick={() => onSelectEmployee?.(emp)}
-                className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 rounded-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 flex items-center justify-center font-bold font-mono text-xs shrink-0">
-                      {(emp.name || 'EM').slice(0, 2).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                        {emp.name}
-                      </h3>
-                      <p className="text-xs text-slate-400 dark:text-zinc-500 font-mono mt-0.5 truncate">
-                        {emp.designation} • <span className="text-slate-500 dark:text-zinc-400 font-sans">{emp.department}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  <span className="text-[11px] font-mono text-slate-400 dark:text-zinc-500 shrink-0">
-                    {emp.employeeCode || 'EMP'}
-                  </span>
-                </div>
-
-                {/* Email & Location */}
-                <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
-                  <div className="flex items-center justify-between text-slate-500 dark:text-zinc-400">
-                    <span className="flex items-center gap-1.5">
-                      <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      Email
-                    </span>
-                    <span className="font-mono text-slate-900 dark:text-zinc-100 truncate max-w-[200px]">
-                      {emp.email}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-slate-500 dark:text-zinc-400">
-                    <span className="flex items-center gap-1.5">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                      Location
-                    </span>
-                    <span className="text-slate-900 dark:text-zinc-100 font-medium">
-                      {emp.officeLocation || 'HQ Bangalore'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Allocated Hardware Devices */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-medium text-slate-500 dark:text-zinc-400 flex items-center gap-1">
-                      <Laptop className="w-3.5 h-3.5 text-slate-400" />
-                      Allocated Assets
-                    </span>
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white">
-                      {empAssets.length} Devices
-                    </span>
-                  </div>
-
-                  {empAssets.length > 0 ? (
-                    <div className="flex flex-wrap gap-1.5">
-                      {empAssets.map((ast) => (
-                        <span
-                          key={ast.id}
-                          className="px-2 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-mono text-[11px] border border-slate-200/60 dark:border-zinc-700/60"
-                        >
-                          {ast.deviceName} ({ast.assetNumber})
-                        </span>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-[11px] text-slate-400 dark:text-zinc-500 italic">
-                      No active hardware assets assigned
-                    </p>
-                  )}
-                </div>
-              </CardSharedComponent>
-            );
-          })}
+          {filteredEmployees.map((emp) => renderEmployeeCard(emp))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {!isLoading && viewMode === 'list' && filteredEmployees.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table
               className={`w-full text-left text-xs ${

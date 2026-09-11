@@ -2,12 +2,14 @@
 # STAGE 1: Build & Publish
 # ==============================================================================
 # We use the full .NET 10 SDK image to restore dependencies and compile the code.
-# Pinned by digest (not the floating "10.0-preview" tag): while .NET 10 is in preview,
-# Microsoft republishes that tag to newer preview builds over time, so the SDK used to
-# build and the aspnet runtime below (also pinned) can silently drift out of sync and
-# produce assembly version mismatches at startup (eg. TypeLoadException on internal
-# ASP.NET Core types). Pinning both stages to the exact same matched digest prevents that.
-FROM mcr.microsoft.com/dotnet/sdk@sha256:1d5e6f2c1ece7d5826bafc8a7f2d54db2c6478a0f2bd1c995d05a37c0be4783e AS build
+# .NET 10 has been GA for a while (the NuGet packages below are on the stable 10.0.11
+# servicing line), but this Dockerfile was still building against the "10.0-preview"
+# tag, which Microsoft stopped updating once GA shipped - it stayed frozen on an old
+# preview build (10.0.0-preview.7) whose ASP.NET Core API surface doesn't line up with
+# the stable packages, causing a TypeLoadException at startup. Using the stable "10.0"
+# tag (not "-preview") fixes that; GA servicing releases keep strict API/ABI
+# compatibility across patches, so SDK/runtime patch-version skew is no longer a risk.
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy only the project file first to take advantage of Docker layer caching
@@ -25,8 +27,8 @@ RUN dotnet publish AssetsphereOrchestratorServiceLayerMSC.csproj \
 # STAGE 2: Lightweight Production Runtime
 # ==============================================================================
 # We switch to the lightweight ASP.NET Core runtime image (no compiler or SDK overhead)
-# Pinned by digest to match the SDK image above - see comment there.
-FROM mcr.microsoft.com/dotnet/aspnet@sha256:ed557d471a2b702b72fd1fd4835040bbbdfbd2532ae78cfc90546773d88a91d7 AS final
+# Stable "10.0" tag - see comment on the build stage above.
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
 # The slim runtime image doesn't ship libgssapi-krb5-2, which .NET's networking stack

@@ -437,21 +437,22 @@ export default function SoftwareLicenseFormModalController({
     >
       {/* 2-Step Progress Indicator Header */}
       <div className="flex items-center justify-between pb-4 mb-5 border-b border-slate-100 dark:border-zinc-800 text-xs">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {/* Step 1 Pill */}
           <button
             type="button"
             onClick={() => setCurrentStep(1)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono font-semibold transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3 py-2.5 sm:py-1.5 rounded-lg font-mono font-semibold transition-all cursor-pointer ${
               currentStep === 1
                 ? 'bg-[#0C2086] text-white shadow-2xs'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
-            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] shrink-0">
               1
             </span>
-            <span>Software Terms & Commercials</span>
+            <span className="hidden sm:inline">Software Terms & Commercials</span>
+            <span className="sm:hidden">Terms</span>
           </button>
 
           <span className="text-slate-300 dark:text-zinc-700 font-mono">→</span>
@@ -464,16 +465,17 @@ export default function SoftwareLicenseFormModalController({
                 setCurrentStep(2);
               }
             }}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono font-semibold transition-all ${
+            className={`flex items-center gap-2 px-3 py-2.5 sm:py-1.5 rounded-lg font-mono font-semibold transition-all ${
               currentStep === 2
                 ? 'bg-[#0C2086] text-white shadow-2xs cursor-pointer'
                 : 'bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-pointer'
             }`}
           >
-            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px]">
+            <span className="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center text-[10px] shrink-0">
               2
             </span>
-            <span>Assign Employee Seats ({selectedEmployeeIds.length}/{totalSeats})</span>
+            <span className="hidden sm:inline">Assign Employee Seats ({selectedEmployeeIds.length}/{totalSeats})</span>
+            <span className="sm:hidden">Seats ({selectedEmployeeIds.length}/{totalSeats})</span>
           </button>
         </div>
 
@@ -508,9 +510,9 @@ export default function SoftwareLicenseFormModalController({
                     if (errors.softwareName) setErrors((prev) => ({ ...prev, softwareName: '' }));
                   }}
                   placeholder="e.g. JetBrains All Products Pack Enterprise"
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.softwareName ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
                 {errors.softwareName && <p className="text-[11px] text-red-500 mt-1">{errors.softwareName}</p>}
               </div>
@@ -529,9 +531,9 @@ export default function SoftwareLicenseFormModalController({
                     if (errors.publisher) setErrors((prev) => ({ ...prev, publisher: '' }));
                   }}
                   placeholder="e.g. JetBrains s.r.o. / Microsoft Corp"
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.publisher ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
                 {errors.publisher && <p className="text-[11px] text-red-500 mt-1">{errors.publisher}</p>}
               </div>
@@ -548,7 +550,7 @@ export default function SoftwareLicenseFormModalController({
                   value={version}
                   onChange={(e) => setVersion(e.target.value)}
                   placeholder="e.g. 2026.1 / E5 Enterprise Cloud"
-                  className="w-full h-10 bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                  className="w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                 />
               </div>
 
@@ -560,7 +562,8 @@ export default function SoftwareLicenseFormModalController({
                   value={category}
                   options={CATEGORY_OPTIONS}
                   onChange={(val) => setCategory(val)}
-                  triggerClassName="h-10"
+                  triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                 />
               </div>
             </div>
@@ -583,7 +586,8 @@ export default function SoftwareLicenseFormModalController({
                   value={licenseType}
                   options={LICENSE_TYPE_OPTIONS}
                   onChange={(val) => setLicenseType(val)}
-                  triggerClassName="h-10"
+                  triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                 />
               </div>
 
@@ -597,7 +601,7 @@ export default function SoftwareLicenseFormModalController({
                   <button
                     type="button"
                     onClick={handleGenerateLicenseKey}
-                    className="text-[11px] font-medium text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1"
+                    className="text-[11px] font-medium text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer flex items-center gap-1 py-1 sm:py-0"
                   >
                     <Sparkles className="w-3 h-3" /> Auto-Generate
                   </button>
@@ -610,9 +614,9 @@ export default function SoftwareLicenseFormModalController({
                     if (errors.licenseKey) setErrors((prev) => ({ ...prev, licenseKey: '' }));
                   }}
                   placeholder="e.g. MSFT-E5-8839-4412-9901-PROD"
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.licenseKey ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
                 {errors.licenseKey && <p className="text-[11px] text-red-500 mt-1">{errors.licenseKey}</p>}
               </div>
@@ -636,9 +640,9 @@ export default function SoftwareLicenseFormModalController({
                     setTotalSeats(val);
                     if (errors.totalSeats) setErrors((prev) => ({ ...prev, totalSeats: '' }));
                   }}
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.totalSeats ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                   placeholder="100"
                 />
                 {errors.totalSeats && <p className="text-[11px] text-red-500 mt-1">{errors.totalSeats}</p>}
@@ -686,9 +690,9 @@ export default function SoftwareLicenseFormModalController({
                       setCostPerSeat(Math.max(0, parseFloat(e.target.value) || 0));
                       if (errors.costPerSeat) setErrors((prev) => ({ ...prev, costPerSeat: '' }));
                     }}
-                    className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                    className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                       errors.costPerSeat ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                    } rounded-lg pl-7 pr-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                    } rounded-lg pl-7 pr-3 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                     placeholder="240.00"
                   />
                 </div>
@@ -703,7 +707,8 @@ export default function SoftwareLicenseFormModalController({
                   value={currency}
                   options={CURRENCY_OPTIONS}
                   onChange={(val) => setCurrency(val as 'USD' | 'INR' | 'EUR' | 'GBP')}
-                  triggerClassName="h-10"
+                  triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                 />
               </div>
             </div>
@@ -736,9 +741,9 @@ export default function SoftwareLicenseFormModalController({
                   type="date"
                   value={purchaseDate}
                   onChange={(e) => handlePurchaseDateChange(e.target.value)}
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.purchaseDate ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
                 {errors.purchaseDate && <p className="text-[11px] text-red-500 mt-1">{errors.purchaseDate}</p>}
               </div>
@@ -755,7 +760,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(1)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+1 Month from start date"
                     >
                       +1m
@@ -763,7 +768,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(3)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+3 Months from start date"
                     >
                       +3m
@@ -771,7 +776,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(6)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+6 Months from start date"
                     >
                       +6m
@@ -779,7 +784,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(12)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+1 Year from start date"
                     >
                       +1y
@@ -787,7 +792,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(24)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+2 Years from start date"
                     >
                       +2y
@@ -795,7 +800,7 @@ export default function SoftwareLicenseFormModalController({
                     <button
                       type="button"
                       onClick={() => handleSetExpiryOffset(36)}
-                      className="text-[10px] font-mono px-1 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 cursor-pointer"
+                      className="text-[11px] sm:text-[10px] font-mono px-1.5 sm:px-1 py-1.5 sm:py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700 max-sm:active:bg-slate-300 dark:max-sm:active:bg-zinc-600 cursor-pointer"
                       title="+3 Years from start date"
                     >
                       +3y
@@ -810,9 +815,9 @@ export default function SoftwareLicenseFormModalController({
                     setExpiryDate(e.target.value);
                     if (errors.expiryDate) setErrors((prev) => ({ ...prev, expiryDate: '' }));
                   }}
-                  className={`w-full h-10 bg-slate-50 dark:bg-[#121216] border ${
+                  className={`w-full !h-11 sm:!h-10 bg-slate-50 dark:bg-[#121216] border ${
                     errors.expiryDate ? 'border-red-500' : 'border-slate-200 dark:border-zinc-800'
-                  } rounded-lg px-3 text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
+                  } rounded-lg px-3 text-sm sm:text-xs font-mono text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all`}
                 />
                 {errors.expiryDate && <p className="text-[11px] text-red-500 mt-1">{errors.expiryDate}</p>}
               </div>
@@ -844,7 +849,7 @@ export default function SoftwareLicenseFormModalController({
                 <button
                   type="button"
                   onClick={handleSelectAllDepartments}
-                  className="text-[11px] text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer"
+                  className="text-[11px] text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer py-1 sm:py-0"
                 >
                   Select All
                 </button>
@@ -852,7 +857,7 @@ export default function SoftwareLicenseFormModalController({
                 <button
                   type="button"
                   onClick={handleClearDepartments}
-                  className="text-[11px] text-slate-500 hover:underline cursor-pointer"
+                  className="text-[11px] text-slate-500 hover:underline cursor-pointer py-1 sm:py-0"
                 >
                   Clear
                 </button>
@@ -867,10 +872,10 @@ export default function SoftwareLicenseFormModalController({
                     key={dept}
                     type="button"
                     onClick={() => handleToggleDepartment(dept)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer border ${
+                    className={`px-3 py-2.5 sm:py-1.5 rounded-lg text-sm sm:text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer border ${
                       isSelected
-                        ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-2xs'
-                        : 'bg-slate-50 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-700'
+                        ? 'bg-[#0C2086] text-white border-[#0C2086] shadow-2xs max-sm:active:bg-[#081765]'
+                        : 'bg-slate-50 dark:bg-zinc-800/80 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700/60 hover:bg-slate-100 dark:hover:bg-zinc-700 max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-600'
                     }`}
                   >
                     {isSelected ? <CheckCircle2 className="w-3 h-3 text-white" /> : <div className="w-3 h-3 rounded-full border border-slate-300 dark:border-zinc-600" />}
@@ -888,6 +893,7 @@ export default function SoftwareLicenseFormModalController({
               variant="outline"
               size="sm"
               onClick={handleModalClose}
+              className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             >
               Cancel
             </ButtonSharedComponent>
@@ -896,7 +902,7 @@ export default function SoftwareLicenseFormModalController({
               variant="primary"
               size="sm"
               rightIcon={<ArrowRight className="w-3.5 h-3.5 !text-white" />}
-              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             >
               Next: Assign Employees
             </ButtonSharedComponent>
@@ -966,7 +972,7 @@ export default function SoftwareLicenseFormModalController({
                 value={employeeSearchQuery}
                 onChange={(e) => setEmployeeSearchQuery(e.target.value)}
                 placeholder="Search employees by name, email, designation..."
-                className="w-full h-10 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#121216] text-slate-900 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                className="w-full !h-11 sm:!h-10 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#121216] text-slate-900 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
               />
             </div>
 
@@ -976,7 +982,8 @@ export default function SoftwareLicenseFormModalController({
                 value={employeeDepartmentFilter}
                 options={departmentFilterOptions}
                 onChange={(val) => setEmployeeDepartmentFilter(val)}
-                triggerClassName="h-10"
+                triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
           </div>
@@ -991,7 +998,7 @@ export default function SoftwareLicenseFormModalController({
                 type="button"
                 onClick={handleSelectAllVisible}
                 disabled={filteredEmployees.length === 0 || selectedEmployeeIds.length >= totalSeats}
-                className="text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="text-[#0C2086] dark:text-blue-400 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed font-medium py-1.5 sm:py-0"
               >
                 Select Visible ({Math.min(filteredEmployees.length, totalSeats - selectedEmployeeIds.length)})
               </button>
@@ -1000,7 +1007,7 @@ export default function SoftwareLicenseFormModalController({
                 type="button"
                 onClick={handleClearSelectedEmployees}
                 disabled={selectedEmployeeIds.length === 0}
-                className="text-slate-500 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-slate-500 hover:underline cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed py-1.5 sm:py-0"
               >
                 Clear Selection
               </button>
@@ -1032,12 +1039,12 @@ export default function SoftwareLicenseFormModalController({
                         handleToggleEmployee(emp.id);
                       }
                     }}
-                    className={`p-3 rounded-xl border transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${
+                    className={`p-3 sm:p-3 max-sm:py-3.5 rounded-xl border transition-all flex items-center justify-between gap-3 cursor-pointer select-none ${
                       isSelected
-                        ? 'bg-blue-50/70 dark:bg-blue-950/30 border-[#0C2086] dark:border-blue-600 shadow-2xs'
+                        ? 'bg-blue-50/70 dark:bg-blue-950/30 border-[#0C2086] dark:border-blue-600 shadow-2xs max-sm:active:bg-blue-100 dark:max-sm:active:bg-blue-950/60'
                         : isCapacityReached
                         ? 'bg-slate-50/60 dark:bg-zinc-900/40 border-slate-200/50 dark:border-zinc-800/50 opacity-60 cursor-not-allowed'
-                        : 'bg-white dark:bg-[#121216] border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700'
+                        : 'bg-white dark:bg-[#121216] border-slate-200 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-800'
                     }`}
                   >
                     {/* Checkbox & Avatar & Info */}
@@ -1092,24 +1099,26 @@ export default function SoftwareLicenseFormModalController({
           </div>
 
           {/* Modal Action Buttons (Step 2 Back / Finish) */}
-          <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6 shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800 mt-6 shrink-0">
             <ButtonSharedComponent
               type="button"
               variant="outline"
               size="sm"
               onClick={() => setCurrentStep(1)}
               icon={<ArrowLeft className="w-3.5 h-3.5" />}
+              className="w-full sm:w-auto justify-center max-sm:!h-11 max-sm:text-sm"
             >
               Back to Software Terms
             </ButtonSharedComponent>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
               <ButtonSharedComponent
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleModalClose}
                 disabled={createLicenseMutation.isPending}
+                className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
               >
                 Cancel
               </ButtonSharedComponent>
@@ -1118,7 +1127,7 @@ export default function SoftwareLicenseFormModalController({
                 variant="primary"
                 size="sm"
                 isLoading={createLicenseMutation.isPending}
-                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
               >
                 Register Subscription ({selectedEmployeeIds.length} seats)
               </ButtonSharedComponent>

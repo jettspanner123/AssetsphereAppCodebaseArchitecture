@@ -372,18 +372,19 @@ export default function DeviceServiceRequestDetailModalController({
       exitDirection={exitDirection}
       headerCloseDirection="down"
       footer={
-        <div className="flex items-center justify-between w-full">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2 w-full">
           <div className="flex items-center gap-2">
             <ButtonSharedComponent
               variant="outline"
               size="sm"
               onClick={handleCloseButton}
+              className="max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
             >
               Close
             </ButtonSharedComponent>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-sm:w-full">
             {/* Edit Mode Save / Cancel Controls */}
             {isEditMode ? (
               <>
@@ -392,6 +393,7 @@ export default function DeviceServiceRequestDetailModalController({
                   size="sm"
                   onClick={handleCancelEdit}
                   disabled={isSavingAdminEdit}
+                  className="max-sm:flex-1 max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
                 >
                   Cancel Editing
                 </ButtonSharedComponent>
@@ -400,7 +402,7 @@ export default function DeviceServiceRequestDetailModalController({
                   size="sm"
                   onClick={handleSaveAdminEdit}
                   disabled={isSavingAdminEdit}
-                  className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+                  className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
                   icon={<CheckCircle2 className="w-3.5 h-3.5 !text-white" />}
                 >
                   <span className="!text-white font-medium">
@@ -416,7 +418,7 @@ export default function DeviceServiceRequestDetailModalController({
                     variant="outline"
                     size="sm"
                     onClick={handleStartEdit}
-                    className="hover:border-blue-300 hover:text-[#0C2086] dark:hover:text-blue-400 font-medium"
+                    className="hover:border-blue-300 hover:text-[#0C2086] dark:hover:text-blue-400 font-medium max-sm:flex-1 max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
                     icon={<Edit3 className="w-3.5 h-3.5" />}
                   >
                     Edit Details
@@ -430,7 +432,7 @@ export default function DeviceServiceRequestDetailModalController({
                     size="sm"
                     onClick={() => handleStatusAction(selectedNewStatus)}
                     disabled={isUpdatingStatus || (selectedNewStatus === displayRequest.status && !technicianNotes.trim())}
-                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold cursor-pointer"
+                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold cursor-pointer max-sm:flex-1 max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
                     icon={
                       isUpdatingStatus ? (
                         <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />
@@ -486,7 +488,7 @@ export default function DeviceServiceRequestDetailModalController({
                   <button
                     type="button"
                     onClick={() => setShowOriginalData(!showOriginalData)}
-                    className="text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs sm:text-[10px] font-mono text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer max-sm:py-1.5"
                   >
                     <RotateCcw className="w-3 h-3" />
                     {showOriginalData ? 'Hide Original Baseline' : 'View Original Baseline'}
@@ -650,6 +652,8 @@ export default function DeviceServiceRequestDetailModalController({
                       enableCustomCreation={false}
                       enableSearch={false}
                       helperText="Select a lifecycle state to transition the hardware ticket workflow."
+                      triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+                      optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
                     />
                   </div>
 
@@ -663,7 +667,7 @@ export default function DeviceServiceRequestDetailModalController({
                       value={technicianNotes}
                       onChange={(e) => setTechnicianNotes(e.target.value)}
                       placeholder="Enter diagnostic findings, bench repair logs, parts replaced, or resolution summary..."
-                      className="w-full p-3 text-xs bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/50 focus:border-[#0C2086] transition-all font-sans leading-relaxed resize-y min-h-[95px]"
+                      className="w-full p-3 text-sm sm:text-xs bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/50 focus:border-[#0C2086] transition-all font-sans leading-relaxed resize-y min-h-[120px] sm:min-h-[95px]"
                     />
                     <p className="text-[11px] text-slate-400 dark:text-zinc-500">
                       Notes will be logged into the permanent revision audit trail and shown upon ticket inspection.
@@ -728,7 +732,7 @@ export default function DeviceServiceRequestDetailModalController({
                     type="text"
                     value={editTargetUserName}
                     onChange={(e) => setEditTargetUserName(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
+                    className="w-full !h-11 sm:!h-9 px-3 text-sm sm:text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
                   />
                 </div>
 
@@ -740,7 +744,7 @@ export default function DeviceServiceRequestDetailModalController({
                     type="email"
                     value={editTargetUserEmail}
                     onChange={(e) => setEditTargetUserEmail(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
+                    className="w-full !h-11 sm:!h-9 px-3 text-sm sm:text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
                   />
                 </div>
 
@@ -764,6 +768,8 @@ export default function DeviceServiceRequestDetailModalController({
                     enableSearch={false}
                     enableCustomCreation={false}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -776,6 +782,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_SERVICE_CHANNELS}
                     onChange={setEditServiceChannel}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -788,6 +796,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_URGENCY_LEVELS}
                     onChange={setEditUrgency}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -800,6 +810,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_STATUS_OPTIONS}
                     onChange={setEditStatus}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
               </div>
@@ -821,7 +833,7 @@ export default function DeviceServiceRequestDetailModalController({
                     type="text"
                     value={editAssetTag}
                     onChange={(e) => setEditAssetTag(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white font-mono focus:ring-1 focus:ring-[#0C2086]"
+                    className="w-full !h-11 sm:!h-9 px-3 text-sm sm:text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white font-mono focus:ring-1 focus:ring-[#0C2086]"
                   />
                 </div>
 
@@ -833,7 +845,7 @@ export default function DeviceServiceRequestDetailModalController({
                     type="text"
                     value={editAssetName}
                     onChange={(e) => setEditAssetName(e.target.value)}
-                    className="w-full h-9 px-3 text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
+                    className="w-full !h-11 sm:!h-9 px-3 text-sm sm:text-xs bg-white dark:bg-[#121216] border border-slate-200 dark:border-zinc-700 rounded-lg text-slate-900 dark:text-white focus:ring-1 focus:ring-[#0C2086]"
                   />
                 </div>
 
@@ -846,6 +858,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_SERVICE_CATEGORIES}
                     onChange={setEditServiceCategory}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -858,6 +872,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_COMPONENT_SUBTYPES}
                     onChange={setEditComponentSubtype}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -870,6 +886,8 @@ export default function DeviceServiceRequestDetailModalController({
                     options={PRESET_USABILITY_STATES}
                     onChange={setEditUsabilityState}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
               </div>

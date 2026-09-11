@@ -2,7 +2,12 @@
 # STAGE 1: Build & Publish
 # ==============================================================================
 # We use the full .NET 10 SDK image to restore dependencies and compile the code.
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS build
+# Pinned by digest (not the floating "10.0-preview" tag): while .NET 10 is in preview,
+# Microsoft republishes that tag to newer preview builds over time, so the SDK used to
+# build and the aspnet runtime below (also pinned) can silently drift out of sync and
+# produce assembly version mismatches at startup (eg. TypeLoadException on internal
+# ASP.NET Core types). Pinning both stages to the exact same matched digest prevents that.
+FROM mcr.microsoft.com/dotnet/sdk@sha256:1d5e6f2c1ece7d5826bafc8a7f2d54db2c6478a0f2bd1c995d05a37c0be4783e AS build
 WORKDIR /src
 
 # Copy only the project file first to take advantage of Docker layer caching
@@ -20,7 +25,8 @@ RUN dotnet publish AssetsphereOrchestratorServiceLayerMSC.csproj \
 # STAGE 2: Lightweight Production Runtime
 # ==============================================================================
 # We switch to the lightweight ASP.NET Core runtime image (no compiler or SDK overhead)
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
+# Pinned by digest to match the SDK image above - see comment there.
+FROM mcr.microsoft.com/dotnet/aspnet@sha256:ed557d471a2b702b72fd1fd4835040bbbdfbd2532ae78cfc90546773d88a91d7 AS final
 WORKDIR /app
 
 # The slim runtime image doesn't ship libgssapi-krb5-2, which .NET's networking stack

@@ -89,7 +89,7 @@ export default function CreateDepartmentModalController({
               value={departmentName}
               onChange={(e) => setDepartmentName(e.target.value)}
               placeholder="e.g. Artificial Intelligence Research"
-              className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+              className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
             />
           </div>
           <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
@@ -104,6 +104,7 @@ export default function CreateDepartmentModalController({
             size="sm"
             onClick={onClose}
             disabled={addDepartmentMutation.isPending}
+            className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
           >
             Cancel
           </ButtonSharedComponent>
@@ -112,7 +113,7 @@ export default function CreateDepartmentModalController({
             variant="primary"
             size="sm"
             isLoading={addDepartmentMutation.isPending}
-            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             icon={<Plus className="w-3.5 h-3.5" />}
           >
             Create Department

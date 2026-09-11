@@ -105,6 +105,8 @@ export default function CreateDesignationModalController({
             searchable={true}
             searchPlaceholder="Search departments..."
             size="sm"
+            triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
           />
         </div>
 
@@ -121,7 +123,7 @@ export default function CreateDesignationModalController({
               value={designationName}
               onChange={(e) => setDesignationName(e.target.value)}
               placeholder="e.g. Lead AI Systems Engineer"
-              className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+              className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
             />
           </div>
           <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-1">
@@ -136,6 +138,7 @@ export default function CreateDesignationModalController({
             size="sm"
             onClick={onClose}
             disabled={addDesignationMutation.isPending}
+            className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
           >
             Cancel
           </ButtonSharedComponent>
@@ -144,7 +147,7 @@ export default function CreateDesignationModalController({
             variant="primary"
             size="sm"
             isLoading={addDesignationMutation.isPending}
-            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+            className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             icon={<Plus className="w-3.5 h-3.5" />}
           >
             Create Designation

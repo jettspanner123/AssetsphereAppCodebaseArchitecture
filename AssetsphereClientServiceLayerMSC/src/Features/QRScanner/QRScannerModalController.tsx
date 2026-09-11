@@ -61,12 +61,24 @@ export default function QRScannerModalController({
             <div className="text-[11px] text-slate-500">
               Serial: {scannedAsset.serialNumber} • Owner: {scannedAsset.assignedToEmployeeName || 'Unassigned'}
             </div>
-            <ButtonSharedComponent variant="primary" size="sm" fullWidth onClick={handleConfirmVerify}>
+            <ButtonSharedComponent
+              variant="primary"
+              size="sm"
+              fullWidth
+              onClick={handleConfirmVerify}
+              className="max-sm:!h-11 max-sm:text-sm"
+            >
               Confirm Physical Audit Signature
             </ButtonSharedComponent>
           </div>
         ) : (
-          <ButtonSharedComponent variant="primary" size="sm" fullWidth onClick={handleSimulateScan}>
+          <ButtonSharedComponent
+            variant="primary"
+            size="sm"
+            fullWidth
+            onClick={handleSimulateScan}
+            className="max-sm:!h-11 max-sm:text-sm"
+          >
             Simulate Camera Barcode Detection
           </ButtonSharedComponent>
         )}

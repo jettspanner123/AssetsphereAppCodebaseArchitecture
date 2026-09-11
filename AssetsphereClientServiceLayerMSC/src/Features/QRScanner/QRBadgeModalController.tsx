@@ -122,7 +122,7 @@ export default function QRBadgeModalController({
             size="sm"
             onClick={handleCopyLink}
             icon={copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            className="w-full"
+            className="w-full max-sm:!h-11 max-sm:text-sm"
           >
             {copied ? 'Link Copied' : 'Copy Passport URL'}
           </ButtonSharedComponent>
@@ -132,14 +132,19 @@ export default function QRBadgeModalController({
             size="sm"
             onClick={handleOpenPassport}
             icon={<ExternalLink className="w-4 h-4" />}
-            className="w-full"
+            className="w-full max-sm:!h-11 max-sm:text-sm"
           >
             Open Passport
           </ButtonSharedComponent>
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-zinc-800">
-          <ButtonSharedComponent variant="outline" size="sm" onClick={onClose}>
+        <div className="flex items-center justify-between gap-2.5 pt-2 border-t border-slate-200 dark:border-zinc-800">
+          <ButtonSharedComponent
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
+          >
             Close
           </ButtonSharedComponent>
           <ButtonSharedComponent
@@ -147,6 +152,7 @@ export default function QRBadgeModalController({
             size="sm"
             onClick={() => window.print()}
             icon={<Printer className="w-4 h-4" />}
+            className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
           >
             Print Badge Tag
           </ButtonSharedComponent>

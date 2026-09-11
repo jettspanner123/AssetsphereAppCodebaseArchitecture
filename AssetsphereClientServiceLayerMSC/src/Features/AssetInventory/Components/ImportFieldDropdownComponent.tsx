@@ -36,6 +36,11 @@ export default function ImportFieldDropdownComponent({
     };
   }, [isOpen]);
 
+  // Skip auto-focus on mobile - focusing the search input immediately pops the
+  // on-screen keyboard and shoves the option list out of view before the user
+  // has even seen what's in the dropdown. Desktop keeps the convenience auto-focus.
+  const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 640;
+
   const filteredHeaders = detectedHeaders.filter((h) =>
     h.toLowerCase().includes(searchQuery.toLowerCase().trim())
   );
@@ -48,12 +53,12 @@ export default function ImportFieldDropdownComponent({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full h-10 px-3 rounded-lg border text-xs flex items-center justify-between gap-2 transition-all cursor-pointer ${
+        className={`w-full !h-11 sm:!h-10 px-3 rounded-lg border text-sm sm:text-xs flex items-center justify-between gap-2 transition-all cursor-pointer max-sm:active:opacity-80 ${
           isMapped
-            ? 'bg-white dark:bg-zinc-900 border-indigo-200 dark:border-indigo-900/60 text-slate-900 dark:text-zinc-100 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-700'
+            ? 'bg-white dark:bg-zinc-900 border-indigo-200 dark:border-indigo-900/60 text-slate-900 dark:text-zinc-100 shadow-xs hover:border-indigo-400 dark:hover:border-indigo-700 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-800'
             : isRequired
-            ? 'bg-amber-500/5 dark:bg-amber-500/10 border-amber-300/60 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 hover:border-amber-400'
-            : 'bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-zinc-700'
+            ? 'bg-amber-500/5 dark:bg-amber-500/10 border-amber-300/60 dark:border-amber-700/50 text-amber-800 dark:text-amber-300 hover:border-amber-400 max-sm:active:bg-amber-500/15'
+            : 'bg-slate-50 dark:bg-zinc-900/50 border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 hover:border-slate-300 dark:hover:border-zinc-700 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-800'
         }`}
       >
         <div className="flex items-center gap-2 truncate">
@@ -111,8 +116,8 @@ export default function ImportFieldDropdownComponent({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Filter CSV headers..."
-                  className="w-full h-7 pl-7 pr-2 rounded-md bg-slate-100 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 text-slate-900 dark:text-zinc-100 text-[11px] focus:outline-none focus:border-indigo-500"
-                  autoFocus
+                  className="w-full !h-9 sm:h-7 pl-7 pr-2 rounded-md bg-slate-100 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 text-slate-900 dark:text-zinc-100 text-sm sm:text-[11px] focus:outline-none focus:border-indigo-500"
+                  autoFocus={!isMobileViewport}
                 />
               </div>
             </div>
@@ -126,10 +131,10 @@ export default function ImportFieldDropdownComponent({
                   onSelect('');
                   setIsOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                className={`w-full flex items-center justify-between px-2.5 py-2.5 sm:py-1.5 rounded-lg text-left transition-colors cursor-pointer max-sm:active:opacity-70 text-sm sm:text-xs ${
                   !selectedHeader
-                    ? 'bg-slate-100 dark:bg-zinc-800/80 text-slate-900 dark:text-white font-semibold'
-                    : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900'
+                    ? 'bg-slate-100 dark:bg-zinc-800/80 text-slate-900 dark:text-white font-semibold max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
+                    : 'text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-zinc-900 max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
                 }`}
               >
                 <div className="flex items-center gap-2">
@@ -150,13 +155,13 @@ export default function ImportFieldDropdownComponent({
                       onSelect(header);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer ${
+                    className={`w-full flex items-center justify-between px-2.5 py-2.5 sm:py-1.5 rounded-lg text-left transition-colors cursor-pointer max-sm:active:opacity-70 text-sm sm:text-xs ${
                       isSelected
-                        ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 font-semibold'
-                        : 'text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/60'
+                        ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-900 dark:text-indigo-200 font-semibold max-sm:active:bg-indigo-100 dark:max-sm:active:bg-indigo-900'
+                        : 'text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800/60 max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
                     }`}
                   >
-                    <div className="font-mono text-xs truncate pr-2">{header}</div>
+                    <div className="font-mono text-sm sm:text-xs truncate pr-2">{header}</div>
                     {isSelected && <Check className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />}
                   </button>
                 );

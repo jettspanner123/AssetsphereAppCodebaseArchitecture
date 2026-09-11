@@ -23,6 +23,13 @@ RUN dotnet publish AssetsphereOrchestratorServiceLayerMSC.csproj \
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS final
 WORKDIR /app
 
+# The slim runtime image doesn't ship libgssapi-krb5-2, which .NET's networking stack
+# (Npgsql's TLS negotiation to Postgres) needs at runtime - without it the container
+# crashes on startup with "libgssapi_krb5.so.2: cannot open shared object file".
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libgssapi-krb5-2 \
+    && rm -rf /var/lib/apt/lists/*
+
 # Configure default ports for container environments like Render (10000)
 ENV ASPNETCORE_HTTP_PORTS=10000
 ENV ASPNETCORE_URLS=http://+:10000

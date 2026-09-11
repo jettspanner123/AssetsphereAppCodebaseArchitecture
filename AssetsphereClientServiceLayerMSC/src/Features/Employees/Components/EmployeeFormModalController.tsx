@@ -225,7 +225,7 @@ export default function EmployeeFormModalController({
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="e.g. Sarah Jenkins"
-                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                   />
                 </div>
 
@@ -241,7 +241,7 @@ export default function EmployeeFormModalController({
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="sarah.jenkins@enterprise.com"
-                      className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                     />
                   </div>
                 </div>
@@ -257,7 +257,7 @@ export default function EmployeeFormModalController({
                     value={employeeCode}
                     onChange={(e) => setEmployeeCode(e.target.value)}
                     placeholder="EMP-1001"
-                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-3 sm:py-2 text-sm sm:text-xs font-mono font-semibold text-slate-900 dark:text-zinc-100 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
                   />
                 </div>
 
@@ -270,6 +270,8 @@ export default function EmployeeFormModalController({
                     onChange={setEmploymentType}
                     options={EMPLOYMENT_TYPE_OPTIONS}
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
               </div>
@@ -294,6 +296,8 @@ export default function EmployeeFormModalController({
                     searchable={true}
                     searchPlaceholder="Search departments..."
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                     footerAction={{
                       label: '+ Create New Department',
                       icon: <Plus className="w-3.5 h-3.5" />,
@@ -320,6 +324,8 @@ export default function EmployeeFormModalController({
                     searchable={true}
                     searchPlaceholder="Search designations..."
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                     footerAction={{
                       label: '+ Create New Designation',
                       icon: <Plus className="w-3.5 h-3.5" />,
@@ -351,6 +357,8 @@ export default function EmployeeFormModalController({
                     searchable={true}
                     searchPlaceholder="Search work locations..."
                     size="sm"
+                    triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                    optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                   />
                 </div>
 
@@ -363,7 +371,7 @@ export default function EmployeeFormModalController({
                     value={managerName}
                     onChange={(e) => setManagerName(e.target.value)}
                     placeholder="e.g. David Ross (CTO)"
-                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
                   />
                 </div>
               </div>
@@ -378,7 +386,7 @@ export default function EmployeeFormModalController({
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
                     placeholder="+1 (555) 019-2834"
-                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
+                    className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg px-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] transition-all"
                   />
                 </div>
               </div>
@@ -393,6 +401,7 @@ export default function EmployeeFormModalController({
               size="sm"
               onClick={handleCancel}
               disabled={isLoading}
+              className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             >
               Cancel
             </ButtonSharedComponent>
@@ -401,7 +410,7 @@ export default function EmployeeFormModalController({
               variant="primary"
               size="sm"
               isLoading={isLoading}
-              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             >
               {initialEmployee ? 'Save Profile Changes' : 'Provision Employee'}
             </ButtonSharedComponent>

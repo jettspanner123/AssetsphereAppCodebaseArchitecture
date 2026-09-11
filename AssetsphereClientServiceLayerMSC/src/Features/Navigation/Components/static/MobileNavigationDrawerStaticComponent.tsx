@@ -97,10 +97,10 @@ export default function MobileNavigationDrawerStaticComponent({
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="relative z-10 w-full bg-white dark:bg-[#0c0c0e] border-t border-slate-200 dark:border-zinc-800 rounded-t-2xl shadow-2xl p-5 pb-10 sm:pb-6 space-y-4 max-h-[85vh] overflow-y-auto"
+            className="relative z-10 w-full bg-white dark:bg-[#0c0c0e] border-t border-slate-200 dark:border-zinc-800 rounded-t-2xl shadow-2xl flex flex-col max-h-[85vh]"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-zinc-800/80">
+            {/* Sticky Header - stays pinned while the nav list below scrolls */}
+            <div className="shrink-0 sticky top-0 z-10 flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-100 dark:border-zinc-800/80 bg-white dark:bg-[#0c0c0e] rounded-t-2xl">
               <div className="flex items-center gap-3">
                 <img
                   src={weplmLogo}
@@ -120,13 +120,14 @@ export default function MobileNavigationDrawerStaticComponent({
                 type="button"
                 onClick={onClose}
                 aria-label="Close navigation menu"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:text-zinc-500 dark:hover:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 active:bg-slate-200 dark:active:bg-zinc-700 active:scale-[0.98] transition-all cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Categorized Nav Items List */}
+            {/* Scrollable Body: Categorized Nav Items + Footer */}
+            <div className="overflow-y-auto px-5 pt-4 pb-10 sm:pb-6 space-y-4">
             {categories.map((category) => {
               const items = NavigationCON.NAV_ITEMS.filter(
                 (i) => i.category === category && ApplicationPermissionService.current.canAccessTab(i.id)
@@ -150,10 +151,10 @@ export default function MobileNavigationDrawerStaticComponent({
                             onSelectTab(item.id);
                             onClose();
                           }}
-                          className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl text-left transition-all cursor-pointer ${
+                          className={`w-full flex items-center gap-3.5 p-3.5 rounded-xl text-left transition-all cursor-pointer active:scale-[0.98] ${
                             isActive
-                              ? 'bg-slate-100 dark:bg-zinc-800/90 border border-slate-300/80 dark:border-zinc-700 border-l-4 border-l-[#0C2086] dark:border-l-blue-500 shadow-xs'
-                              : 'bg-slate-50/70 dark:bg-[#121215]/80 hover:bg-slate-100 dark:hover:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800/80'
+                              ? 'bg-slate-100 dark:bg-zinc-800/90 border border-slate-300/80 dark:border-zinc-700 border-l-4 border-l-[#0C2086] dark:border-l-blue-500 shadow-xs active:bg-slate-200 dark:active:bg-zinc-700'
+                              : 'bg-slate-50/70 dark:bg-[#121215]/80 hover:bg-slate-100 dark:hover:bg-zinc-800/60 active:bg-slate-200 dark:active:bg-zinc-700/80 border border-slate-200/80 dark:border-zinc-800/80'
                           }`}
                         >
                           <div
@@ -228,6 +229,7 @@ export default function MobileNavigationDrawerStaticComponent({
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
               </button>
+            </div>
             </div>
           </motion.div>
         </div>

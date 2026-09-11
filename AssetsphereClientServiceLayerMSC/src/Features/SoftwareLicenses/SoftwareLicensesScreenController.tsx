@@ -129,15 +129,149 @@ export default function SoftwareLicensesScreenController({
     0
   );
 
+  // Shared license card renderer - `compact` produces the tighter mobile-forced 2-per-row variant
+  const renderLicenseCard = (lic: SoftwareLicense, compact: boolean = false) => {
+    const utilPct = Math.round((lic.allocatedSeats / (lic.totalSeats || 1)) * 100);
+    const annualCost = lic.annualCost || (lic.costPerSeat * lic.totalSeats);
+    const currencySymbol =
+      lic.currency === 'INR' ? '₹' : lic.currency === 'EUR' ? '€' : lic.currency === 'GBP' ? '£' : '$';
+
+    return (
+      <CardSharedComponent
+        key={lic.id}
+        hoverable
+        onClick={() => {
+          if (onSelectLicense) {
+            onSelectLicense(lic);
+          } else {
+            setSelectedLicenseIdForDetail(lic.id);
+          }
+        }}
+        className={
+          compact
+            ? 'p-3 flex flex-col justify-between space-y-3 cursor-pointer'
+            : 'p-6 flex flex-col justify-between space-y-5 cursor-pointer'
+        }
+      >
+        {/* Header */}
+        <div>
+          <div className="flex items-start justify-between gap-2">
+            <h3
+              className={
+                compact
+                  ? 'text-sm font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate'
+                  : 'text-base font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate'
+              }
+            >
+              {lic.softwareName}
+            </h3>
+            <span
+              className={`rounded-full font-mono font-semibold shrink-0 ${
+                compact ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]'
+              } ${
+                lic.complianceStatus === 'Compliant'
+                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60'
+                  : lic.complianceStatus === 'Expiring Soon'
+                  ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60'
+                  : 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-800/60'
+              }`}
+            >
+              {lic.complianceStatus}
+            </span>
+          </div>
+          <p
+            className={
+              compact
+                ? 'text-[10px] text-slate-500 dark:text-zinc-400 mt-1 truncate'
+                : 'text-xs text-slate-500 dark:text-zinc-400 mt-1'
+            }
+          >
+            {lic.publisher} {lic.version ? `• ${lic.version}` : ''}{' '}
+            {!compact && <span className="font-mono text-slate-400">• {lic.licenseType}</span>}
+          </p>
+        </div>
+
+        {/* Main Metric: Price & Seats */}
+        <div
+          className={
+            compact
+              ? 'py-2 border-y border-slate-100 dark:border-zinc-800/80 space-y-2'
+              : 'py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3'
+          }
+        >
+          <div className="flex items-baseline justify-between">
+            <span
+              className={
+                compact
+                  ? 'text-base font-bold tracking-tight text-slate-900 dark:text-white font-mono'
+                  : 'text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono'
+              }
+            >
+              {currencySymbol}
+              {annualCost.toLocaleString()}
+            </span>
+            {!compact && (
+              <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
+                {lic.costPerSeat > 0 ? `@ $${lic.costPerSeat}/seat • ` : ''}/ year
+              </span>
+            )}
+          </div>
+
+          {/* Seat Bar */}
+          <div className="space-y-1.5">
+            <div
+              className={
+                compact
+                  ? 'flex justify-between text-[10px] text-slate-500 dark:text-zinc-400 font-medium'
+                  : 'flex justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium'
+              }
+            >
+              <span>Seats</span>
+              <span className="font-mono text-slate-900 dark:text-white font-semibold">
+                {lic.allocatedSeats} / {lic.totalSeats} ({utilPct}%)
+              </span>
+            </div>
+            <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${
+                  utilPct > 90 ? 'bg-amber-500' : 'bg-emerald-500'
+                }`}
+                style={{ width: `${utilPct}%` }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Footer Details */}
+        <div
+          className={
+            compact
+              ? 'flex items-center justify-between text-[10px] text-slate-500 dark:text-zinc-400 font-mono gap-2'
+              : 'flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-mono'
+          }
+        >
+          <div className="flex items-center gap-1.5 truncate">
+            <KeyRound className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="truncate">{lic.licenseKey}</span>
+          </div>
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>{lic.expirationDate}</span>
+          </div>
+        </div>
+      </CardSharedComponent>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Software & SaaS Subscriptions
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Enterprise software seat allocation, contract renewals, and annual SaaS investment
           </p>
         </div>
@@ -168,8 +302,8 @@ export default function SoftwareLicensesScreenController({
 
       {/* Control Toolbar Card (Search, Filters, Divider, Switchers & Add Action) */}
       <CardSharedComponent className="p-3 space-y-3">
-        {/* Row 1: Search + Add Subscription */}
-        <div className="flex items-center justify-between gap-3">
+        {/* Row 1: Search + Add Subscription (stacked, full-width on mobile) */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-md">
             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
             <input
@@ -177,7 +311,7 @@ export default function SoftwareLicensesScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by software name, publisher, key, category..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
@@ -187,39 +321,44 @@ export default function SoftwareLicensesScreenController({
             <PrimaryActionButtonSharedComponent
               label="Add Subscription"
               onClick={handleOpenAddModal}
+              className="w-full sm:w-auto justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
             />
           </PermissionGuardSharedComponent>
         </div>
 
         {/* Row 2: Relevant Filters + View Options (with divider) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-200/60 dark:border-zinc-800/60 text-xs">
           {/* Left: Status & License Type Dropdown Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Status:</span>
               <CustomSelectSharedComponent
                 value={complianceFilter}
                 options={COMPLIANCE_FILTER_OPTIONS}
                 onChange={(val) => setComplianceFilter(val)}
                 size="sm"
-                className="w-36 sm:w-40"
+                className="w-full sm:w-40"
+                triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
               <span className="text-slate-500 dark:text-zinc-400 font-medium">Type:</span>
               <CustomSelectSharedComponent
                 value={licenseTypeFilter}
                 options={LICENSE_TYPE_FILTER_OPTIONS}
                 onChange={(val) => setLicenseTypeFilter(val)}
                 size="sm"
-                className="w-44 sm:w-48"
+                className="w-full sm:w-48"
+                triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
               />
             </div>
           </div>
 
-          {/* Right: Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-end gap-3">
+          {/* Right: Uniform Height Control Switchers (hidden on mobile - mobile is grid-only, 2 per row) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -320,108 +459,29 @@ export default function SoftwareLicensesScreenController({
         />
       )}
 
-      {/* Grid View Mode with Dynamic Column Density (2 vs 3 per row) */}
+      {/* Mobile-Forced Grid View: 2 per row, compact cards, ignores the grid/list & column-density preference below sm */}
+      {filteredLicenses.length > 0 && (
+        <div className="sm:hidden grid grid-cols-2 gap-3">
+          {filteredLicenses.map((lic) => renderLicenseCard(lic, true))}
+        </div>
+      )}
+
+      {/* Grid View Mode with Dynamic Column Density (2 vs 3 per row) - sm and up */}
       {viewMode === 'grid' && filteredLicenses.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredLicenses.map((lic) => {
-            const utilPct = Math.round(
-              (lic.allocatedSeats / (lic.totalSeats || 1)) * 100
-            );
-            const annualCost = lic.annualCost || (lic.costPerSeat * lic.totalSeats);
-
-            return (
-              <CardSharedComponent
-                key={lic.id}
-                hoverable
-                onClick={() => {
-                  if (onSelectLicense) {
-                    onSelectLicense(lic);
-                  } else {
-                    setSelectedLicenseIdForDetail(lic.id);
-                  }
-                }}
-                className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
-              >
-                {/* Header */}
-                <div>
-                  <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline leading-snug truncate">
-                      {lic.softwareName}
-                    </h3>
-                    <span
-                      className={`px-2 py-0.5 rounded-full font-mono text-[10px] font-semibold shrink-0 ${
-                        lic.complianceStatus === 'Compliant'
-                          ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-800/60'
-                          : lic.complianceStatus === 'Expiring Soon'
-                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400 border border-amber-200/60 dark:border-amber-800/60'
-                          : 'bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400 border border-red-200/60 dark:border-red-800/60'
-                      }`}
-                    >
-                      {lic.complianceStatus}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-1">
-                    {lic.publisher} {lic.version ? `• ${lic.version}` : ''} • <span className="font-mono text-slate-400">{lic.licenseType}</span>
-                  </p>
-                </div>
-
-                {/* Main Metric: Price & Seats */}
-                <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-3">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
-                      {lic.currency === 'INR' ? '₹' : lic.currency === 'EUR' ? '€' : lic.currency === 'GBP' ? '£' : '$'}
-                      {annualCost.toLocaleString()}
-                    </span>
-                    <span className="text-xs text-slate-400 dark:text-zinc-500 font-mono">
-                      {lic.costPerSeat > 0 ? `@ $${lic.costPerSeat}/seat • ` : ''}/ year
-                    </span>
-                  </div>
-
-                  {/* Seat Bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-slate-500 dark:text-zinc-400 font-medium">
-                      <span>Seats Utilized</span>
-                      <span className="font-mono text-slate-900 dark:text-white font-semibold">
-                        {lic.allocatedSeats} / {lic.totalSeats} ({utilPct}%)
-                      </span>
-                    </div>
-                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${
-                          utilPct > 90 ? 'bg-amber-500' : 'bg-emerald-500'
-                        }`}
-                        style={{ width: `${utilPct}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer Details */}
-                <div className="flex items-center justify-between text-xs text-slate-500 dark:text-zinc-400 font-mono">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <KeyRound className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{lic.licenseKey}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{lic.expirationDate}</span>
-                  </div>
-                </div>
-              </CardSharedComponent>
-            );
-          })}
+          {filteredLicenses.map((lic) => renderLicenseCard(lic, false))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {viewMode === 'list' && filteredLicenses.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs min-w-[900px] ${isSingleLineMode ? 'whitespace-nowrap' : ''}`}>
               <thead>

@@ -191,8 +191,6 @@ export default function HeaderStaticComponent({
             isOpen={isProfileOpen}
             onClose={() => setIsProfileOpen(false)}
             onOpenScanner={onOpenScanner}
-            deploymentMode={deploymentMode}
-            onToggleDeploymentMode={onToggleDeploymentMode}
             onNavigateSettings={onNavigateSettings}
             onNavigateDevDashboard={onNavigateDevDashboard}
             currentTheme={currentTheme}

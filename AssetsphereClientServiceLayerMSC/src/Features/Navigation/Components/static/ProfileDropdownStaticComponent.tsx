@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  Shield,
   QrCode,
   Settings,
   LogOut,
@@ -13,6 +12,7 @@ import {
   EyeOff,
   Trash2,
   Code2,
+  RotateCw,
 } from 'lucide-react';
 import ApplicationThemeCON from '../../../../Constants/ApplicationThemeCON';
 import ApplicationThemeUtility from '../../../../Utilities/ApplicationThemeUtility';
@@ -25,8 +25,6 @@ export interface ProfileDropdownStaticComponentProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenScanner: () => void;
-  deploymentMode: 'Self-Hosted Air-Gapped' | 'Enterprise Cloud Sync';
-  onToggleDeploymentMode: () => void;
   onNavigateSettings?: () => void;
   onNavigateDevDashboard?: () => void;
   currentTheme: string;
@@ -38,8 +36,6 @@ export default function ProfileDropdownStaticComponent({
   isOpen,
   onClose,
   onOpenScanner,
-  deploymentMode,
-  onToggleDeploymentMode,
   onNavigateSettings,
   onNavigateDevDashboard,
   currentTheme,
@@ -47,7 +43,6 @@ export default function ProfileDropdownStaticComponent({
   onSignOut,
 }: ProfileDropdownStaticComponentProps): React.JSX.Element {
   const isDark = currentTheme === ApplicationThemeCON.DARK;
-  const isSelfHosted = deploymentMode === 'Self-Hosted Air-Gapped';
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   // Dynamic user data from Zustand store
@@ -214,37 +209,6 @@ export default function ProfileDropdownStaticComponent({
                 </div>
               </div>
 
-              {/* Environment Control Block */}
-              <div className="space-y-2 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/80">
-                <div className="flex items-center gap-2 text-sm sm:text-xs text-slate-700 dark:text-zinc-200 font-medium">
-                  <Shield className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0" />
-                  <span>Deployment Environment</span>
-                </div>
-
-                <div className="flex items-center p-1 rounded-lg bg-slate-200/80 dark:bg-zinc-800 border border-slate-300/60 dark:border-zinc-700/60 h-11 sm:h-8 w-full">
-                  <button
-                    onClick={() => !isSelfHosted && onToggleDeploymentMode()}
-                    className={`flex-1 py-2 sm:py-1 h-9 sm:h-6 rounded-lg sm:rounded-md text-sm sm:text-xs font-medium transition-all cursor-pointer text-center ${
-                      isSelfHosted
-                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
-                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    Air-Gapped
-                  </button>
-                  <button
-                    onClick={() => isSelfHosted && onToggleDeploymentMode()}
-                    className={`flex-1 py-2 sm:py-1 h-9 sm:h-6 rounded-lg sm:rounded-md text-sm sm:text-xs font-medium transition-all cursor-pointer text-center ${
-                      !isSelfHosted
-                        ? 'bg-white dark:bg-zinc-700 text-slate-900 dark:text-white shadow-xs font-bold'
-                        : 'text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    Cloud Sync
-                  </button>
-                </div>
-              </div>
-
             {/* 3. Development Tools Section (Only shown if ASSETSPHERE_ENV_MODE is "development" and user is DEVELOPER) */}
             {isDevelopmentMode && ApplicationPermissionService.current.canAccessDevDashboard() && (
               <div className="space-y-2 pt-1">
@@ -314,6 +278,17 @@ export default function ProfileDropdownStaticComponent({
                   <span>System Settings & Config</span>
                 </button>
               )}
+
+              <button
+                onClick={() => {
+                  onClose();
+                  window.location.reload();
+                }}
+                className="w-full flex items-center gap-2.5 px-2.5 py-3 sm:py-2 rounded-lg text-sm sm:text-xs text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors font-medium cursor-pointer"
+              >
+                <RotateCw className="w-5 h-5 sm:w-4 sm:h-4 text-slate-400" />
+                <span>Refresh Page</span>
+              </button>
             </div>
 
             {/* 4. Footer: Sign Out */}

@@ -150,10 +150,10 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Page Header */}
       <div className="pb-4 border-b border-slate-200 dark:border-zinc-800">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
           Enterprise Work Locations & Settings
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
           Manage corporate physical facilities, regional operational sites, and asset deployment locations
         </p>
       </div>
@@ -194,7 +194,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                         if (buttonErrorText) setButtonErrorText(null);
                       }}
                       placeholder="e.g. Frankfurt, Germany or Bangalore HQ"
-                      className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-2 text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                      className="w-full bg-slate-50 dark:bg-[#121216] border border-slate-200 dark:border-zinc-800 rounded-lg pl-8 pr-3 py-3 sm:py-2 text-sm sm:text-xs text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-600 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                     />
                   </div>
                   <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-4">
@@ -208,7 +208,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                     variant={buttonErrorText ? 'danger' : 'primary'}
                     size="sm"
                     isLoading={addWorkLocationMutation.isPending}
-                    className={`w-full flex items-center justify-center gap-1.5 transition-all duration-300 font-semibold ${
+                    className={`w-full flex items-center justify-center gap-1.5 transition-all duration-300 font-semibold max-sm:!h-11 ${
                       buttonErrorText
                         ? `!bg-rose-600 hover:!bg-rose-700 !text-white border-none shadow-sm ${
                             isButtonShaking ? 'animate-shake' : ''
@@ -223,7 +223,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                       )
                     }
                   >
-                    <span className="text-xs truncate">
+                    <span className="text-sm sm:text-xs truncate">
                       {buttonErrorText ? buttonErrorText : 'Add Work Location'}
                     </span>
                   </ButtonSharedComponent>
@@ -302,9 +302,9 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
                             ? `Cannot delete: in use by ${employeeCount} employees and ${assetCount} assets`
                             : `Delete ${loc}`
                         }
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
+                        className="p-2.5 sm:p-1.5 max-sm:active:bg-rose-100 dark:max-sm:active:bg-rose-950/50 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
                       </button>
                     </div>
                   );
@@ -379,7 +379,7 @@ export default function SettingsScreenController({}: SettingsScreenControllerPro
               variant="primary"
               size="sm"
               onClick={() => setIsWarningModalOpen(false)}
-              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none"
+              className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
             >
               Understood
             </ButtonSharedComponent>

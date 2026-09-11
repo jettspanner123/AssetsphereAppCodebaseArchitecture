@@ -32,10 +32,10 @@ export default function AnalyticsScreenController({
   return (
     <div className="space-y-6">
       <div className="pb-4 border-b border-slate-200 dark:border-zinc-800">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
           Analytics & Failure Risk Models
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+        <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
           Depreciation curves, hardware degradation analytics, and lifecycle planning
         </p>
       </div>

@@ -85,7 +85,7 @@ export default function AssetPassportScreenController({
           <div className="pt-2">
             <button
               onClick={() => (onNavigateHome ? onNavigateHome() : (window.location.href = ApplicationRouteCON.ROOT))}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-3 sm:py-2 bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" /> Return to Home
             </button>
@@ -115,15 +115,15 @@ export default function AssetPassportScreenController({
           <div className="flex items-center gap-2">
             <button
               onClick={() => window.print()}
-              className="p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-colors cursor-pointer text-xs font-medium inline-flex items-center gap-1.5"
+              className="p-2.5 sm:p-2 max-sm:active:bg-slate-800 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-colors cursor-pointer text-xs font-medium inline-flex items-center gap-1.5"
               title="Print Asset Sheet"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
               <span className="hidden sm:inline">Print Passport</span>
             </button>
             <button
               onClick={() => handleCopy(window.location.href, 'Passport URL')}
-              className="p-2 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-colors cursor-pointer text-xs font-medium inline-flex items-center gap-1.5"
+              className="p-2.5 sm:p-2 max-sm:active:bg-slate-800 text-slate-400 hover:text-white bg-slate-900 border border-slate-800 rounded-lg hover:border-slate-700 transition-colors cursor-pointer text-xs font-medium inline-flex items-center gap-1.5"
               title="Share Passport Link"
             >
               {copiedField === 'Passport URL' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -141,7 +141,7 @@ export default function AssetPassportScreenController({
                 <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-md text-xs font-mono font-semibold">
                   <ShieldCheck className="w-3.5 h-3.5" /> ITAM DIGITAL PASSPORT
                 </div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-white font-serif-headline tracking-tight">
+                <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif-headline tracking-tight">
                   {asset.deviceName}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono">
@@ -360,7 +360,7 @@ export default function AssetPassportScreenController({
           <div className="p-6 bg-slate-900 flex flex-col sm:flex-row items-center justify-between gap-3">
             <button
               onClick={handleLogVerification}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 bg-slate-800 hover:bg-slate-700 max-sm:active:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-sm sm:text-xs font-semibold transition-colors cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Record Physical Audit
             </button>
@@ -373,7 +373,7 @@ export default function AssetPassportScreenController({
                   window.location.href = `${ApplicationRouteCON.DASHBOARD_DEVICE_SERVICE_REQUESTS}?newRequest=true&assetId=${encodeURIComponent(asset.id || asset.assetNumber)}`;
                 }
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#0C2086] hover:bg-[#0C2086]/90 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-900/30 transition-all cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 bg-[#0C2086] hover:bg-[#0C2086]/90 max-sm:active:bg-[#0C2086]/80 text-white rounded-xl text-sm sm:text-xs font-semibold shadow-lg shadow-indigo-900/30 transition-all cursor-pointer"
             >
               <Wrench className="w-4 h-4" /> Report Issue / Request Service
             </button>

@@ -20,10 +20,10 @@ export default function VerificationCampaignScreenController({
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Physical Verification Audit Campaign
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Barcode scan auditing, location validation, and physical custody checks
           </p>
         </div>
@@ -32,6 +32,7 @@ export default function VerificationCampaignScreenController({
           size="md"
           onClick={onOpenScanner}
           icon={<QrCode className="w-4 h-4" />}
+          className="w-full sm:w-auto justify-center max-sm:!h-12 max-sm:text-base"
         >
           Launch Barcode Scanner
         </ButtonSharedComponent>

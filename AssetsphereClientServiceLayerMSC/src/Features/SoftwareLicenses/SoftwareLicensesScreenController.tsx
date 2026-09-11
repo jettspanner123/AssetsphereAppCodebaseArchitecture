@@ -55,7 +55,16 @@ export default function SoftwareLicensesScreenController({
   onSelectLicense,
 }: SoftwareLicensesScreenControllerProps): React.JSX.Element {
   const [isInternalAddModalOpen, setIsInternalAddModalOpen] = useState(false);
-  const [selectedLicenseForDetail, setSelectedLicenseForDetail] = useState<SoftwareLicense | null>(null);
+  const [selectedLicenseIdForDetail, setSelectedLicenseIdForDetail] = useState<string | null>(null);
+
+  // Derived live from `licenses` (not a snapshot) so that when a mutation inside the
+  // detail modal (e.g. assigning/unassigning an employee) invalidates the licenses query
+  // and this prop refreshes, the open modal reflects the update immediately instead of
+  // showing stale data until it's closed and reopened.
+  const selectedLicenseForDetail =
+    (selectedLicenseIdForDetail
+      ? licenses.find((lic) => lic.id === selectedLicenseIdForDetail)
+      : null) || null;
 
   const [viewMode, setViewModeState] = useState<'grid' | 'list'>(() =>
     UserPreferencesUtility.current.getSoftwareViewMode('grid')
@@ -334,7 +343,7 @@ export default function SoftwareLicensesScreenController({
                   if (onSelectLicense) {
                     onSelectLicense(lic);
                   } else {
-                    setSelectedLicenseForDetail(lic);
+                    setSelectedLicenseIdForDetail(lic.id);
                   }
                 }}
                 className="p-6 flex flex-col justify-between space-y-5 cursor-pointer"
@@ -439,7 +448,7 @@ export default function SoftwareLicensesScreenController({
                         if (onSelectLicense) {
                           onSelectLicense(lic);
                         } else {
-                          setSelectedLicenseForDetail(lic);
+                          setSelectedLicenseIdForDetail(lic.id);
                         }
                       }}
                       className="hover:bg-slate-100/60 dark:hover:bg-zinc-800/40 transition-colors cursor-pointer"
@@ -506,7 +515,7 @@ export default function SoftwareLicensesScreenController({
       {/* Software License Detail Modal Controller */}
       <SoftwareLicenseDetailModalController
         license={selectedLicenseForDetail}
-        onClose={() => setSelectedLicenseForDetail(null)}
+        onClose={() => setSelectedLicenseIdForDetail(null)}
       />
     </div>
   );

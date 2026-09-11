@@ -479,6 +479,89 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
     }
   };
 
+  const renderRequestCard = (req: DeviceServiceRequestItemType) => (
+    <CardSharedComponent
+      key={req.id}
+      hoverable
+      onClick={() => setInspectingRequest(req)}
+      className="p-5 flex flex-col justify-between space-y-4 cursor-pointer relative overflow-hidden border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all shadow-xs"
+    >
+      {/* Top Urgency Ambient Gradient Bar */}
+      <div
+        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${getUrgencyGradient(req.urgency)}`}
+      />
+
+      {/* 1. Header: Ticket # & Status Badge */}
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <span className="font-mono font-bold text-sm text-[#0C2086] dark:text-blue-400">
+          {req.requestNumber}
+        </span>
+        <div>
+          {getStatusBadge(req.status)}
+        </div>
+      </div>
+
+      {/* 2. Device Title & Asset Tag */}
+      <div className="space-y-1">
+        <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
+          {req.assetName}
+        </h4>
+        <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
+          <span className="font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[10px]">
+            {req.assetTag}
+          </span>
+          <span>•</span>
+          <span className="truncate">{req.serviceCategory}</span>
+        </div>
+      </div>
+
+      {/* 3. Beneficiary & Location Metadata Row */}
+      <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5 text-xs">
+        <div className="flex items-center justify-between">
+          <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1 text-[11px]">
+            <User className="w-3 h-3 text-slate-400" /> Beneficiary:
+          </span>
+          <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
+            {req.targetUserName}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1 text-[11px]">
+            <MapPin className="w-3 h-3 text-slate-400" /> Facility:
+          </span>
+          <span className="font-medium text-slate-700 dark:text-zinc-300 truncate max-w-[150px]">
+            {req.workLocation}
+          </span>
+        </div>
+      </div>
+
+      {/* 4. Problem Description Snippet */}
+      <div className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-2 italic bg-slate-50/50 dark:bg-zinc-900/40 p-2 rounded-lg border border-slate-100 dark:border-zinc-800/60">
+        "{req.descriptionRichText.replace(/[#*`_]/g, '').trim()}"
+      </div>
+
+      {/* 5. Footer: Timestamp & Inspect Trigger */}
+      <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-400 dark:text-zinc-500">
+        <span>
+          {new Date(req.createdAt).toLocaleDateString()} at{' '}
+          {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </span>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setInspectingRequest(req);
+          }}
+          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-[#0C2086] dark:hover:text-blue-400 transition-colors font-medium cursor-pointer"
+        >
+          <Eye className="w-3 h-3" />
+          <span>Inspect</span>
+        </button>
+      </div>
+    </CardSharedComponent>
+  );
+
   const getUrgencyGradient = (urgencyVal: string) => {
     switch (urgencyVal?.toUpperCase()) {
       case 'CRITICAL':
@@ -498,10 +581,10 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
       {/* Page Title & Hero Summary Banner (Structured identically to Employees & People page) */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Device Service Request
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Enterprise hardware maintenance tickets, device repairs, and fulfillment tracking
           </p>
         </div>
@@ -573,6 +656,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
               enableCustomCreation={false}
               enableSearch={true}
               helperText="Operator privilege: Select any registered enterprise employee to raise a hardware request on their behalf."
+              triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+              optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
             />
           </div>
         ) : (
@@ -611,6 +696,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                 ? 'No assigned hardware registered for this employee. You can type a custom asset tag inline.'
                 : `Displaying hardware assigned to ${selectedTargetUser?.fullName || 'user'}.`
             }
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
         </div>
 
@@ -624,6 +711,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             onChange={(val) => setServiceCategory(val)}
             placeholder="Select service category..."
             searchPlaceholder="Search categories or type custom..."
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
 
           <CreatableCustomSelectSharedComponent
@@ -634,6 +723,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             onChange={(val) => setComponentSubtype(val)}
             placeholder="Select component..."
             searchPlaceholder="Search components or type custom..."
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
 
           <CreatableCustomSelectSharedComponent
@@ -643,6 +734,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             options={PRESET_USABILITY_STATES}
             onChange={(val) => setUsabilityState(val)}
             placeholder="Select usability state..."
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
         </div>
 
@@ -655,6 +748,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             options={PRESET_SERVICE_CHANNELS}
             onChange={(val) => setServiceChannel(val)}
             placeholder="Select fulfillment channel..."
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
 
           <CreatableCustomSelectSharedComponent
@@ -664,6 +759,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             options={PRESET_URGENCY_LEVELS}
             onChange={(val) => setUrgency(val)}
             placeholder="Select priority level..."
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
 
           <CreatableCustomSelectSharedComponent
@@ -675,6 +772,8 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             placeholder="Select location..."
             enableSearch={false}
             enableCustomCreation={false}
+            triggerClassName="!h-11 sm:!h-10 !text-sm sm:!text-xs"
+            optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-2 sm:text-xs"
           />
         </div>
 
@@ -694,7 +793,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             value={descriptionText}
             onChange={(e) => setDescriptionText(e.target.value)}
             placeholder="Provide a comprehensive explanation of the issue, error codes, steps to reproduce, or diagnostic observations..."
-            className="w-full p-3.5 text-xs bg-slate-50/50 dark:bg-zinc-800/40 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/60 dark:focus:ring-blue-500/60 focus:bg-white dark:focus:bg-zinc-900 transition-all font-sans leading-relaxed resize-y min-h-[120px]"
+            className="w-full p-3.5 text-sm sm:text-xs bg-slate-50/50 dark:bg-zinc-800/40 border border-slate-300 dark:border-zinc-700/80 rounded-xl text-slate-900 dark:text-zinc-100 placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1.5 focus:ring-[#0C2086]/60 dark:focus:ring-blue-500/60 focus:bg-white dark:focus:bg-zinc-900 transition-all font-sans leading-relaxed resize-y min-h-[140px] sm:min-h-[120px]"
           />
         </div>
 
@@ -707,6 +806,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
             isLoading={createMutation.isPending}
             loadingText="Submitting Request..."
             icon={<Send className="w-3.5 h-3.5 !text-white" />}
+            className="w-full sm:w-auto justify-center !h-11 sm:!h-9 text-sm sm:text-xs"
           />
         </div>
       </form>
@@ -725,7 +825,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
           </div>
 
           {/* Line 1: Search Bar on Left + View Mode Switchers on Right */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative flex-1 max-w-md">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
               <input
@@ -733,12 +833,12 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                 value={historySearchTerm}
                 onChange={(e) => setHistorySearchTerm(e.target.value)}
                 placeholder="Search ticket #, device, employee, issue..."
-                className="w-full h-9 pl-9 pr-3 text-xs bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
+                className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
               />
             </div>
 
-            {/* Right: Uniform Switchers (Matching Asset Inventory Management Page) */}
-            <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {/* Right: Uniform Switchers (hidden on mobile - mobile is grid-only) */}
+            <div className="hidden sm:flex flex-wrap items-center gap-3 shrink-0">
               {/* Grid Density Switcher (2 Col vs 3 Col) */}
               {viewMode === 'grid' && (
                 <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -834,27 +934,31 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
           </div>
 
           {/* Line 2: Secondary Dropdown Filters (Status & Urgency) */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 text-xs">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-slate-100 dark:border-zinc-800/60 text-xs">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
                 <span className="text-slate-500 dark:text-zinc-400 font-medium">Status:</span>
                 <CustomSelectSharedComponent
                   value={historyStatusFilter}
                   options={STATUS_FILTER_OPTIONS}
                   onChange={(val) => setHistoryStatusFilter(val)}
                   size="sm"
-                  className="w-40 sm:w-44"
+                  className="w-full sm:w-44"
+                  triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                 />
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
                 <span className="text-slate-500 dark:text-zinc-400 font-medium">Urgency:</span>
                 <CustomSelectSharedComponent
                   value={historyUrgencyFilter}
                   options={URGENCY_FILTER_OPTIONS}
                   onChange={(val) => setHistoryUrgencyFilter(val)}
                   size="sm"
-                  className="w-40 sm:w-48"
+                  className="w-full sm:w-48"
+                  triggerClassName="!h-11 sm:!h-9 !text-sm sm:!text-xs"
+                  optionClassName="!py-3 !px-3.5 text-sm sm:!py-2 sm:!px-3 sm:text-xs"
                 />
               </div>
             </div>
@@ -867,7 +971,7 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                   setHistoryUrgencyFilter('ALL');
                   setHistorySearchTerm('');
                 }}
-                className="text-xs text-slate-400 hover:text-[#0C2086] dark:hover:text-blue-400 font-medium cursor-pointer transition-colors"
+                className="text-sm sm:text-xs text-slate-400 hover:text-[#0C2086] dark:hover:text-blue-400 font-medium cursor-pointer transition-colors max-sm:w-full max-sm:text-center max-sm:py-2"
               >
                 Reset Filters
               </button>
@@ -919,11 +1023,18 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                   : 'Your enterprise hardware maintenance queue is currently empty. Submit your first service ticket using the form above.'
               }
             />
-          ) : viewMode === 'table' ? (
-            /* ========================================================================= */
-            /* TABLE VIEW MODE                                                          */
-            /* ========================================================================= */
-            <div className="overflow-x-auto w-full">
+          ) : (
+            <>
+              {/* Mobile-Forced Grid View: 1 full-width column, ignores the table/grid & column-density preference below sm */}
+              <div className="sm:hidden grid grid-cols-1 gap-3">
+                {filteredRequests.map((req) => renderRequestCard(req))}
+              </div>
+
+              {viewMode === 'table' ? (
+                /* ========================================================================= */
+                /* TABLE VIEW MODE - sm and up                                              */
+                /* ========================================================================= */
+                <div className="hidden sm:block overflow-x-auto w-full">
               <table className={`w-full text-left text-xs border-collapse ${isSingleLineMode ? 'min-w-[1100px] whitespace-nowrap' : ''}`}>
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-zinc-800 text-[11px] font-mono text-slate-400 dark:text-zinc-500 uppercase tracking-wider bg-slate-50/50 dark:bg-zinc-800/30">
@@ -997,99 +1108,20 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
                   ))}
                 </tbody>
               </table>
-            </div>
-          ) : (
-            /* ========================================================================= */
-            /* GRID VIEW MODE (Matching User Registration Requests Top Accent Elegance)   */
-            /* ========================================================================= */
-            <div
-              className={`grid grid-cols-1 ${
-                gridColumns === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
-              } gap-4`}
-            >
-              {filteredRequests.map((req) => (
-                <CardSharedComponent
-                  key={req.id}
-                  hoverable
-                  onClick={() => setInspectingRequest(req)}
-                  className="p-5 flex flex-col justify-between space-y-4 cursor-pointer relative overflow-hidden border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 transition-all shadow-xs"
+                </div>
+              ) : (
+                /* ========================================================================= */
+                /* GRID VIEW MODE - sm and up                                               */
+                /* ========================================================================= */
+                <div
+                  className={`hidden sm:grid grid-cols-1 ${
+                    gridColumns === 2 ? 'md:grid-cols-2' : 'md:grid-cols-2 lg:grid-cols-3'
+                  } gap-4`}
                 >
-                  {/* Top Urgency Ambient Gradient Bar */}
-                  <div
-                    className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${getUrgencyGradient(req.urgency)}`}
-                  />
-
-                  {/* 1. Header: Ticket # & Status Badge */}
-                  <div className="flex items-center justify-between gap-2 pt-0.5">
-                    <span className="font-mono font-bold text-sm text-[#0C2086] dark:text-blue-400">
-                      {req.requestNumber}
-                    </span>
-                    <div>
-                      {getStatusBadge(req.status)}
-                    </div>
-                  </div>
-
-                  {/* 2. Device Title & Asset Tag */}
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                      {req.assetName}
-                    </h4>
-                    <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-zinc-400">
-                      <span className="font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[10px]">
-                        {req.assetTag}
-                      </span>
-                      <span>•</span>
-                      <span className="truncate">{req.serviceCategory}</span>
-                    </div>
-                  </div>
-
-                  {/* 3. Beneficiary & Location Metadata Row */}
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/40 border border-slate-200/60 dark:border-zinc-700/60 space-y-1.5 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1 text-[11px]">
-                        <User className="w-3 h-3 text-slate-400" /> Beneficiary:
-                      </span>
-                      <span className="font-semibold text-slate-900 dark:text-white truncate max-w-[150px]">
-                        {req.targetUserName}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-slate-500 dark:text-zinc-400 flex items-center gap-1 text-[11px]">
-                        <MapPin className="w-3 h-3 text-slate-400" /> Facility:
-                      </span>
-                      <span className="font-medium text-slate-700 dark:text-zinc-300 truncate max-w-[150px]">
-                        {req.workLocation}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* 4. Problem Description Snippet */}
-                  <div className="text-xs text-slate-600 dark:text-zinc-400 line-clamp-2 italic bg-slate-50/50 dark:bg-zinc-900/40 p-2 rounded-lg border border-slate-100 dark:border-zinc-800/60">
-                    "{req.descriptionRichText.replace(/[#*`_]/g, '').trim()}"
-                  </div>
-
-                  {/* 5. Footer: Timestamp & Inspect Trigger */}
-                  <div className="pt-2 border-t border-slate-100 dark:border-zinc-800/80 flex items-center justify-between text-[11px] text-slate-400 dark:text-zinc-500">
-                    <span>
-                      {new Date(req.createdAt).toLocaleDateString()} at{' '}
-                      {new Date(req.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInspectingRequest(req);
-                      }}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-blue-50 dark:hover:bg-blue-950/60 hover:text-[#0C2086] dark:hover:text-blue-400 transition-colors font-medium cursor-pointer"
-                    >
-                      <Eye className="w-3 h-3" />
-                      <span>Inspect</span>
-                    </button>
-                  </div>
-                </CardSharedComponent>
-              ))}
-            </div>
+                  {filteredRequests.map((req) => renderRequestCard(req))}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

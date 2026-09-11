@@ -209,6 +209,17 @@ export default function ModalSharedComponent({
     lockedViewportHeight && isMobileBottomSheetViewport ? lockedViewportHeight : null;
   const mobileLockedMaxHeightPx = mobileLockedViewportPx ? mobileLockedViewportPx * 0.92 : null;
 
+  /**
+   * Below `sm`, the sheet is always height-capped with its own internal scroll -
+   * that's inherent to being a bottom sheet, regardless of scrollMode. At `sm` and up,
+   * only scrollMode="body" caps and internally scrolls the body; the default
+   * scrollMode="backdrop" lets the dialog grow to whatever height its content needs,
+   * with the outer backdrop container scrolling the page instead (the pre-bottom-sheet
+   * desktop behavior, which must stay intact).
+   */
+  const desktopBodyOverflowClass =
+    scrollMode === 'body' ? 'sm:overflow-y-auto sm:max-h-[calc(90vh-130px)]' : 'sm:overflow-visible sm:max-h-none';
+
   const modalVariants = {
     initial: {
       y: isSlideUp ? (typeof window !== 'undefined' ? window.innerHeight + 1000 : '150vh') : 8,
@@ -280,7 +291,7 @@ export default function ModalSharedComponent({
             exit="exit"
             onAnimationComplete={handleEnterAnimationComplete}
             style={{ maxHeight: mobileLockedMaxHeightPx ? `${mobileLockedMaxHeightPx}px` : undefined }}
-            className={`relative w-[100dvw] sm:w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong max-sm:!border-b-0 rounded-t-2xl rounded-b-none sm:rounded-2xl shadow-2xl z-10 my-0 sm:my-8 max-h-[92dvh] sm:max-h-[90vh] flex flex-col shrink-0 focus:outline-none`}
+            className={`relative w-[100dvw] sm:w-full ${widthClass} bg-white dark:bg-[#0a0a0c] hairline-border-strong max-sm:!border-b-0 rounded-t-2xl rounded-b-none sm:rounded-2xl shadow-2xl z-10 my-0 sm:my-8 max-h-[92dvh] ${scrollMode === 'body' ? 'sm:max-h-[90vh]' : 'sm:max-h-none'} flex flex-col shrink-0 focus:outline-none`}
           >
             {/* Header */}
             {(title || subtitle) && (
@@ -310,7 +321,7 @@ export default function ModalSharedComponent({
             {/* Body */}
             <div
               style={{ maxHeight: mobileLockedMaxHeightPx ? `${mobileLockedMaxHeightPx - 130}px` : undefined }}
-              className={`p-5 sm:p-6 flex-1 overflow-y-auto max-h-[calc(92dvh-130px)] sm:max-h-none ${scrollMode === 'body' ? '' : ''} ${minHeight ? minHeight : ''}`}
+              className={`p-5 sm:p-6 flex-1 overflow-y-auto max-h-[calc(92dvh-130px)] ${desktopBodyOverflowClass} ${minHeight ? minHeight : ''}`}
             >
               {children}
             </div>

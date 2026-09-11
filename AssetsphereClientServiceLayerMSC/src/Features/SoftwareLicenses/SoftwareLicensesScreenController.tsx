@@ -278,7 +278,7 @@ export default function SoftwareLicensesScreenController({
 
         {/* Executive Typographic Metric Counters */}
         <div className="flex items-center gap-6 shrink-0 bg-slate-50 dark:bg-zinc-900/60 px-5 py-2.5 rounded-2xl border border-slate-200/60 dark:border-zinc-800/80">
-          <div className="flex items-baseline gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               ${totalSpend.toLocaleString()}
             </span>
@@ -287,9 +287,9 @@ export default function SoftwareLicensesScreenController({
             </span>
           </div>
 
-          <div className="h-6 w-px bg-slate-200 dark:bg-zinc-800" />
+          <div className="self-stretch w-px bg-slate-200 dark:bg-zinc-800" />
 
-          <div className="flex items-baseline gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-baseline gap-0 sm:gap-2">
             <span className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white font-mono">
               {totalAllocatedSeats} / {totalCapacitySeats}
             </span>

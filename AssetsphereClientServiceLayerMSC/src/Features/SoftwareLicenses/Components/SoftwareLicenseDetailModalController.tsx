@@ -338,7 +338,7 @@ export default function SoftwareLicenseDetailModalController({
     >
       <div className="space-y-6">
         {/* Action Header Ribbon */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <BadgeSharedComponent variant={complianceVariant} size="md" showDot>
               {displayLicense.complianceStatus}
@@ -361,7 +361,7 @@ export default function SoftwareLicenseDetailModalController({
                 size="sm"
                 onClick={() => setIsDeleteConfirmationOpen(true)}
                 icon={<Trash2 className="w-3.5 h-3.5 text-rose-500" />}
-                className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60"
+                className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60 max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
               >
                 Delete Subscription
               </ButtonSharedComponent>
@@ -556,7 +556,7 @@ export default function SoftwareLicenseDetailModalController({
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_LICENSES}>
                   <ButtonSharedComponent
                     variant="primary"
@@ -570,7 +570,7 @@ export default function SoftwareLicenseDetailModalController({
                     }}
                     disabled={availableCapacity <= 0 || updateLicenseMutation.isPending}
                     icon={<UserPlus className="w-3.5 h-3.5 text-white" />}
-                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white text-xs font-medium cursor-pointer"
+                    className="!bg-[#0C2086] hover:!bg-[#081765] !text-white font-medium cursor-pointer w-full sm:w-auto justify-center max-sm:!h-11 max-sm:text-sm"
                   >
                     Assign Employee
                   </ButtonSharedComponent>
@@ -580,14 +580,14 @@ export default function SoftwareLicenseDetailModalController({
 
             {/* Search Filter for Current Roster */}
             {parsedAssignedUsers.length > 0 && (
-              <div className="relative max-w-sm">
+              <div className="relative max-w-none sm:max-w-sm">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
                 <input
                   type="text"
                   value={rosterSearchQuery}
                   onChange={(e) => setRosterSearchQuery(e.target.value)}
                   placeholder="Search assigned employees by name, email, or department..."
-                  className="w-full h-8 pl-8 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#121216] text-slate-900 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
+                  className="w-full !h-11 sm:!h-8 pl-8 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#121216] text-slate-900 dark:text-zinc-100 border border-slate-200 dark:border-zinc-800 focus:outline-hidden focus:ring-1 focus:ring-[#0C2086] dark:focus:ring-blue-500 transition-all"
                 />
               </div>
             )}
@@ -635,7 +635,7 @@ export default function SoftwareLicenseDetailModalController({
 
                     <div className="flex items-center gap-2 shrink-0">
                       {user.department && (
-                        <span className="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono">
+                        <span className="hidden sm:inline-block px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 font-mono">
                           {user.department}
                         </span>
                       )}
@@ -647,7 +647,7 @@ export default function SoftwareLicenseDetailModalController({
                           onClick={() => setEmployeeToUnassign(user)}
                           disabled={updateLicenseMutation.isPending}
                           icon={<UserMinus className="w-3.5 h-3.5 text-rose-500" />}
-                          className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 text-xs !py-1 !px-2 font-medium"
+                          className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 text-xs !py-1 !px-2 font-medium max-sm:!h-10 max-sm:!py-2 max-sm:!px-3 max-sm:text-sm"
                           title="Unassign employee from seat"
                         >
                           Unassign
@@ -752,7 +752,12 @@ export default function SoftwareLicenseDetailModalController({
 
         {/* Footer Close Button (Always Dismisses Upwards) */}
         <div className="flex items-center justify-end pt-4 border-t border-slate-200 dark:border-zinc-800">
-          <ButtonSharedComponent variant="outline" size="sm" onClick={handleCloseModal}>
+          <ButtonSharedComponent
+            variant="outline"
+            size="sm"
+            onClick={handleCloseModal}
+            className="max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
+          >
             Close
           </ButtonSharedComponent>
         </div>

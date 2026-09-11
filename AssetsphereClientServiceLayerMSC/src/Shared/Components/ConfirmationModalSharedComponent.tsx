@@ -87,13 +87,14 @@ export default function ConfirmationModalSharedComponent({
           {additionalContent && <div>{additionalContent}</div>}
         </div>
 
-        {/* Footer Actions matching Register Device Modal button layout */}
+        {/* Footer Actions matching Register Device Modal button layout - 50:50 full-width on mobile, auto-width right-aligned on desktop */}
         <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0">
           <ButtonSharedComponent
             variant="outline"
             size="sm"
             onClick={handleCancel}
             disabled={isLoading}
+            className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
           >
             {cancelText}
           </ButtonSharedComponent>
@@ -103,7 +104,7 @@ export default function ConfirmationModalSharedComponent({
             size="sm"
             disabled={isLoading}
             onClick={handleConfirm}
-            className={getConfirmButtonClasses()}
+            className={`${getConfirmButtonClasses()} max-sm:flex-1 max-sm:!h-11 max-sm:text-sm`}
             icon={
               isLoading ? (
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin shrink-0" />

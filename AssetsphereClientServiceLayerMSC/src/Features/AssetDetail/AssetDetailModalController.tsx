@@ -145,7 +145,7 @@ export default function AssetDetailModalController({
     >
       <div className="space-y-6">
         {/* Action Header Ribbon */}
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center justify-between gap-3 pb-4 border-b border-slate-200 dark:border-zinc-800">
           <div className="flex items-center gap-2">
             <BadgeSharedComponent
               variant={displayAsset.security?.isCompliant ? 'success' : 'danger'}
@@ -168,12 +168,13 @@ export default function AssetDetailModalController({
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <ButtonSharedComponent
               variant="ghost"
               size="sm"
               onClick={() => onOpenQRBadgeModal(displayAsset)}
               icon={<QrCode className="w-3.5 h-3.5" />}
+              className="max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
             >
               Print Badge
             </ButtonSharedComponent>
@@ -183,7 +184,7 @@ export default function AssetDetailModalController({
                 size="sm"
                 onClick={() => setIsDeleteConfirmationOpen(true)}
                 icon={<Trash2 className="w-3.5 h-3.5 text-rose-500" />}
-                className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60"
+                className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60 max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
               >
                 Delete Asset
               </ButtonSharedComponent>
@@ -193,6 +194,7 @@ export default function AssetDetailModalController({
               size="sm"
               onClick={() => onEditAsset(displayAsset)}
               icon={<Edit className="w-3.5 h-3.5" />}
+              className="max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
             >
               Edit Asset
             </ButtonSharedComponent>
@@ -205,7 +207,7 @@ export default function AssetDetailModalController({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-2 border-b-2 font-medium transition-colors cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-2.5 sm:py-2 border-b-2 font-medium transition-colors cursor-pointer whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'border-zinc-900 text-slate-900 dark:border-white dark:text-white font-semibold'
                   : 'border-transparent text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
@@ -568,7 +570,7 @@ export default function AssetDetailModalController({
 
         {activeTab === 'ai_diagnostics' && (
           <div className="space-y-4 text-xs">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
               <p className="text-slate-500 dark:text-zinc-400">
                 Generate an instant AI failure risk assessment using Gemini 3.6 Flash.
               </p>
@@ -577,7 +579,7 @@ export default function AssetDetailModalController({
                 size="sm"
                 onClick={handleRunAiDiagnostics}
                 disabled={loadingAi}
-                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold"
+                className="!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold w-full sm:w-auto justify-center max-sm:!h-11 max-sm:text-sm"
                 icon={<Sparkles className="w-4 h-4 !text-white" />}
               >
                 <span className="!text-white font-medium">{loadingAi ? 'Analyzing Hardware...' : 'Run Diagnostics'}</span>

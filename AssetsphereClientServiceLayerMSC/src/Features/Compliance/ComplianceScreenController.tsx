@@ -65,15 +65,99 @@ export default function ComplianceScreenController({
       ? Math.round((compliantCount / filteredAssets.length) * 100)
       : 100;
 
+  const renderComplianceCard = (a: Asset) => {
+    const isCompliant = a.security?.isCompliant;
+    return (
+      <CardSharedComponent
+        key={a.id}
+        hoverable
+        className="p-6 flex flex-col justify-between space-y-4 relative overflow-hidden"
+      >
+        {/* Top Ambient Compliance Accent Line */}
+        <div
+          className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
+            isCompliant
+              ? 'from-emerald-500 via-teal-400 to-emerald-500'
+              : 'from-rose-500 via-red-500 to-rose-500'
+          }`}
+          title={isCompliant ? 'Compliant Endpoint' : 'Non-Compliant - Action Needed'}
+        />
+
+        {/* Header */}
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <span className="text-[11px] font-mono text-slate-400">{a.assetNumber}</span>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 truncate">
+              {a.deviceName}
+            </h3>
+          </div>
+          <span className="text-xs font-mono font-bold shrink-0">
+            {isCompliant ? (
+              <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <ShieldCheck className="w-4 h-4" /> Compliant
+              </span>
+            ) : (
+              <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                <ShieldAlert className="w-4 h-4" /> Flagged
+              </span>
+            )}
+          </span>
+        </div>
+
+        {/* Security Matrix Details */}
+        <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
+          <div className="flex justify-between items-center">
+            <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
+              <Lock className="w-3.5 h-3.5" /> BitLocker / FileVault:
+            </span>
+            <span
+              className={`font-bold ${
+                a.security?.encryptionStatus === 'Encrypted'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              {a.security?.encryptionStatus || 'Unencrypted'}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
+              <Radio className="w-3.5 h-3.5" /> CrowdStrike EDR Agent:
+            </span>
+            <span
+              className={`font-bold ${
+                a.security?.antivirusStatus === 'Active'
+                  ? 'text-emerald-600 dark:text-emerald-400'
+                  : 'text-rose-600 dark:text-rose-400'
+              }`}
+            >
+              {a.security?.antivirusStatus || 'Missing'}
+            </span>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
+              <Cpu className="w-3.5 h-3.5" /> OS Security Patch:
+            </span>
+            <span className="text-slate-700 dark:text-zinc-300 font-medium">
+              {a.security?.patchLevel || 'Outdated'}
+            </span>
+          </div>
+        </div>
+      </CardSharedComponent>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Security & ISO/SOC2 Compliance Audit
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Endpoint encryption status, EDR agents, OS patch levels, and security risk scores
           </p>
         </div>
@@ -124,12 +208,12 @@ export default function ComplianceScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search asset, encryption status, EDR, patch level..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          {/* Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+          {/* Uniform Height Control Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-between sm:justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -231,104 +315,29 @@ export default function ComplianceScreenController({
         </CardSharedComponent>
       )}
 
-      {/* Grid View Mode */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
+      {filteredAssets.length > 0 && (
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredAssets.map((a) => renderComplianceCard(a))}
+        </div>
+      )}
+
+      {/* Grid View Mode - sm and up */}
       {viewMode === 'grid' && filteredAssets.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredAssets.map((a) => {
-            const isCompliant = a.security?.isCompliant;
-            return (
-              <CardSharedComponent
-                key={a.id}
-                hoverable
-                className="p-6 flex flex-col justify-between space-y-4 relative overflow-hidden"
-              >
-                {/* Top Ambient Compliance Accent Line */}
-                <div
-                  className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${
-                    isCompliant
-                      ? 'from-emerald-500 via-teal-400 to-emerald-500'
-                      : 'from-rose-500 via-red-500 to-rose-500'
-                  }`}
-                  title={isCompliant ? 'Compliant Endpoint' : 'Non-Compliant - Action Needed'}
-                />
-
-                {/* Header */}
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="text-[11px] font-mono text-slate-400">{a.assetNumber}</span>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 truncate">
-                      {a.deviceName}
-                    </h3>
-                  </div>
-                  <span className="text-xs font-mono font-bold shrink-0">
-                    {isCompliant ? (
-                      <span className="text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                        <ShieldCheck className="w-4 h-4" /> Compliant
-                      </span>
-                    ) : (
-                      <span className="text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                        <ShieldAlert className="w-4 h-4" /> Flagged
-                      </span>
-                    )}
-                  </span>
-                </div>
-
-                {/* Security Matrix Details */}
-                <div className="pt-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
-                  <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
-                      <Lock className="w-3.5 h-3.5" /> BitLocker / FileVault:
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        a.security?.encryptionStatus === 'Encrypted'
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }`}
-                    >
-                      {a.security?.encryptionStatus || 'Unencrypted'}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
-                      <Radio className="w-3.5 h-3.5" /> CrowdStrike EDR Agent:
-                    </span>
-                    <span
-                      className={`font-bold ${
-                        a.security?.antivirusStatus === 'Active'
-                          ? 'text-emerald-600 dark:text-emerald-400'
-                          : 'text-rose-600 dark:text-rose-400'
-                      }`}
-                    >
-                      {a.security?.antivirusStatus || 'Missing'}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-1.5 text-slate-400 font-sans font-medium">
-                      <Cpu className="w-3.5 h-3.5" /> OS Security Patch:
-                    </span>
-                    <span className="text-slate-700 dark:text-zinc-300 font-medium">
-                      {a.security?.patchLevel || 'Outdated'}
-                    </span>
-                  </div>
-                </div>
-              </CardSharedComponent>
-            );
-          })}
+          {filteredAssets.map((a) => renderComplianceCard(a))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {viewMode === 'list' && filteredAssets.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[900px] whitespace-nowrap' : ''}`}>
               <thead>

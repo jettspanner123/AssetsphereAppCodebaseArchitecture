@@ -18,6 +18,7 @@ export interface CreatableCustomSelectSharedComponentProps {
   className?: string;
   triggerClassName?: string;
   dropdownClassName?: string;
+  optionClassName?: string;
   size?: 'sm' | 'md';
   searchPlaceholder?: string;
   enableSearch?: boolean;
@@ -36,6 +37,7 @@ export default function CreatableCustomSelectSharedComponent({
   className = 'w-full',
   triggerClassName,
   dropdownClassName,
+  optionClassName = '',
   size = 'md',
   searchPlaceholder = 'Search options or type custom value...',
   enableSearch = true,
@@ -58,7 +60,11 @@ export default function CreatableCustomSelectSharedComponent({
       return;
     }
 
-    if (searchInputRef.current) {
+    // Skip auto-focus on mobile - focusing the search input immediately pops the
+    // on-screen keyboard and shoves the option list out of view before the user
+    // has even seen what's in the dropdown. Desktop keeps the convenience auto-focus.
+    const isMobileViewport = typeof window !== 'undefined' && window.innerWidth < 640;
+    if (searchInputRef.current && !isMobileViewport) {
       searchInputRef.current.focus();
     }
 
@@ -134,7 +140,7 @@ export default function CreatableCustomSelectSharedComponent({
           type="button"
           disabled={disabled}
           onClick={() => !disabled && setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between text-xs rounded-xl bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 hover:border-slate-400 dark:hover:border-zinc-600 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 ${
+          className={`w-full flex items-center justify-between text-xs rounded-xl bg-white dark:bg-zinc-900/80 border border-slate-300 dark:border-zinc-700/80 text-slate-900 dark:text-zinc-100 hover:border-slate-400 dark:hover:border-zinc-600 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-800 max-sm:active:opacity-80 transition-all shadow-2xs cursor-pointer focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 ${
             disabled ? 'opacity-50 cursor-not-allowed' : ''
           } ${heightClass} ${triggerClassName || ''}`}
         >
@@ -186,7 +192,7 @@ export default function CreatableCustomSelectSharedComponent({
                       }
                     }}
                     placeholder={searchPlaceholder}
-                    className="w-full h-8 pl-8 pr-2.5 text-xs bg-slate-50 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
+                    className="w-full h-8 max-sm:!h-10 pl-8 pr-2.5 text-xs max-sm:!text-sm bg-slate-50 dark:bg-zinc-800/70 border border-slate-200 dark:border-zinc-700/60 rounded-lg text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
                   />
                 </div>
               </div>
@@ -199,7 +205,7 @@ export default function CreatableCustomSelectSharedComponent({
                 <button
                   type="button"
                   onClick={handleApplyCustomValue}
-                  className="w-full flex items-center justify-between p-2 rounded-lg text-left text-xs bg-blue-50/80 dark:bg-blue-950/40 text-[#0C2086] dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 border border-blue-200/60 dark:border-blue-800/40 transition-colors cursor-pointer mb-1 group"
+                  className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs bg-blue-50/80 dark:bg-blue-950/40 text-[#0C2086] dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/60 max-sm:active:bg-blue-200 dark:max-sm:active:bg-blue-900 border border-blue-200/60 dark:border-blue-800/40 transition-colors cursor-pointer mb-1 group ${optionClassName}`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <Plus className="w-3.5 h-3.5 text-[#0C2086] dark:text-blue-400 shrink-0 group-hover:scale-110 transition-transform" />
@@ -221,11 +227,11 @@ export default function CreatableCustomSelectSharedComponent({
                       key={opt.value}
                       type="button"
                       onClick={() => handleSelectOption(opt.value)}
-                      className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs transition-colors cursor-pointer ${
+                      className={`w-full flex items-center justify-between p-2 rounded-lg text-left text-xs transition-colors cursor-pointer max-sm:active:opacity-70 ${
                         isSelected
-                          ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold'
-                          : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50'
-                      }`}
+                          ? 'bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-semibold max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
+                          : 'text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800/50 max-sm:active:bg-slate-200 dark:max-sm:active:bg-zinc-700'
+                      } ${optionClassName}`}
                     >
                       <div className="flex items-center gap-2 min-w-0 pr-2">
                         {opt.icon}

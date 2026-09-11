@@ -61,15 +61,57 @@ export default function ProcurementScreenController({
     0
   );
 
+  const renderOrderCard = (po: PurchaseOrder) => (
+    <CardSharedComponent key={po.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
+      {/* Header */}
+      <div>
+        <span className="text-xs font-mono text-sky-500 font-bold flex items-center gap-1">
+          <FileText className="w-3.5 h-3.5" /> {po.poNumber}
+        </span>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate mt-0.5">
+          {po.vendorName}
+        </h3>
+      </div>
+
+      {/* Middle Section: Details & Valuation */}
+      <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
+        <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
+          <span className="flex items-center gap-1 text-slate-400">
+            <Calendar className="w-3.5 h-3.5" /> Order Date:
+          </span>
+          <span className="font-mono">{po.requestDate}</span>
+        </div>
+        <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
+          <span className="flex items-center gap-1 text-slate-400">
+            <User className="w-3.5 h-3.5" /> Requestor:
+          </span>
+          <span className="font-medium">{po.requestorName}</span>
+        </div>
+        <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
+          <span className="text-slate-400 font-medium">Status:</span>
+          <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">{po.status}</span>
+        </div>
+
+        {/* PO Cost at the very last with a top divider */}
+        <div className="flex justify-between items-baseline pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
+          <span className="text-slate-500 dark:text-zinc-400 font-medium">PO Cost:</span>
+          <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
+            ${po.totalCost?.toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </CardSharedComponent>
+  );
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Procurement & Purchase Orders
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             CAPEX approval workflows, vendor invoices, hardware orders, and fulfillment logs
           </p>
         </div>
@@ -109,12 +151,12 @@ export default function ProcurementScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by PO number, vendor, requestor..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          {/* Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+          {/* Uniform Height Control Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-between sm:justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -216,62 +258,29 @@ export default function ProcurementScreenController({
         </CardSharedComponent>
       )}
 
-      {/* Grid View Mode */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
+      {filteredOrders.length > 0 && (
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredOrders.map((po) => renderOrderCard(po))}
+        </div>
+      )}
+
+      {/* Grid View Mode - sm and up */}
       {viewMode === 'grid' && filteredOrders.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredOrders.map((po) => (
-            <CardSharedComponent key={po.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
-              {/* Header */}
-              <div>
-                <span className="text-xs font-mono text-sky-500 font-bold flex items-center gap-1">
-                  <FileText className="w-3.5 h-3.5" /> {po.poNumber}
-                </span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate mt-0.5">
-                  {po.vendorName}
-                </h3>
-              </div>
-
-              {/* Middle Section: Details & Valuation */}
-              <div className="py-3 border-y border-slate-100 dark:border-zinc-800/80 space-y-2 text-xs">
-                <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
-                  <span className="flex items-center gap-1 text-slate-400">
-                    <Calendar className="w-3.5 h-3.5" /> Order Date:
-                  </span>
-                  <span className="font-mono">{po.requestDate}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
-                  <span className="flex items-center gap-1 text-slate-400">
-                    <User className="w-3.5 h-3.5" /> Requestor:
-                  </span>
-                  <span className="font-medium">{po.requestorName}</span>
-                </div>
-                <div className="flex justify-between items-center text-slate-600 dark:text-zinc-300">
-                  <span className="text-slate-400 font-medium">Status:</span>
-                  <span className="font-mono font-semibold text-emerald-600 dark:text-emerald-400">{po.status}</span>
-                </div>
-
-                {/* PO Cost at the very last with a top divider */}
-                <div className="flex justify-between items-baseline pt-2.5 border-t border-slate-100 dark:border-zinc-800/80">
-                  <span className="text-slate-500 dark:text-zinc-400 font-medium">PO Cost:</span>
-                  <span className="text-xl font-bold font-mono text-slate-900 dark:text-white">
-                    ${po.totalCost?.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </CardSharedComponent>
-          ))}
+          {filteredOrders.map((po) => renderOrderCard(po))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {viewMode === 'list' && filteredOrders.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[900px] whitespace-nowrap' : ''}`}>
               <thead>

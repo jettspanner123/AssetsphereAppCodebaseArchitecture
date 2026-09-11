@@ -85,15 +85,67 @@ export default function VendorsScreenController({
     };
   };
 
+  const renderVendorCard = (v: Vendor) => {
+    const slaStyles = getSLAColorStyles(v.ratingScore || 0);
+    return (
+      <CardSharedComponent key={v.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
+        {/* Header */}
+        <div>
+          <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
+            {v.name}
+          </h3>
+          <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
+            <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
+          </p>
+        </div>
+
+        {/* Contact Details & SLA Score */}
+        <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
+          <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
+            <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span className="truncate">{v.email}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
+            <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>{v.phone}</span>
+          </div>
+
+          {/* Dynamic Color SLA Rating Gauge & Score Bar */}
+          <div className="pt-3.5 mt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-2.5">
+            <div className="flex justify-between items-baseline">
+              <span className="text-xs text-slate-500 dark:text-zinc-400 font-sans font-semibold flex items-center gap-1.5">
+                <Award className={`w-4 h-4 ${slaStyles.icon}`} /> SLA Rating Score
+              </span>
+              <div className="flex items-baseline gap-1 font-mono">
+                <span className={`text-2xl font-extrabold tracking-tight ${slaStyles.text}`}>
+                  {v.ratingScore}
+                </span>
+                <span className="text-slate-400 font-medium text-xs">/ 5.0</span>
+              </div>
+            </div>
+
+            {/* Dynamic Color SLA Rating Progress Meter Bar */}
+            <div className="w-full bg-slate-100 dark:bg-zinc-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/80 dark:border-zinc-700/60">
+              <div
+                className={`h-full rounded-full transition-all duration-300 ${slaStyles.bar}`}
+                style={{ width: `${((v.ratingScore || 0) / 5) * 100}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      </CardSharedComponent>
+    );
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Vendors & Service Level Agreements
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Supplier performance metrics, contract renewals, SLA compliance scores, and vendor contacts
           </p>
         </div>
@@ -133,12 +185,12 @@ export default function VendorsScreenController({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by vendor name, contact, email, phone..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          {/* Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+          {/* Uniform Height Control Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-between sm:justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -240,72 +292,29 @@ export default function VendorsScreenController({
         </CardSharedComponent>
       )}
 
-      {/* Grid View Mode */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
+      {filteredVendors.length > 0 && (
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredVendors.map((v) => renderVendorCard(v))}
+        </div>
+      )}
+
+      {/* Grid View Mode - sm and up */}
       {viewMode === 'grid' && filteredVendors.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredVendors.map((v) => {
-            const slaStyles = getSLAColorStyles(v.ratingScore || 0);
-            return (
-              <CardSharedComponent key={v.id} hoverable className="p-6 flex flex-col justify-between space-y-5">
-                {/* Header */}
-                <div>
-                  <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline truncate leading-tight">
-                    {v.name}
-                  </h3>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 flex items-center gap-1 mt-1">
-                    <User className="w-3.5 h-3.5 text-slate-400" /> {v.contactPerson}
-                  </p>
-                </div>
-
-                {/* Contact Details & SLA Score */}
-                <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
-                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span className="truncate">{v.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-zinc-300">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{v.phone}</span>
-                  </div>
-
-                  {/* Dynamic Color SLA Rating Gauge & Score Bar */}
-                  <div className="pt-3.5 mt-3 border-t border-slate-100 dark:border-zinc-800/80 space-y-2.5">
-                    <div className="flex justify-between items-baseline">
-                      <span className="text-xs text-slate-500 dark:text-zinc-400 font-sans font-semibold flex items-center gap-1.5">
-                        <Award className={`w-4 h-4 ${slaStyles.icon}`} /> SLA Rating Score
-                      </span>
-                      <div className="flex items-baseline gap-1 font-mono">
-                        <span className={`text-2xl font-extrabold tracking-tight ${slaStyles.text}`}>
-                          {v.ratingScore}
-                        </span>
-                        <span className="text-slate-400 font-medium text-xs">/ 5.0</span>
-                      </div>
-                    </div>
-
-                    {/* Dynamic Color SLA Rating Progress Meter Bar */}
-                    <div className="w-full bg-slate-100 dark:bg-zinc-800 h-3 rounded-full overflow-hidden p-0.5 border border-slate-200/80 dark:border-zinc-700/60">
-                      <div
-                        className={`h-full rounded-full transition-all duration-300 ${slaStyles.bar}`}
-                        style={{ width: `${((v.ratingScore || 0) / 5) * 100}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CardSharedComponent>
-            );
-          })}
+          {filteredVendors.map((v) => renderVendorCard(v))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {viewMode === 'list' && filteredVendors.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[900px] whitespace-nowrap' : ''}`}>
               <thead>

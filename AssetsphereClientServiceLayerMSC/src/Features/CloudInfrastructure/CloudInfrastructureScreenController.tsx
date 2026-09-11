@@ -51,15 +51,48 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
 
   const totalMonthlySpend = filteredResources.reduce((sum, r) => sum + r.cost, 0);
 
+  const renderResourceCard = (res: CloudResource) => (
+    <CardSharedComponent key={res.id} hoverable className="p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
+      {/* Top Status Ambient Gradient Bar */}
+      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
+
+      {/* Header */}
+      <div>
+        <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider">{res.provider}</span>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 leading-tight truncate">
+          {res.name}
+        </h3>
+      </div>
+
+      {/* Node Specification & Details */}
+      <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
+        <div className="flex justify-between">
+          <span className="text-slate-400">Instance Type:</span>
+          <span className="text-slate-900 dark:text-zinc-200 font-medium">{res.type}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-slate-400">Cloud Region:</span>
+          <span className="text-slate-900 dark:text-zinc-200 font-medium">{res.region}</span>
+        </div>
+
+        {/* Monthly Burn Rate at bottom with top divider */}
+        <div className="flex justify-between items-baseline pt-2.5 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
+          <span className="text-slate-400 font-sans font-medium">Monthly Burn Rate:</span>
+          <span className="text-base font-bold font-mono text-slate-900 dark:text-white">${res.cost}/mo</span>
+        </div>
+      </div>
+    </CardSharedComponent>
+  );
+
   return (
     <div className="space-y-6">
       {/* Page Title & Hero Summary Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-200 dark:border-zinc-800">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 dark:text-white font-serif-headline">
             Cloud Infrastructure & Compute Nodes
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-zinc-400 mt-1">
+          <p className="text-sm sm:text-base text-slate-500 dark:text-zinc-400 mt-1">
             Multi-cloud instance discovery, region mapping, and monthly cloud spend
           </p>
         </div>
@@ -99,12 +132,12 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by instance name, provider, type, region..."
-              className="w-full h-9 pl-9 pr-3 text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
             />
           </div>
 
-          {/* Uniform Height Control Switchers */}
-          <div className="flex flex-wrap items-center justify-between sm:justify-end gap-3">
+          {/* Uniform Height Control Switchers (hidden on mobile - mobile is grid-only) */}
+          <div className="hidden sm:flex flex-wrap items-center justify-between sm:justify-end gap-3">
             {/* Grid Column Density Switcher (2 Col vs 3 Col) */}
             {viewMode === 'grid' && (
               <div className="flex items-center p-1 rounded-lg bg-slate-100 dark:bg-zinc-800/80 border border-slate-200/60 dark:border-zinc-700/60 h-9">
@@ -222,53 +255,29 @@ export default function CloudInfrastructureScreenController(): React.JSX.Element
         </CardSharedComponent>
       )}
 
-      {/* Grid View Mode */}
+      {/* Mobile-Forced Grid View: 1 full-width column, ignores the grid/list & column-density preference below sm */}
+      {filteredResources.length > 0 && (
+        <div className="sm:hidden grid grid-cols-1 gap-3">
+          {filteredResources.map((res) => renderResourceCard(res))}
+        </div>
+      )}
+
+      {/* Grid View Mode - sm and up */}
       {viewMode === 'grid' && filteredResources.length > 0 && (
         <div
-          className={`grid grid-cols-1 ${
+          className={`hidden sm:grid grid-cols-1 ${
             gridColumns === 2
               ? 'md:grid-cols-2'
               : 'md:grid-cols-2 lg:grid-cols-3'
           } gap-6`}
         >
-          {filteredResources.map((res) => (
-            <CardSharedComponent key={res.id} hoverable className="p-6 flex flex-col justify-between space-y-5 relative overflow-hidden">
-              {/* Top Status Ambient Gradient Bar */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500" />
-
-              {/* Header */}
-              <div>
-                <span className="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-wider">{res.provider}</span>
-                <h3 className="text-base font-bold text-slate-900 dark:text-white font-serif-headline mt-0.5 leading-tight truncate">
-                  {res.name}
-                </h3>
-              </div>
-
-              {/* Node Specification & Details */}
-              <div className="py-3 border-t border-slate-100 dark:border-zinc-800/80 text-xs space-y-2 font-mono">
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Instance Type:</span>
-                  <span className="text-slate-900 dark:text-zinc-200 font-medium">{res.type}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400">Cloud Region:</span>
-                  <span className="text-slate-900 dark:text-zinc-200 font-medium">{res.region}</span>
-                </div>
-
-                {/* Monthly Burn Rate at bottom with top divider */}
-                <div className="flex justify-between items-baseline pt-2.5 mt-2 border-t border-slate-100 dark:border-zinc-800/80">
-                  <span className="text-slate-400 font-sans font-medium">Monthly Burn Rate:</span>
-                  <span className="text-base font-bold font-mono text-slate-900 dark:text-white">${res.cost}/mo</span>
-                </div>
-              </div>
-            </CardSharedComponent>
-          ))}
+          {filteredResources.map((res) => renderResourceCard(res))}
         </div>
       )}
 
-      {/* List / Table View Mode */}
+      {/* List / Table View Mode - sm and up */}
       {viewMode === 'list' && filteredResources.length > 0 && (
-        <CardSharedComponent className="p-0 overflow-hidden">
+        <CardSharedComponent className="hidden sm:block p-0 overflow-hidden">
           <div className="overflow-x-auto w-full">
             <table className={`w-full text-left text-xs ${isSingleLineMode ? 'min-w-[900px] whitespace-nowrap' : ''}`}>
               <thead>

@@ -23,6 +23,10 @@ import ApplicationPermissionCON from '@/src/Constants/ApplicationPermissionCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import SoftwareLicenseFormModalController from './Components/SoftwareLicenseFormModalController';
 import SoftwareLicenseDetailModalController from './Components/SoftwareLicenseDetailModalController';
+import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
+import TanstackQueryKeysCON from '../../Constants/TanstackQueryKeysCON';
+import RefreshButtonSharedComponent from '../../Shared/Components/RefreshButtonSharedComponent';
+import { toast } from 'sonner';
 
 export interface SoftwareLicensesScreenControllerProps {
   licenses: SoftwareLicense[];
@@ -100,6 +104,15 @@ export default function SoftwareLicensesScreenController({
     } else {
       setIsInternalAddModalOpen(true);
     }
+  };
+
+  const handleRefresh = async () => {
+    await TanstackQueryClientService.current.client.invalidateQueries({
+      queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+    });
+    toast.success('Software Subscriptions Refreshed', {
+      description: 'Fetched the latest licenses and contract data from server.',
+    });
   };
 
   const filteredLicenses = licenses.filter((lic) => {
@@ -304,15 +317,18 @@ export default function SoftwareLicensesScreenController({
       <CardSharedComponent className="p-3 space-y-3">
         {/* Row 1: Search + Add Subscription (stacked, full-width on mobile) */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by software name, publisher, key, category..."
-              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
-            />
+          <div className="flex items-stretch gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by software name, publisher, key, category..."
+                className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              />
+            </div>
+            <RefreshButtonSharedComponent onRefresh={handleRefresh} title="Refresh Software Subscriptions" />
           </div>
 
           <PermissionGuardSharedComponent

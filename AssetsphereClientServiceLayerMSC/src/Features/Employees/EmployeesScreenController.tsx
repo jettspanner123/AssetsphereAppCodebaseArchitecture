@@ -28,6 +28,9 @@ import PrimaryActionButtonSharedComponent from '../../Shared/Components/PrimaryA
 import ApplicationPermissionCON from '../../Constants/ApplicationPermissionCON';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
+import TanstackQueryKeysCON from '../../Constants/TanstackQueryKeysCON';
+import RefreshButtonSharedComponent from '../../Shared/Components/RefreshButtonSharedComponent';
+import { toast } from 'sonner';
 
 export interface EmployeesScreenControllerProps {
   employees: Employee[];
@@ -107,6 +110,20 @@ export default function EmployeesScreenController({
   const totalAssignedAssets = assets.filter(
     (a) => a.assignedToEmployeeId || a.assignedToEmployeeName
   ).length;
+
+  const handleRefresh = async () => {
+    await Promise.all([
+      TanstackQueryClientService.current.client.invalidateQueries({
+        queryKey: TanstackQueryKeysCON.EMPLOYEES,
+      }),
+      TanstackQueryClientService.current.client.invalidateQueries({
+        queryKey: TanstackQueryKeysCON.ASSETS,
+      }),
+    ]);
+    toast.success('Employee Directory Refreshed', {
+      description: 'Fetched the latest personnel and device allocation records.',
+    });
+  };
 
   const renderEmployeeCard = (emp: Employee) => {
     const empAssets = assets.filter(
@@ -241,15 +258,18 @@ export default function EmployeesScreenController({
       <CardSharedComponent className="p-3 space-y-3">
         {/* Row 1: Search + Add Employee (stacked, full-width on mobile) */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by name, email, department, code..."
-              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
-            />
+          <div className="flex items-stretch gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by name, email, department, code..."
+                className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              />
+            </div>
+            <RefreshButtonSharedComponent onRefresh={handleRefresh} title="Refresh Employee Directory" />
           </div>
 
           <PermissionGuardSharedComponent

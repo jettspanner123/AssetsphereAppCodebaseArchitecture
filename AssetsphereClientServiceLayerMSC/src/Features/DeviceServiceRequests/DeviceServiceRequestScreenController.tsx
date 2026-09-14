@@ -26,6 +26,8 @@ import {
 import { toast } from 'sonner';
 import useAuthenticationStateStore from '../../Store/AuthenticationStateStore';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
+import TanstackQueryKeysCON from '../../Constants/TanstackQueryKeysCON';
+import RefreshButtonSharedComponent from '../../Shared/Components/RefreshButtonSharedComponent';
 import UserPreferencesUtility from '../../Utilities/UserPreferencesUtility';
 import CardSharedComponent from '../../Shared/Components/CardSharedComponent';
 import CustomSelectSharedComponent, {
@@ -128,6 +130,15 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
     TanstackQueryClientService.current.deviceServiceRequests.useUpdateDeviceServiceRequestStatusMutation();
   const adminUpdateMutation =
     TanstackQueryClientService.current.deviceServiceRequests.useAdminUpdateDeviceServiceRequestMutation();
+
+  const handleRefresh = async () => {
+    await TanstackQueryClientService.current.client.invalidateQueries({
+      queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS,
+    });
+    toast.success('Service Requests Refreshed', {
+      description: 'Fetched the latest device service request records from server.',
+    });
+  };
 
   const isAdminOrDeveloper = currentUser?.role === 'ADMIN' || currentUser?.role === 'DEVELOPER';
 
@@ -826,15 +837,18 @@ export default function DeviceServiceRequestScreenController(): React.JSX.Elemen
 
           {/* Line 1: Search Bar on Left + View Mode Switchers on Right */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div className="relative flex-1 max-w-md">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
-              <input
-                type="text"
-                value={historySearchTerm}
-                onChange={(e) => setHistorySearchTerm(e.target.value)}
-                placeholder="Search ticket #, device, employee, issue..."
-                className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
-              />
+            <div className="flex items-stretch gap-2 flex-1 max-w-md">
+              <div className="relative flex-1">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+                <input
+                  type="text"
+                  value={historySearchTerm}
+                  onChange={(e) => setHistorySearchTerm(e.target.value)}
+                  placeholder="Search ticket #, device, employee, issue..."
+                  className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-700/60 rounded-xl text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-1 focus:ring-[#0C2086]/50 focus:border-[#0C2086]"
+                />
+              </div>
+              <RefreshButtonSharedComponent onRefresh={handleRefresh} title="Refresh Service Requests" />
             </div>
 
             {/* Right: Uniform Switchers (hidden on mobile - mobile is grid-only) */}

@@ -47,6 +47,7 @@ import useAuthenticationStateStore from '../../Store/AuthenticationStateStore';
 import CurrencyFormatterUtility from '../../Utilities/CurrencyFormatterUtility';
 import TanstackQueryClientService from '../../Services/TanstackQueryClientService';
 import TanstackQueryKeysCON from '../../Constants/TanstackQueryKeysCON';
+import RefreshButtonSharedComponent from '../../Shared/Components/RefreshButtonSharedComponent';
 import { toast } from 'sonner';
 
 export interface AssetInventoryScreenControllerProps {
@@ -291,6 +292,19 @@ export default function AssetInventoryScreenController({
     setContextMenu((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const handleRefresh = async () => {
+    if (onRefresh) {
+      onRefresh();
+    } else {
+      await TanstackQueryClientService.current.client.invalidateQueries({
+        queryKey: TanstackQueryKeysCON.ASSETS,
+      });
+    }
+    toast.success('Asset Inventory Refreshed', {
+      description: 'Fetched latest hardware assets from server.',
+    });
+  };
+
   const canWrite = ApplicationPermissionService.current.canWriteCore();
 
   const contextMenuItems: ContextMenuItem[] = contextMenu.asset
@@ -373,18 +387,7 @@ export default function AssetInventoryScreenController({
           label: 'Refresh',
           icon: <RotateCw className="w-3.5 h-3.5" />,
           shortcut: 'R',
-          onClick: () => {
-            if (onRefresh) {
-              onRefresh();
-            } else {
-              TanstackQueryClientService.current.client.invalidateQueries({
-                queryKey: TanstackQueryKeysCON.ASSETS,
-              });
-            }
-            toast.success('Asset Inventory Refreshed', {
-              description: 'Fetched latest hardware assets from server.',
-            });
-          },
+          onClick: handleRefresh,
         },
         {
           id: 'settings',
@@ -645,15 +648,18 @@ export default function AssetInventoryScreenController({
         <CardSharedComponent className="space-y-4 p-4">
         {/* Row 1: Search Input & Primary Actions on Same Line */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="relative flex-1 max-w-md">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by ID, serial, user..."
-              className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
-            />
+          <div className="flex items-stretch gap-2 flex-1 max-w-md">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-500" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by ID, serial, user..."
+                className="w-full !h-11 sm:!h-9 pl-9 pr-3 text-sm sm:text-xs rounded-lg bg-slate-50 dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 focus:outline-none focus:border-zinc-900 dark:focus:border-white transition-colors"
+              />
+            </div>
+            <RefreshButtonSharedComponent onRefresh={handleRefresh} title="Refresh Asset Inventory" />
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 shrink-0 w-full sm:w-auto">

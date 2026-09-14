@@ -1,9 +1,5 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
-  UserCheck,
-  Building2,
-  Briefcase,
-  MapPin,
   Mail,
   User,
   Phone,
@@ -64,6 +60,7 @@ export default function ApproveUserSetupModalController({
   const [managerName, setManagerName] = useState<string>('');
   const [contactPhone, setContactPhone] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [exitDirection, setExitDirection] = useState<'down' | 'up'>('down');
 
   // Nested Creation Modals
   const [isCreateDeptModalOpen, setIsCreateDeptModalOpen] = useState<boolean>(false);
@@ -98,6 +95,7 @@ export default function ApproveUserSetupModalController({
   const prevIsOpenRef = useRef(false);
   useEffect(() => {
     if (isOpen && !prevIsOpenRef.current && user) {
+      setExitDirection('down');
       const randomNum = Math.floor(1000 + Math.random() * 9000);
       setEmployeeId(`EMP-${randomNum}`);
       setFullName(user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'New Employee');
@@ -133,6 +131,13 @@ export default function ApproveUserSetupModalController({
   };
 
   const isSubmitting = approveMutation.isPending || createEmployeeMutation.isPending;
+
+  const handleCancel = () => {
+    setExitDirection('up');
+    setTimeout(() => {
+      onClose();
+    }, 0);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,6 +192,7 @@ export default function ApproveUserSetupModalController({
 
       toast.success(`${trimmedFullName} approved and registered in Employee Directory.`);
 
+      setExitDirection('up');
       if (onSuccess) {
         onSuccess();
       }
@@ -204,22 +210,12 @@ export default function ApproveUserSetupModalController({
       <ModalSharedComponent
         isOpen={isOpen}
         onClose={onClose}
-        title={
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <UserCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="font-semibold text-slate-900 dark:text-white">
-                Approve User & Setup Employee Directory Record
-              </span>
-            </div>
-          </div>
-        }
+        title="Approve User & Setup Employee Directory Record"
         subtitle="Transfer the verified user into the enterprise employee directory with configured credentials and assignment"
         maxWidth="2xl"
         scrollMode="body"
         animationType="slide-up"
+        exitDirection={exitDirection}
       >
         <form onSubmit={handleSubmit} className="space-y-5 text-xs">
           {errorMessage && (
@@ -412,7 +408,7 @@ export default function ApproveUserSetupModalController({
               variant="outline"
               size="sm"
               disabled={isSubmitting}
-              onClick={onClose}
+              onClick={handleCancel}
               className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
             >
               Cancel

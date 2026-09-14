@@ -947,6 +947,7 @@ export default function SoftwareLicenseDetailModalController({
         onClose={() => setEmployeeToUnassign(null)}
         onConfirm={handleConfirmUnassign}
         isLoading={updateLicenseMutation.isPending}
+        zIndex={zIndex + 10}
         title="Unassign Employee from License"
         subtitle={`${displayLicense.softwareName} • Seat Deallocation`}
         variant="warning"
@@ -979,6 +980,7 @@ export default function SoftwareLicenseDetailModalController({
           await deleteLicenseMutation.mutateAsync(displayLicense.id);
         }}
         isLoading={deleteLicenseMutation.isPending}
+        zIndex={zIndex + 10}
         title="Delete Software Subscription"
         subtitle={`License Agreement: ${displayLicense.licenseKey}`}
         variant="danger"

@@ -17,6 +17,7 @@ export interface ConfirmationModalSharedComponentProps {
   isLoading?: boolean;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   additionalContent?: React.ReactNode;
+  zIndex?: number;
 }
 
 export default function ConfirmationModalSharedComponent({
@@ -32,6 +33,7 @@ export default function ConfirmationModalSharedComponent({
   isLoading = false,
   maxWidth = 'md',
   additionalContent,
+  zIndex,
 }: ConfirmationModalSharedComponentProps): React.JSX.Element {
   const [exitDirection, setExitDirection] = React.useState<'down' | 'up'>('down');
   const prevIsOpenRef = React.useRef(isOpen);
@@ -75,6 +77,7 @@ export default function ConfirmationModalSharedComponent({
       title={title}
       subtitle={subtitle}
       maxWidth={maxWidth}
+      zIndex={zIndex}
     >
       <div className="flex flex-col justify-between h-full text-xs">
         {/* Main Content Area (Clean natural typography, no icon) */}

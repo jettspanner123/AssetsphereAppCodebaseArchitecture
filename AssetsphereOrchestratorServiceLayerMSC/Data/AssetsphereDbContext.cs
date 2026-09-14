@@ -53,7 +53,9 @@ public class AssetsphereDbContext : DbContext
         {
             entity.ToTable(DatabaseCON.UsersTable);
             entity.HasKey(e => e.Id);
-            entity.HasIndex(e => e.Email).IsUnique();
+            // Filtered so a soft-deleted user's email doesn't block a new registration
+            // reusing that address - the unique constraint only applies to live rows.
+            entity.HasIndex(e => e.Email).IsUnique().HasFilter("is_deleted = false");
             entity.HasIndex(e => e.IsVerified);
             entity.Property(e => e.Role).HasConversion<string>();
             entity.Property(e => e.Department).HasConversion<string>();

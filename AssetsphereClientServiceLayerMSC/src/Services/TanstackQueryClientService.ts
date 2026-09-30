@@ -18,7 +18,7 @@ import {
   AssetValuationSummaryResponse,
 } from '../Features/AssetInventory/Services/AssetInventoryService';
 import { Employee } from '../Types/EmployeeType';
-import { CreateEmployeeRequest } from '../Features/Employees/Services/EmployeesDirectoryService';
+import { CreateEmployeeRequest, DEPARTMENT_NAME_MAP } from '../Features/Employees/Services/EmployeesDirectoryService';
 import {
   SoftwareLicense,
   CreateSoftwareLicenseRequest,
@@ -128,19 +128,37 @@ export class AuthenticationQueryService {
     options?: UseMutationOptions<UserProfileType, Error, string>
   ): UseMutationResult<UserProfileType, Error, string> {
     return useMutation({
+      ...options,
       mutationFn: async (id: string) => {
         return await UserRequestsService.current.approveUser(id);
       },
-      onSuccess: async (...args) => {
-        const [, approvedId] = args;
-        this.getClient?.()?.setQueryData<PendingUserType[]>(
-          TanstackQueryKeysCON.PENDING_USERS,
-          (old) => (old ? old.filter((u) => u.id !== approvedId) : [])
+      onMutate: async (id) => {
+        await this.getClient?.()?.cancelQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        // Prefix match: the real cache key is [...PENDING_USERS, status], not the bare PENDING_USERS key.
+        const previousQueries =
+          this.getClient?.()?.getQueriesData<PendingUserType[]>({ queryKey: TanstackQueryKeysCON.PENDING_USERS }) ?? [];
+
+        this.getClient?.()?.setQueriesData<PendingUserType[]>(
+          { queryKey: TanstackQueryKeysCON.PENDING_USERS },
+          (old) => (old ? old.filter((u) => u.id !== id) : old)
         );
-        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+
+        (options?.onMutate as any)?.(id);
+        return { previousQueries };
+      },
+      onError: (err, id, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient?.()?.setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, id, context);
+      },
+      onSuccess: (...args) => {
         (options?.onSuccess as any)?.(...args);
       },
-      ...options,
+      onSettled: async (...args) => {
+        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        (options?.onSettled as any)?.(...args);
+      },
     });
   }
 
@@ -155,19 +173,36 @@ export class AuthenticationQueryService {
     options?: UseMutationOptions<boolean, Error, string>
   ): UseMutationResult<boolean, Error, string> {
     return useMutation({
+      ...options,
       mutationFn: async (id: string) => {
         return await UserRequestsService.current.rejectUser(id);
       },
-      onSuccess: async (...args) => {
-        const [, rejectedId] = args;
-        this.getClient?.()?.setQueryData<PendingUserType[]>(
-          TanstackQueryKeysCON.PENDING_USERS,
-          (old) => (old ? old.filter((u) => u.id !== rejectedId) : [])
+      onMutate: async (id) => {
+        await this.getClient?.()?.cancelQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        const previousQueries =
+          this.getClient?.()?.getQueriesData<PendingUserType[]>({ queryKey: TanstackQueryKeysCON.PENDING_USERS }) ?? [];
+
+        this.getClient?.()?.setQueriesData<PendingUserType[]>(
+          { queryKey: TanstackQueryKeysCON.PENDING_USERS },
+          (old) => (old ? old.filter((u) => u.id !== id) : old)
         );
-        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+
+        (options?.onMutate as any)?.(id);
+        return { previousQueries };
+      },
+      onError: (err, id, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient?.()?.setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, id, context);
+      },
+      onSuccess: (...args) => {
         (options?.onSuccess as any)?.(...args);
       },
-      ...options,
+      onSettled: async (...args) => {
+        await this.getClient?.()?.invalidateQueries({ queryKey: TanstackQueryKeysCON.PENDING_USERS });
+        (options?.onSettled as any)?.(...args);
+      },
     });
   }
 
@@ -180,6 +215,34 @@ export class AuthenticationQueryService {
 
 export class AssetQueryService {
   constructor(private readonly getClient: () => QueryClient) {}
+
+  private applyOptimisticAssetPatch(existing: Asset, patch: Partial<CreateAssetRequest>): Asset {
+    return {
+      ...existing,
+      displayName: patch.displayName ?? existing.displayName,
+      serialNumber: patch.serialNumber ?? existing.serialNumber,
+      category: (patch.category as Asset['category']) ?? existing.category,
+      subtype: (patch.subtype as Asset['subtype']) ?? existing.subtype,
+      manufacturer: patch.manufacturer ?? existing.manufacturer,
+      model: patch.modelName ?? existing.model,
+      lifecycleStatus: (patch.status as Asset['lifecycleStatus']) ?? existing.lifecycleStatus,
+      currentLocation: patch.location ?? existing.currentLocation,
+      department: patch.assignedDepartment ?? existing.department,
+      assignedToEmployeeId: patch.assignedEmployeeId ?? existing.assignedToEmployeeId,
+      assignedToEmployeeName: patch.assignedEmployeeName ?? existing.assignedToEmployeeName,
+      currency: patch.currency ?? existing.currency,
+      procurement:
+        patch.purchasePrice !== undefined
+          ? { ...existing.procurement, purchaseCost: patch.purchasePrice }
+          : existing.procurement,
+      hardwareSpecs:
+        patch.specs && existing.hardwareSpecs
+          ? { ...existing.hardwareSpecs, ...patch.specs }
+          : patch.specs
+            ? (patch.specs as Asset['hardwareSpecs'])
+            : existing.hardwareSpecs,
+    };
+  }
 
   public useAssetsQuery(
     options?: Omit<UseQueryOptions<Asset[], Error>, 'queryKey' | 'queryFn'>
@@ -278,7 +341,26 @@ export class AssetQueryService {
         const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
         return await AssetInventoryService.current.updateAsset(id, data);
       },
-      onSuccess: async (...args) => {
+      onMutate: async (variables) => {
+        const { id, data } = variables;
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        const previousAssets = this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS);
+
+        this.getClient().setQueryData<Asset[]>(
+          TanstackQueryKeysCON.ASSETS,
+          (oldAssets) => oldAssets?.map((a) => (a.id === id ? this.applyOptimisticAssetPatch(a, data) : a))
+        );
+
+        (options?.onMutate as any)?.(variables);
+        return { previousAssets };
+      },
+      onError: (err, variables, context: any) => {
+        if (context?.previousAssets) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.ASSETS, context.previousAssets);
+        }
+        (options?.onError as any)?.(err, variables, context);
+      },
+      onSuccess: (...args) => {
         const [updatedAsset] = args;
         this.getClient().setQueryData<Asset[]>(
           TanstackQueryKeysCON.ASSETS,
@@ -287,10 +369,13 @@ export class AssetQueryService {
             return oldAssets.map((a) => (a.id === updatedAsset.id ? updatedAsset : a));
           }
         );
+        (options?.onSuccess as any)?.(...args);
+      },
+      onSettled: async (...args) => {
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
         await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
-        (options?.onSuccess as any)?.(...args);
+        (options?.onSettled as any)?.(...args);
       },
     });
   }
@@ -310,19 +395,32 @@ export class AssetQueryService {
         const { default: AssetInventoryService } = await import('../Features/AssetInventory/Services/AssetInventoryService');
         return await AssetInventoryService.current.deleteAsset(id);
       },
-      onSuccess: async (...args) => {
-        const [, id] = args;
+      onMutate: async (id) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+        const previousAssets = this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS);
+
         this.getClient().setQueryData<Asset[]>(
           TanstackQueryKeysCON.ASSETS,
-          (oldAssets) => {
-            if (!oldAssets) return [];
-            return oldAssets.filter((a) => a.id !== id);
-          }
+          (oldAssets) => oldAssets?.filter((a) => a.id !== id)
         );
+
+        (options?.onMutate as any)?.(id);
+        return { previousAssets };
+      },
+      onError: (err, id, context: any) => {
+        if (context?.previousAssets) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.ASSETS, context.previousAssets);
+        }
+        (options?.onError as any)?.(err, id, context);
+      },
+      onSuccess: (...args) => {
+        (options?.onSuccess as any)?.(...args);
+      },
+      onSettled: async (...args) => {
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
         await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
-        (options?.onSuccess as any)?.(...args);
+        (options?.onSettled as any)?.(...args);
       },
     });
   }
@@ -336,6 +434,48 @@ export class AssetQueryService {
 
 export class EmployeeQueryService {
   constructor(private readonly getClient: () => QueryClient) {}
+
+  private resolveDepartmentName(department: string | number | undefined, fallback: string): string {
+    if (department === undefined) return fallback;
+    return typeof department === 'number' ? (DEPARTMENT_NAME_MAP[department] ?? fallback) : department;
+  }
+
+  private buildOptimisticEmployee(request: CreateEmployeeRequest): Employee {
+    return {
+      id: `optimistic-${Date.now()}`,
+      employeeCode: request.employeeId,
+      name: request.fullName,
+      email: request.email,
+      phone: request.contactPhone || '',
+      department: this.resolveDepartmentName(request.department, ''),
+      businessUnit: '',
+      costCenter: '',
+      managerName: request.managerName || '',
+      designation: request.designation,
+      officeLocation: request.location,
+      floor: '',
+      desk: '',
+      employmentType: 'Full-time',
+      joiningDate: new Date().toISOString().split('T')[0],
+      avatarUrl: request.avatarUrl,
+      assignedAssetCount: 0,
+    };
+  }
+
+  private applyOptimisticEmployeePatch(existing: Employee, patch: Partial<CreateEmployeeRequest>): Employee {
+    return {
+      ...existing,
+      employeeCode: patch.employeeId ?? existing.employeeCode,
+      name: patch.fullName ?? existing.name,
+      email: patch.email ?? existing.email,
+      phone: patch.contactPhone ?? existing.phone,
+      department: this.resolveDepartmentName(patch.department, existing.department),
+      managerName: patch.managerName ?? existing.managerName,
+      designation: patch.designation ?? existing.designation,
+      officeLocation: patch.location ?? existing.officeLocation,
+      avatarUrl: patch.avatarUrl ?? existing.avatarUrl,
+    };
+  }
 
   public useEmployeesQuery(
     options?: Omit<UseQueryOptions<Employee[], Error>, 'queryKey' | 'queryFn'>
@@ -380,18 +520,41 @@ export class EmployeeQueryService {
         const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
         return await EmployeesDirectoryService.current.createEmployee(request);
       },
-      onSuccess: async (...args) => {
+      onMutate: async (request) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        const previousEmployees = this.getClient().getQueryData<Employee[]>(TanstackQueryKeysCON.EMPLOYEES);
+
+        const optimisticEmployee = this.buildOptimisticEmployee(request);
+        this.getClient().setQueryData<Employee[]>(
+          TanstackQueryKeysCON.EMPLOYEES,
+          (oldEmployees) => (oldEmployees ? [optimisticEmployee, ...oldEmployees] : [optimisticEmployee])
+        );
+
+        (options?.onMutate as any)?.(request);
+        return { previousEmployees };
+      },
+      onError: (err, request, context: any) => {
+        if (context?.previousEmployees) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEES, context.previousEmployees);
+        }
+        (options?.onError as any)?.(err, request, context);
+      },
+      onSuccess: (...args) => {
         const [createdEmp] = args;
         this.getClient().setQueryData<Employee[]>(
           TanstackQueryKeysCON.EMPLOYEES,
           (oldEmployees) => {
             if (!oldEmployees) return [createdEmp];
-            const exists = oldEmployees.some((e) => e.id === createdEmp.id);
-            return exists ? oldEmployees : [createdEmp, ...oldEmployees];
+            const withoutOptimistic = oldEmployees.filter((e) => !e.id.startsWith('optimistic-'));
+            const exists = withoutOptimistic.some((e) => e.id === createdEmp.id);
+            return exists ? withoutOptimistic : [createdEmp, ...withoutOptimistic];
           }
         );
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        (options?.onSettled as any)?.(...args);
       },
     });
   }
@@ -411,7 +574,36 @@ export class EmployeeQueryService {
         const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
         return await EmployeesDirectoryService.current.updateEmployee(id, request);
       },
-      onSuccess: async (...args) => {
+      onMutate: async (variables) => {
+        const { id, request } = variables;
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        const previousEmployees = this.getClient().getQueryData<Employee[]>(TanstackQueryKeysCON.EMPLOYEES);
+        const previousDetail = this.getClient().getQueryData<Employee>(TanstackQueryKeysCON.EMPLOYEE_DETAIL(id));
+
+        this.getClient().setQueryData<Employee[]>(
+          TanstackQueryKeysCON.EMPLOYEES,
+          (oldEmployees) => oldEmployees?.map((e) => (e.id === id ? this.applyOptimisticEmployeePatch(e, request) : e))
+        );
+        if (previousDetail) {
+          this.getClient().setQueryData<Employee>(
+            TanstackQueryKeysCON.EMPLOYEE_DETAIL(id),
+            this.applyOptimisticEmployeePatch(previousDetail, request)
+          );
+        }
+
+        (options?.onMutate as any)?.(variables);
+        return { previousEmployees, previousDetail, id };
+      },
+      onError: (err, variables, context: any) => {
+        if (context?.previousEmployees) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEES, context.previousEmployees);
+        }
+        if (context?.previousDetail && context?.id) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEE_DETAIL(context.id), context.previousDetail);
+        }
+        (options?.onError as any)?.(err, variables, context);
+      },
+      onSuccess: (...args) => {
         const [updatedEmp] = args;
         this.getClient().setQueryData<Employee[]>(
           TanstackQueryKeysCON.EMPLOYEES,
@@ -424,9 +616,12 @@ export class EmployeeQueryService {
           TanstackQueryKeysCON.EMPLOYEE_DETAIL(updatedEmp.id),
           updatedEmp
         );
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEE_DETAIL(updatedEmp.id) });
         (options?.onSuccess as any)?.(...args);
+      },
+      onSettled: async (data, error, variables, ...rest) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEE_DETAIL(variables.id) });
+        (options?.onSettled as any)?.(data, error, variables, ...rest);
       },
     });
   }
@@ -446,17 +641,30 @@ export class EmployeeQueryService {
         const { default: EmployeesDirectoryService } = await import('../Features/Employees/Services/EmployeesDirectoryService');
         return await EmployeesDirectoryService.current.deleteEmployee(id);
       },
-      onSuccess: async (...args) => {
-        const [, id] = args;
+      onMutate: async (id) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        const previousEmployees = this.getClient().getQueryData<Employee[]>(TanstackQueryKeysCON.EMPLOYEES);
+
         this.getClient().setQueryData<Employee[]>(
           TanstackQueryKeysCON.EMPLOYEES,
-          (oldEmployees) => {
-            if (!oldEmployees) return [];
-            return oldEmployees.filter((e) => e.id !== id);
-          }
+          (oldEmployees) => oldEmployees?.filter((e) => e.id !== id)
         );
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+
+        (options?.onMutate as any)?.(id);
+        return { previousEmployees };
+      },
+      onError: (err, id, context: any) => {
+        if (context?.previousEmployees) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.EMPLOYEES, context.previousEmployees);
+        }
+        (options?.onError as any)?.(err, id, context);
+      },
+      onSuccess: (...args) => {
         (options?.onSuccess as any)?.(...args);
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        (options?.onSettled as any)?.(...args);
       },
     });
   }

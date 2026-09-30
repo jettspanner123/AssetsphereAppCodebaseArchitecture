@@ -91,7 +91,7 @@ export default class ApplicationNetworkAPIConfiguration {
 
     // When built for production (such as on Vercel), default to live Render Cloud API
     if (typeof import.meta !== 'undefined' && import.meta.env?.PROD) {
-      return 'https://assetsphereappcodebasearchitecture.onrender.com';
+      return 'https://assetsphereappcodebasearchitecture-op10.onrender.com';
     }
 
     return 'http://localhost:5125';

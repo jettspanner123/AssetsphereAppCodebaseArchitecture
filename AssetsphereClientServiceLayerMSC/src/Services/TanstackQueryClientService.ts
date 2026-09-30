@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-query';
 import { LoginCredentials, LoginAuthState } from '../Features/LoginScreen/Models/LoginScreenModel';
 import LoginScreenService from '../Features/LoginScreen/Services/LoginScreenService';
+import ApplicationLocalStorageService from './ApplicationLocalStorageService';
 import { SignupFormData, SignupAuthState } from '../Features/SignupScreen/Models/SignupScreenModel';
 import SignupScreenService from '../Features/SignupScreen/Services/SignupScreenService';
 import { Asset } from '../Types/AssetType';
@@ -705,15 +706,70 @@ export class DeviceServiceRequestsQueryService {
     import('../Types/DeviceServiceRequestType').CreateDeviceServiceRequestInput
   > {
     return useMutation({
+      ...options,
       mutationFn: async (input: import('../Types/DeviceServiceRequestType').CreateDeviceServiceRequestInput) => {
         const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
         return await DeviceServiceRequestsService.current.createRequest(input);
       },
-      onSuccess: () => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      onMutate: async (input) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        const previousQueries = this.getClient().getQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+
+        const session = ApplicationLocalStorageService.current.getAuthSession();
+        const currentUserId = session?.user?.id || '';
+        const currentUserName = session?.userName || session?.user?.fullName || 'You';
+        const currentUserEmail = session?.userEmail || session?.user?.email || '';
+        const currentUserRole = session?.userRole || (session?.user?.role as string) || '';
+        const nowIso = new Date().toISOString();
+
+        const optimisticRequest: import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType = {
+          id: `optimistic-${Date.now()}`,
+          requestNumber: 'Submitting...',
+          requesterUserId: currentUserId,
+          requesterName: currentUserName,
+          requesterEmail: currentUserEmail,
+          requesterRole: currentUserRole,
+          targetUserId: input.targetUserId || currentUserId,
+          targetUserName: input.targetUserName || currentUserName,
+          targetUserEmail: input.targetUserEmail || currentUserEmail,
+          assetId: input.assetId,
+          assetTag: input.assetTag,
+          assetName: input.assetName,
+          serviceCategory: input.serviceCategory,
+          componentSubtype: input.componentSubtype,
+          usabilityState: input.usabilityState,
+          serviceChannel: input.serviceChannel,
+          urgency: input.urgency,
+          workLocation: input.workLocation,
+          descriptionRichText: input.descriptionRichText,
+          status: 'PENDING',
+          createdAt: nowIso,
+          createdBy: currentUserName,
+        };
+
+        this.getClient().setQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >(
+          { queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS },
+          (old) => (old ? [optimisticRequest, ...old] : [optimisticRequest])
+        );
+
+        (options?.onMutate as any)?.(input);
+        return { previousQueries };
       },
-      ...options,
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, variables, context);
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+        (options?.onSettled as any)?.(...args);
+      },
     });
   }
 
@@ -732,15 +788,45 @@ export class DeviceServiceRequestsQueryService {
     { id: string; input: import('../Types/DeviceServiceRequestType').UpdateDeviceServiceRequestStatusInput }
   > {
     return useMutation({
+      ...options,
       mutationFn: async ({ id, input }) => {
         const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
         return await DeviceServiceRequestsService.current.updateRequestStatus(id, input);
       },
-      onSuccess: () => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      onMutate: async (variables) => {
+        const { id, input } = variables;
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        const previousQueries = this.getClient().getQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+
+        const nowIso = new Date().toISOString();
+        this.getClient().setQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >(
+          { queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS },
+          (old) =>
+            old?.map((r) =>
+              r.id === id
+                ? { ...r, status: input.status, resolutionNotes: input.resolutionNotes ?? r.resolutionNotes, updatedAt: nowIso }
+                : r
+            )
+        );
+
+        (options?.onMutate as any)?.(variables);
+        return { previousQueries };
       },
-      ...options,
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, variables, context);
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+        (options?.onSettled as any)?.(...args);
+      },
     });
   }
 
@@ -759,21 +845,81 @@ export class DeviceServiceRequestsQueryService {
     { id: string; input: import('../Types/DeviceServiceRequestType').AdminUpdateDeviceServiceRequestInput }
   > {
     return useMutation({
+      ...options,
       mutationFn: async ({ id, input }) => {
         const { default: DeviceServiceRequestsService } = await import('../Features/DeviceServiceRequests/Services/DeviceServiceRequestsService');
         return await DeviceServiceRequestsService.current.adminUpdateRequest(id, input);
       },
-      onSuccess: () => {
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
-        this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+      onMutate: async (variables) => {
+        const { id, input } = variables;
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        const previousQueries = this.getClient().getQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+
+        const nowIso = new Date().toISOString();
+        this.getClient().setQueriesData<
+          import('../Types/DeviceServiceRequestType').DeviceServiceRequestItemType[]
+        >(
+          { queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS },
+          (old) => old?.map((r) => (r.id === id ? { ...r, ...input, updatedAt: nowIso } : r))
+        );
+
+        (options?.onMutate as any)?.(variables);
+        return { previousQueries };
       },
-      ...options,
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, variables, context);
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.DEVICE_SERVICE_REQUESTS });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.MY_DEVICE_SERVICE_REQUESTS });
+        (options?.onSettled as any)?.(...args);
+      },
     });
   }
 }
 
 export class SoftwareLicensesQueryService {
   constructor(private readonly getClient: () => QueryClient) {}
+
+  private isLicenseListQueryKey(key: readonly unknown[]): boolean {
+    return key.length === 1 || (key.length === 2 && typeof key[1] === 'object' && key[1] !== null);
+  }
+
+  private applyLicensePatch(existing: SoftwareLicense, patch: UpdateSoftwareLicenseRequest): SoftwareLicense {
+    let assignedDepartments = existing.assignedDepartments;
+    if (patch.assignedDepartmentsJson !== undefined) {
+      try {
+        const parsed = JSON.parse(patch.assignedDepartmentsJson);
+        assignedDepartments = Array.isArray(parsed) ? parsed : existing.assignedDepartments;
+      } catch {
+        assignedDepartments = existing.assignedDepartments;
+      }
+    }
+
+    return {
+      ...existing,
+      softwareName: patch.softwareName ?? existing.softwareName,
+      publisher: patch.publisher ?? existing.publisher,
+      version: patch.version ?? existing.version,
+      category: patch.category ?? existing.category,
+      licenseKey: patch.licenseKey ?? existing.licenseKey,
+      licenseType: patch.licenseType ?? existing.licenseType,
+      totalSeats: patch.totalSeats ?? existing.totalSeats,
+      allocatedSeats: patch.assignedSeats ?? existing.allocatedSeats,
+      costPerSeat: patch.costPerSeat ?? existing.costPerSeat,
+      annualCost: patch.annualCost ?? existing.annualCost,
+      currency: patch.currency ?? existing.currency,
+      purchaseDate: patch.purchaseDate ?? existing.purchaseDate,
+      expirationDate: patch.expiryDate ?? existing.expirationDate,
+      complianceStatus: patch.complianceStatus ?? existing.complianceStatus,
+      assignedDepartments,
+    };
+  }
 
   public useSoftwareLicensesQuery(
     category?: string,
@@ -822,11 +968,65 @@ export class SoftwareLicensesQueryService {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.createLicense(request);
       },
+      onMutate: async (request) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        const previousQueries = this.getClient().getQueriesData<SoftwareLicense[]>({
+          queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+          predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+        });
+
+        let assignedDepartments: string[] = [];
+        if (request.assignedDepartmentsJson) {
+          try {
+            const parsed = JSON.parse(request.assignedDepartmentsJson);
+            if (Array.isArray(parsed)) assignedDepartments = parsed;
+          } catch {}
+        }
+
+        const optimisticLicense: SoftwareLicense = {
+          id: `optimistic-${Date.now()}`,
+          softwareName: request.softwareName,
+          publisher: request.publisher,
+          version: request.version,
+          category: request.category,
+          licenseKey: request.licenseKey,
+          licenseType: request.licenseType,
+          totalSeats: request.totalSeats,
+          allocatedSeats: request.assignedSeats || 0,
+          costPerSeat: request.costPerSeat,
+          annualCost: request.annualCost ?? request.costPerSeat * request.totalSeats,
+          currency: request.currency || 'USD',
+          purchaseDate: request.purchaseDate || new Date().toISOString().split('T')[0],
+          expirationDate: request.expiryDate,
+          complianceStatus: request.complianceStatus || 'Compliant',
+          assignedDepartments,
+        };
+
+        this.getClient().setQueriesData<SoftwareLicense[]>(
+          {
+            queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+            predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+          },
+          (old) => (old ? [optimisticLicense, ...old] : [optimisticLicense])
+        );
+
+        (options?.onMutate as any)?.(request);
+        return { previousQueries };
+      },
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, variables, context);
+      },
       onSuccess: async (...args) => {
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
         if (options?.onSuccess) {
           options.onSuccess(...args);
         }
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        (options?.onSettled as any)?.(...args);
       },
     });
   }
@@ -840,13 +1040,52 @@ export class SoftwareLicensesQueryService {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.updateLicense(id, request);
       },
+      onMutate: async (variables) => {
+        const { id, request } = variables;
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        const previousQueries = this.getClient().getQueriesData<SoftwareLicense[]>({
+          queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+          predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+        });
+        const previousDetail = this.getClient().getQueryData<SoftwareLicense>(
+          TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(id)
+        );
+
+        this.getClient().setQueriesData<SoftwareLicense[]>(
+          {
+            queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+            predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+          },
+          (old) => old?.map((license) => (license.id === id ? this.applyLicensePatch(license, request) : license))
+        );
+        if (previousDetail) {
+          this.getClient().setQueryData<SoftwareLicense>(
+            TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(id),
+            this.applyLicensePatch(previousDetail, request)
+          );
+        }
+
+        (options?.onMutate as any)?.(variables);
+        return { previousQueries, previousDetail, id };
+      },
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        if (context?.previousDetail && context?.id) {
+          this.getClient().setQueryData(TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(context.id), context.previousDetail);
+        }
+        (options?.onError as any)?.(err, variables, context);
+      },
       onSuccess: async (...args) => {
-        const [, variables] = args;
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(variables.id) });
         if (options?.onSuccess) {
           options.onSuccess(...args);
         }
+      },
+      onSettled: async (data, error, variables, ...rest) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSE_DETAIL(variables.id) });
+        (options?.onSettled as any)?.(data, error, variables, ...rest);
       },
     });
   }
@@ -860,11 +1099,38 @@ export class SoftwareLicensesQueryService {
         const { default: SoftwareLicensesService } = await import('../Features/SoftwareLicenses/Services/SoftwareLicensesService');
         return await SoftwareLicensesService.current.deleteLicense(id);
       },
+      onMutate: async (id) => {
+        await this.getClient().cancelQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        const previousQueries = this.getClient().getQueriesData<SoftwareLicense[]>({
+          queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+          predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+        });
+
+        this.getClient().setQueriesData<SoftwareLicense[]>(
+          {
+            queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES,
+            predicate: (query) => this.isLicenseListQueryKey(query.queryKey as readonly unknown[]),
+          },
+          (old) => old?.filter((license) => license.id !== id)
+        );
+
+        (options?.onMutate as any)?.(id);
+        return { previousQueries };
+      },
+      onError: (err, variables, context: any) => {
+        context?.previousQueries?.forEach(([key, data]: [readonly unknown[], unknown]) => {
+          this.getClient().setQueryData(key, data);
+        });
+        (options?.onError as any)?.(err, variables, context);
+      },
       onSuccess: async (...args) => {
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
         if (options?.onSuccess) {
           options.onSuccess(...args);
         }
+      },
+      onSettled: async (...args) => {
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.SOFTWARE_LICENSES });
+        (options?.onSettled as any)?.(...args);
       },
     });
   }

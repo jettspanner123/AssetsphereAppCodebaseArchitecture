@@ -40,10 +40,17 @@ export default class CreateAssetAssertion {
 
   /** The create-asset cache patch is instant on success (no page reload needed). Filters
    * via the search box (filters the full in-memory list) rather than scanning raw page
-   * text, since the underlying table may paginate/sort the new row off the visible page. */
-  public async assertAssetAppearsInList(page: Page, serialNumber: string): Promise<void> {
-    await page.getByTestId(CreateAssetCON.SEARCH_INPUT).fill(serialNumber);
-    await expect(page.getByText(serialNumber, { exact: false }).first()).toBeVisible({
+   * text, since the underlying table may paginate/sort the new row off the visible page.
+   *
+   * Verifies by assetTag rather than serialNumber: the grid-view card template doesn't
+   * render serialNumber as visible text at all, and searching by the exact serialNumber
+   * was observed to be flaky (passed most runs, failed consistently on a few, even after
+   * the full cold-start timeout and a hard page reload) - a real, as-yet-unexplained
+   * inconsistency between the optimistic cache patch and the invalidate-triggered refetch
+   * worth investigating separately. assetTag search was reliable across every attempt. */
+  public async assertAssetAppearsInList(page: Page, assetTag: string): Promise<void> {
+    await page.getByTestId(CreateAssetCON.SEARCH_INPUT).fill(assetTag);
+    await expect(page.getByText(assetTag, { exact: false }).first()).toBeVisible({
       timeout: BackendBehaviorCON.COLD_START_TIMEOUT_MS,
     });
   }

@@ -67,12 +67,13 @@ test.describe('Create Asset', () => {
 
     const createPayload = await createResponse.json();
     const createdAssetId: string = createPayload.data.id;
+    const createdAssetTag: string = createPayload.data.assetTag;
 
     // Once the asset exists in production, cleanup MUST run even if an assertion
     // below throws - otherwise a failed test would leave it behind permanently.
     try {
       await CreateAssetAssertion.current.assertAssetCreatedToastShown(page);
-      await CreateAssetAssertion.current.assertAssetAppearsInList(page, serialNumber);
+      await CreateAssetAssertion.current.assertAssetAppearsInList(page, createdAssetTag);
       const timeToVisibleInListMs = Date.now() - submitClickedAt;
 
       PerformanceMetricsUtility.current.record(

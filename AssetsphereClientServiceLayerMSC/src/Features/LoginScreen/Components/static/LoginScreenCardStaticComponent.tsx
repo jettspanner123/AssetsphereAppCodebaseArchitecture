@@ -85,7 +85,7 @@ export default function LoginScreenCardStaticComponent({
       {/* General Error / Verification Banner */}
       {errors.general && (
         errors.general.includes('VERIFICATION_PENDING') ? (
-          <div className="mb-5 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs font-medium flex items-start gap-2.5 shadow-sm text-left">
+          <div data-testid="login-general-error" className="mb-5 p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 text-xs font-medium flex items-start gap-2.5 shadow-sm text-left">
             <span className="shrink-0 text-amber-500 mt-0.5 font-bold text-sm">⚠️</span>
             <div>
               <span className="font-bold block text-amber-900 dark:text-amber-200 mb-0.5">Account Approval Pending</span>
@@ -93,7 +93,7 @@ export default function LoginScreenCardStaticComponent({
             </div>
           </div>
         ) : (
-          <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
+          <div data-testid="login-general-error" className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
             {errors.general}
           </div>
         )
@@ -182,6 +182,7 @@ export default function LoginScreenCardStaticComponent({
               <Mail className="w-4 h-4" />
             </div>
             <input
+              data-testid="login-email-input"
               type="email"
               value={credentials.email}
               onChange={(e) => onFieldChange('email', e.target.value)}
@@ -195,7 +196,7 @@ export default function LoginScreenCardStaticComponent({
             />
           </div>
           {errors.email && (
-            <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+            <p data-testid="login-email-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
               {errors.email}
             </p>
           )}
@@ -220,6 +221,7 @@ export default function LoginScreenCardStaticComponent({
               <Lock className="w-4 h-4" />
             </div>
             <input
+              data-testid="login-password-input"
               type={showPassword ? 'text' : 'password'}
               value={credentials.password}
               onChange={(e) => onFieldChange('password', e.target.value)}
@@ -240,7 +242,7 @@ export default function LoginScreenCardStaticComponent({
             </button>
           </div>
           {errors.password && (
-            <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+            <p data-testid="login-password-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
               {errors.password}
             </p>
           )}
@@ -261,7 +263,7 @@ export default function LoginScreenCardStaticComponent({
         </div>
 
         {/* Primary Accent Button */}
-        <div style={{ viewTransitionName: 'auth-submit-btn' }} className="pt-2">
+        <div data-testid="login-submit-button" style={{ viewTransitionName: 'auth-submit-btn' }} className="pt-2">
           <ButtonSharedComponent
             variant="primary"
             size="md"

@@ -690,6 +690,7 @@ export default function AssetInventoryScreenController({
             <PermissionGuardSharedComponent permission={ApplicationPermissionCON.CAN_WRITE_CORE_ASSETS}>
               <div className="relative w-full sm:w-auto" ref={registerDropdownRef}>
                 <PrimaryActionButtonSharedComponent
+                  testId="asset-inventory-register-device-button"
                   label="Register Device"
                   onClick={() => setIsRegisterDropdownOpen((prev) => !prev)}
                   icon={<ChevronDown className={`w-3.5 h-3.5 !text-white transition-transform duration-200 ${isRegisterDropdownOpen ? 'rotate-180' : ''}`} />}
@@ -708,6 +709,7 @@ export default function AssetInventoryScreenController({
                       <div className="p-1 space-y-1">
                         {/* Option 1: Create From Scratch */}
                         <button
+                          data-testid="asset-inventory-create-from-scratch-option"
                           type="button"
                           onClick={() => {
                             setIsRegisterDropdownOpen(false);

@@ -16,6 +16,7 @@ export interface InputSharedComponentProps {
   required?: boolean;
   disabled?: boolean;
   name?: string;
+  testId?: string;
 }
 
 export default function InputSharedComponent({
@@ -34,6 +35,7 @@ export default function InputSharedComponent({
   required = false,
   disabled = false,
   name,
+  testId,
 }: InputSharedComponentProps): React.JSX.Element {
   const widthStyle = fullWidth ? 'w-full' : '';
 
@@ -51,6 +53,7 @@ export default function InputSharedComponent({
           </div>
         )}
         <input
+          data-testid={testId}
           type={type}
           name={name}
           value={value}

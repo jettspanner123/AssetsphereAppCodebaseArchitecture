@@ -29,6 +29,7 @@ export interface CustomSelectSharedComponentProps {
   searchable?: boolean;
   searchPlaceholder?: string;
   footerAction?: SelectFooterAction;
+  testId?: string;
 }
 
 export default function CustomSelectSharedComponent({
@@ -45,6 +46,7 @@ export default function CustomSelectSharedComponent({
   searchable = false,
   searchPlaceholder = 'Search options...',
   footerAction,
+  testId,
 }: CustomSelectSharedComponentProps): React.JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -108,6 +110,7 @@ export default function CustomSelectSharedComponent({
 
       {/* Trigger Button */}
       <button
+        data-testid={testId}
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={`${className.includes('w-') ? 'w-full' : ''} ${heightClass} rounded-lg bg-white dark:bg-[#0a0a0c] text-slate-900 dark:text-zinc-100 border border-slate-200/80 dark:border-zinc-800 hover:border-slate-300 dark:hover:border-zinc-700 max-sm:active:bg-slate-100 dark:max-sm:active:bg-zinc-900 max-sm:active:opacity-80 transition-colors focus:outline-none text-xs flex items-center justify-between gap-2 cursor-pointer select-none ${triggerClassName || ''}`}

@@ -454,6 +454,7 @@ export default function AssetFormModalController({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputSharedComponent
+                testId="asset-form-device-name-input"
                 label="Device Name / Model Title *"
                 value={deviceName}
                 onChange={(e) => setDeviceName(e.target.value)}
@@ -462,6 +463,7 @@ export default function AssetFormModalController({
                 className="!h-12 sm:!h-10 !text-base sm:!text-sm"
               />
               <InputSharedComponent
+                testId="asset-form-serial-number-input"
                 label="Serial Number (S/N) *"
                 value={serialNumber}
                 onChange={(e) => setSerialNumber(e.target.value)}
@@ -820,6 +822,7 @@ export default function AssetFormModalController({
             Cancel
           </ButtonSharedComponent>
           <ButtonSharedComponent
+            testId="asset-form-submit-button"
             type="submit"
             variant="primary"
             size="sm"

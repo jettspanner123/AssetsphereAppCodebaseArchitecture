@@ -16,6 +16,7 @@ export interface ButtonSharedComponentProps {
   type?: 'button' | 'submit' | 'reset';
   className?: string;
   title?: string;
+  testId?: string;
 }
 
 export default function ButtonSharedComponent({
@@ -32,6 +33,7 @@ export default function ButtonSharedComponent({
   type = 'button',
   className = '',
   title,
+  testId,
 }: ButtonSharedComponentProps): React.JSX.Element {
   let baseStyles =
     'inline-flex items-center justify-center font-medium rounded-md cursor-pointer select-none transition-colors duration-200 focus:outline-none whitespace-nowrap max-sm:active:opacity-80';
@@ -65,6 +67,7 @@ export default function ButtonSharedComponent({
 
   return (
     <motion.button
+      data-testid={testId}
       type={type}
       onClick={onClick}
       disabled={isButtonDisabled}

@@ -11,6 +11,7 @@ export interface PrimaryActionButtonSharedComponentProps {
   loadingText?: React.ReactNode;
   type?: 'button' | 'submit' | 'reset';
   className?: string;
+  testId?: string;
 }
 
 export default function PrimaryActionButtonSharedComponent({
@@ -22,6 +23,7 @@ export default function PrimaryActionButtonSharedComponent({
   loadingText,
   type = 'button',
   className = '',
+  testId,
 }: PrimaryActionButtonSharedComponentProps): React.JSX.Element {
   return (
     <ButtonSharedComponent
@@ -34,6 +36,7 @@ export default function PrimaryActionButtonSharedComponent({
       loadingText={loadingText}
       className={`!bg-[#0C2086] hover:!bg-[#081765] !text-white border-none shadow-sm font-semibold shrink-0 ${className}`}
       icon={icon}
+      testId={testId}
     >
       <span className="!text-white font-medium">{label}</span>
     </ButtonSharedComponent>

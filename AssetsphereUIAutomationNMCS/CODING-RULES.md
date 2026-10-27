@@ -161,3 +161,21 @@ export default class ApplicationPageRoutesFactory {
     } as const;
 }
 ```
+
+---
+
+## Guaranteed Cleanup For Production-Creating Tests
+
+- These tests run against the real, live production environment - not a disposable test environment. Any test that creates a real resource (a user, an asset, an employee, a device service request, anything) **must** remove or neutralize it afterward, so it never lingers and shows up on the production side for a real user to see.
+- Cleanup must happen through the same real backend workflow a human admin/user would use to remove that kind of resource (e.g. the actual `RejectUser`/`DeleteAsset`/`DeleteEmployee` endpoint), called directly via the API (not through the UI) using a dedicated Utility in that feature's `Utilities/` folder - never a special "test-only" backdoor.
+- **Cleanup must run no matter what** - if any assertion after the resource is created throws, the test still fails (that's correct), but the cleanup call must still execute. Capture the created resource's id as soon as it is known, then wrap everything from that point onward in `try { ... } finally { await cleanup(id); }`:
+  ```typescript
+  const createdId = /* ...from the create response... */;
+
+  try {
+    // assertions that could throw
+  } finally {
+    await SomeCleanupUtility.current.deleteSomething(request, createdId);
+  }
+  ```
+- Never place a cleanup call as the last line of a sequential test body with no `try/finally` - if an earlier assertion fails, that line is never reached and the resource is left behind in production permanently.

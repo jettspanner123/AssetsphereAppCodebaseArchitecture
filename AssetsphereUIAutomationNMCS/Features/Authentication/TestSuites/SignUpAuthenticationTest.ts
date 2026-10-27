@@ -75,21 +75,24 @@ test.describe('Sign Up Authentication', () => {
     const registerPayload = await registerResponse.json();
     const pendingUserId: string = registerPayload.data.user.id;
 
-    await SignUpAuthenticationAssertion.current.assertPendingApprovalShown(page, testEmail);
-    const timeToPendingApprovalMs = Date.now() - submitClickedAt;
+    // Once the account exists in production, cleanup MUST run even if an assertion
+    // below throws - otherwise a failed test would leave the pending user behind.
+    try {
+      await SignUpAuthenticationAssertion.current.assertPendingApprovalShown(page, testEmail);
+      const timeToPendingApprovalMs = Date.now() - submitClickedAt;
 
-    PerformanceMetricsUtility.current.record(
-      testInfo.title,
-      {
-        registerRequestDurationMs,
-        timeToPendingApprovalMs,
-        coldStart: registerRequestDurationMs > COLD_START_THRESHOLD_MS,
-      },
-      testInfo
-    );
-
-    // Clean up: this is a real production row sitting in the admin's approval queue.
-    await PendingUserCleanupUtility.current.rejectPendingUser(request, pendingUserId);
+      PerformanceMetricsUtility.current.record(
+        testInfo.title,
+        {
+          registerRequestDurationMs,
+          timeToPendingApprovalMs,
+          coldStart: registerRequestDurationMs > COLD_START_THRESHOLD_MS,
+        },
+        testInfo
+      );
+    } finally {
+      await PendingUserCleanupUtility.current.rejectPendingUser(request, pendingUserId);
+    }
   });
 
   test('rejects registration with an email that already has an account', async ({ page }) => {

@@ -83,7 +83,7 @@ export default function SignupScreenCardStaticComponent({
 
       {/* General Error Banner */}
       {errors.general && (
-        <div className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
+        <div data-testid="signup-general-error" className="mb-4 p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
           {errors.general}
         </div>
       )}
@@ -173,6 +173,7 @@ export default function SignupScreenCardStaticComponent({
                 <User className="w-4 h-4" />
               </div>
               <input
+                data-testid="signup-fullname-input"
                 type="text"
                 value={formData.fullName}
                 onChange={(e) => onFieldChange('fullName', e.target.value)}
@@ -186,7 +187,7 @@ export default function SignupScreenCardStaticComponent({
               />
             </div>
             {errors.fullName && (
-              <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+              <p data-testid="signup-fullname-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
                 {errors.fullName}
               </p>
             )}
@@ -202,6 +203,7 @@ export default function SignupScreenCardStaticComponent({
                 <Mail className="w-4 h-4" />
               </div>
               <input
+                data-testid="signup-email-input"
                 type="email"
                 value={formData.email}
                 onChange={(e) => onFieldChange('email', e.target.value)}
@@ -215,7 +217,7 @@ export default function SignupScreenCardStaticComponent({
               />
             </div>
             {errors.email && (
-              <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+              <p data-testid="signup-email-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
                 {errors.email}
               </p>
             )}
@@ -234,6 +236,7 @@ export default function SignupScreenCardStaticComponent({
                 <Lock className="w-4 h-4" />
               </div>
               <input
+                data-testid="signup-password-input"
                 type={showPassword ? 'text' : 'password'}
                 value={formData.password}
                 onChange={(e) => onFieldChange('password', e.target.value)}
@@ -254,7 +257,7 @@ export default function SignupScreenCardStaticComponent({
               </button>
             </div>
             {errors.password && (
-              <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+              <p data-testid="signup-password-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
                 {errors.password}
               </p>
             )}
@@ -270,6 +273,7 @@ export default function SignupScreenCardStaticComponent({
                 <Lock className="w-4 h-4" />
               </div>
               <input
+                data-testid="signup-confirm-password-input"
                 type={showConfirmPassword ? 'text' : 'password'}
                 value={formData.confirmPassword}
                 onChange={(e) => onFieldChange('confirmPassword', e.target.value)}
@@ -290,7 +294,7 @@ export default function SignupScreenCardStaticComponent({
               </button>
             </div>
             {errors.confirmPassword && (
-              <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+              <p data-testid="signup-confirm-password-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
                 {errors.confirmPassword}
               </p>
             )}
@@ -301,6 +305,7 @@ export default function SignupScreenCardStaticComponent({
         <div className="pt-1">
           <div className="flex items-start gap-2">
             <input
+              data-testid="signup-accept-terms-checkbox"
               id="acceptTerms"
               type="checkbox"
               checked={formData.acceptTerms}
@@ -312,14 +317,14 @@ export default function SignupScreenCardStaticComponent({
             </label>
           </div>
           {errors.acceptTerms && (
-            <p className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
+            <p data-testid="signup-accept-terms-field-error" className="mt-1 text-[11px] text-rose-500 dark:text-rose-400 font-medium">
               {errors.acceptTerms}
             </p>
           )}
         </div>
 
         {/* Primary Submit Button */}
-        <div style={{ viewTransitionName: 'auth-submit-btn' }} className="pt-2">
+        <div data-testid="signup-submit-button" style={{ viewTransitionName: 'auth-submit-btn' }} className="pt-2">
           <ButtonSharedComponent
             variant="primary"
             size="md"

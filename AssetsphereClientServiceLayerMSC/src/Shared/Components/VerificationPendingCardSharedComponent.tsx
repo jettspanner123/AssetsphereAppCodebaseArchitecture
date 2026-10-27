@@ -20,6 +20,7 @@ export default function VerificationPendingCardSharedComponent({
 }: VerificationPendingCardSharedComponentProps): React.JSX.Element {
   return (
     <div
+      data-testid="verification-pending-card"
       style={{ viewTransitionName: 'auth-card' }}
       className={`w-full ${maxWidthClassName} bg-white dark:bg-[#0a0a0c] border border-slate-200 dark:border-zinc-800/90 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl relative z-10 transition-colors text-center`}
     >
@@ -62,7 +63,7 @@ export default function VerificationPendingCardSharedComponent({
         )}
         <div className="flex justify-between items-center pb-2 border-b border-slate-200/60 dark:border-zinc-800">
           <span className="text-slate-500 dark:text-zinc-400 font-medium">Email Address:</span>
-          <span className="font-mono text-slate-900 dark:text-zinc-100">{email}</span>
+          <span data-testid="verification-pending-email" className="font-mono text-slate-900 dark:text-zinc-100">{email}</span>
         </div>
         <div className="flex justify-between items-center pb-2 border-b border-slate-200/60 dark:border-zinc-800">
           <span className="text-slate-500 dark:text-zinc-400 font-medium">Assigned Role:</span>
@@ -78,7 +79,7 @@ export default function VerificationPendingCardSharedComponent({
       </div>
 
       {/* Action Button */}
-      <div className="mt-6 pt-2">
+      <div data-testid="verification-pending-back-to-signin" className="mt-6 pt-2">
         <ButtonSharedComponent
           variant="primary"
           size="md"

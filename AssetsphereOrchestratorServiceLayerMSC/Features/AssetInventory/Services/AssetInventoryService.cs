@@ -6,6 +6,7 @@ using AssetsphereOrchestratorServiceLayerMSC.Models.DTOs;
 using AssetsphereOrchestratorServiceLayerMSC.Utilities;
 using AssetsphereOrchestratorServiceLayerMSC.Validators;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace AssetsphereOrchestratorServiceLayerMSC.Features.AssetInventory.Services;
 
@@ -84,6 +85,34 @@ public sealed class AssetInventoryService
         return MapToDTO(asset);
     }
 
+    /// <summary>
+    /// Finds the next free "AST-{number}" tag by looking at the highest numeric suffix ever
+    /// used across ALL rows (including soft-deleted ones, via IgnoreQueryFilters) - the
+    /// unique constraint on asset_tag is not scoped to non-deleted rows, so a soft-deleted
+    /// asset's tag still permanently blocks reuse. Counting only active rows (the old
+    /// behavior) regenerated the same tag forever once every active asset shared a count
+    /// with a previously soft-deleted or otherwise already-used tag.
+    /// </summary>
+    private async Task<string> GenerateNextAssetTagAsync()
+    {
+        List<string> existingTags = await _dbContext.Assets
+            .IgnoreQueryFilters()
+            .Where(a => a.AssetTag.StartsWith("AST-"))
+            .Select(a => a.AssetTag)
+            .ToListAsync();
+
+        int maxNumber = 1000;
+        foreach (string tag in existingTags)
+        {
+            if (int.TryParse(tag.AsSpan("AST-".Length), out int number) && number > maxNumber)
+            {
+                maxNumber = number;
+            }
+        }
+
+        return $"AST-{maxNumber + 1}";
+    }
+
     public async Task<AssetResponseDTO> CreateAssetAsync(AssetCreateDTO request, string createdBy)
     {
         if (string.IsNullOrWhiteSpace(request.SerialNumber))
@@ -98,10 +127,10 @@ public sealed class AssetInventoryService
         }
 
         string assetTag = request.AssetTag?.Trim().ToUpper() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(assetTag))
+        bool autoGenerateTag = string.IsNullOrWhiteSpace(assetTag);
+        if (autoGenerateTag)
         {
-            int totalAssets = await _dbContext.Assets.CountAsync();
-            assetTag = $"AST-{1000 + totalAssets + 1}";
+            assetTag = await GenerateNextAssetTagAsync();
         }
         else
         {
@@ -186,7 +215,27 @@ public sealed class AssetInventoryService
         };
 
         await _dbContext.Assets.AddAsync(newAsset);
-        await _dbContext.SaveChangesAsync();
+
+        const int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
+        {
+            try
+            {
+                await _dbContext.SaveChangesAsync();
+                break;
+            }
+            catch (DbUpdateException ex) when (
+                autoGenerateTag &&
+                attempt < maxAttempts &&
+                ex.InnerException is PostgresException { SqlState: "23505" } pg &&
+                pg.ConstraintName?.Contains("asset_tag", StringComparison.OrdinalIgnoreCase) == true)
+            {
+                // Another concurrent request claimed the same generated tag first - regenerate and retry.
+                _dbContext.Entry(newAsset).State = EntityState.Detached;
+                newAsset.AssetTag = await GenerateNextAssetTagAsync();
+                await _dbContext.Assets.AddAsync(newAsset);
+            }
+        }
 
         return MapToDTO(newAsset);
     }

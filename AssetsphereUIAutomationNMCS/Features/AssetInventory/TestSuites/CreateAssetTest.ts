@@ -30,7 +30,7 @@ async function fillAssetForm(page: Page, formData: AssetCreateFormDataType): Pro
 async function submitAssetFormAndCaptureResponse(page: Page): Promise<Response> {
   const createResponsePromise = page.waitForResponse(
     (response) =>
-      response.url().includes(CreateAssetCON.CREATE_ASSET_ENDPOINT_FRAGMENT) &&
+      new URL(response.url()).pathname === CreateAssetCON.CREATE_ASSET_ENDPOINT_PATH &&
       response.request().method() === 'POST',
     { timeout: BackendBehaviorCON.COLD_START_TIMEOUT_MS }
   );

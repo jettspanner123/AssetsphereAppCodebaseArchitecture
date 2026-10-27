@@ -38,9 +38,11 @@ export default class CreateAssetAssertion {
     });
   }
 
-  /** The create-asset cache patch is instant on success (no page reload needed) - the
-   * new row should already be present by its unique serial number. */
+  /** The create-asset cache patch is instant on success (no page reload needed). Filters
+   * via the search box (filters the full in-memory list) rather than scanning raw page
+   * text, since the underlying table may paginate/sort the new row off the visible page. */
   public async assertAssetAppearsInList(page: Page, serialNumber: string): Promise<void> {
+    await page.getByTestId(CreateAssetCON.SEARCH_INPUT).fill(serialNumber);
     await expect(page.getByText(serialNumber, { exact: false }).first()).toBeVisible({
       timeout: BackendBehaviorCON.COLD_START_TIMEOUT_MS,
     });

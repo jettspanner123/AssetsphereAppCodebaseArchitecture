@@ -7,5 +7,6 @@ export default class ApplicationPageRoutesFactory {
 
   public static readonly DashboardRoutes = {
     Overview: '/dashboard',
+    AssetInventory: '/dashboard/asset-inventory',
   } as const;
 }

@@ -8,4 +8,8 @@ export default class BackendAPIRoutesFactory {
     RejectUser: (id: string) => `${BackendAPIRoutesFactory.BASE_URL}/Api/V1/Authentication/RejectUser/${id}`,
     ApproveUser: (id: string) => `${BackendAPIRoutesFactory.BASE_URL}/Api/V1/Authentication/ApproveUser/${id}`,
   } as const;
+
+  public static readonly AssetInventoryEndpoints = {
+    DeleteAsset: (id: string) => `${BackendAPIRoutesFactory.BASE_URL}/Api/V1/AssetInventory/${id}`,
+  } as const;
 }

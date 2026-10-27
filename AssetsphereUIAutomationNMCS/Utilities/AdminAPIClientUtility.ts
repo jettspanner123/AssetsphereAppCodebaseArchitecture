@@ -1,13 +1,13 @@
 import { APIRequestContext } from '@playwright/test';
-import BackendApiRoutesFactory from '../Factories/BackendApiRoutesFactory';
+import BackendAPIRoutesFactory from '../Factories/BackendAPIRoutesFactory';
 
 /**
  * Obtains and caches an admin bearer token via a direct backend API call (no browser
  * involved) - for test setup/teardown that needs authenticated backend access without
  * going through the UI, e.g. cleaning up a test-created pending user registration.
  */
-export default class AdminApiClientUtility {
-  public static readonly current: AdminApiClientUtility = new AdminApiClientUtility();
+export default class AdminAPIClientUtility {
+  public static readonly current: AdminAPIClientUtility = new AdminAPIClientUtility();
   private constructor() {}
 
   private cachedToken: string | null = null;
@@ -26,7 +26,7 @@ export default class AdminApiClientUtility {
       );
     }
 
-    const response = await request.post(BackendApiRoutesFactory.AuthenticationEndpoints.Login, {
+    const response = await request.post(BackendAPIRoutesFactory.AuthenticationEndpoints.Login, {
       data: { email: adminEmail, password: adminPassword },
     });
 

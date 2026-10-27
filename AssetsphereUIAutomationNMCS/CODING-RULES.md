@@ -28,6 +28,18 @@
   const isActive: boolean = true;
   ```
 
+- Acronyms in a class, file, or identifier name are written in full caps, never Pascal-cased as if they were an ordinary word:
+  ```typescript
+  // Wrong
+  BackendApiRoutesFactory
+  AdminApiClientUtility
+
+  // Right
+  BackendAPIRoutesFactory
+  AdminAPIClientUtility
+  ```
+  This applies to the acronym itself (`API`, `URL`, `DTO`, `SSO`, etc.) wherever it appears in an identifier - at the start, middle, or end. It does not apply to literal string values like a URL path (e.g. `/Api/V1/Authentication/Login` stays exactly as the real backend casing it, since that is data, not an identifier).
+
 ---
 
 ## File Structure

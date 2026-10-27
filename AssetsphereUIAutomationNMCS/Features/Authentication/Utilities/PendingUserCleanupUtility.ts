@@ -1,6 +1,6 @@
 import { APIRequestContext } from '@playwright/test';
-import AdminApiClientUtility from '../../../Utilities/AdminApiClientUtility';
-import BackendApiRoutesFactory from '../../../Factories/BackendApiRoutesFactory';
+import AdminAPIClientUtility from '../../../Utilities/AdminAPIClientUtility';
+import BackendAPIRoutesFactory from '../../../Factories/BackendAPIRoutesFactory';
 
 /**
  * Rejects a pending user registration via a direct backend API call - used to clean up
@@ -11,9 +11,9 @@ export default class PendingUserCleanupUtility {
   private constructor() {}
 
   public async rejectPendingUser(request: APIRequestContext, pendingUserId: string): Promise<void> {
-    const adminToken = await AdminApiClientUtility.current.getAdminToken(request);
+    const adminToken = await AdminAPIClientUtility.current.getAdminToken(request);
 
-    const response = await request.post(BackendApiRoutesFactory.AuthenticationEndpoints.RejectUser(pendingUserId), {
+    const response = await request.post(BackendAPIRoutesFactory.AuthenticationEndpoints.RejectUser(pendingUserId), {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
 

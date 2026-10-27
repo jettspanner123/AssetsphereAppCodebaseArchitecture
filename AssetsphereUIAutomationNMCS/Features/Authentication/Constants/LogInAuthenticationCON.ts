@@ -18,10 +18,4 @@ export default class LogInAuthenticationCON {
   public static readonly ERROR_EMAIL_INVALID: string = 'Please enter a valid work email address.';
   public static readonly ERROR_PASSWORD_REQUIRED: string = 'Password is required.';
   public static readonly ERROR_PASSWORD_LENGTH: string = 'Password must be at least 6 characters.';
-
-  // Timeouts (ms) - the backend is hosted on Render's free tier and spins down
-  // after ~15 minutes idle; the first request after that can take up to ~60s
-  // to cold-start. Any assertion waiting on a real backend response uses this
-  // budget instead of Playwright's default 5s expect timeout.
-  public static readonly COLD_START_TIMEOUT_MS: number = 75_000;
 }

@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, test } from '@playwright/test';
 import LogInAuthenticationCON from '../Features/Authentication/Constants/LogInAuthenticationCON';
 import ApplicationPageRoutesFactory from '../Factories/ApplicationPageRoutesFactory';
 import BackendBehaviorCON from '../Constants/BackendBehaviorCON';
@@ -21,6 +21,10 @@ export default class UILoginUtility {
         'ASSETSPHERE_ADMIN_EMAIL / ASSETSPHERE_ADMIN_PASSWORD are not set. Copy .env.example to .env and fill them in.'
       );
     }
+
+    // beforeEach hooks run under Playwright's default 30s timeout until a test body
+    // calls test.setTimeout() - too late if the slow part (this login) is in beforeEach.
+    test.setTimeout(BackendBehaviorCON.COLD_START_TIMEOUT_MS + 15_000);
 
     await page.goto(ApplicationPageRoutesFactory.AuthenticationRoutes.Login);
     await page.getByTestId(LogInAuthenticationCON.EMAIL_INPUT).fill(adminEmail);

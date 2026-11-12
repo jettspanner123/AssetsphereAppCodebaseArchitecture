@@ -12,13 +12,16 @@ export default class AssetDetailNavigationUtility {
 
   public async openAssetDetailModal(page: Page, assetTag: string): Promise<void> {
     await page.getByTestId(CreateAssetCON.SEARCH_INPUT).fill(assetTag);
-    await page.getByTestId(`asset-card-${assetTag}`).click();
+    // Each matching asset also renders a second, CSS-hidden duplicate card for a
+    // different responsive layout - scope to the one actually visible to avoid a
+    // strict-mode "resolved to 2 elements" error.
+    await page.getByTestId(`asset-card-${assetTag}`).and(page.locator(':visible')).click();
   }
 
   /** Searches for the asset (narrowing results to its single card) then clicks the
    * card's own "Print Badge" trigger, without opening the full detail modal first. */
   public async openQRBadgeFromCard(page: Page, assetTag: string): Promise<void> {
     await page.getByTestId(CreateAssetCON.SEARCH_INPUT).fill(assetTag);
-    await page.getByTestId('asset-card-qr-badge-button').click();
+    await page.getByTestId('asset-card-qr-badge-button').and(page.locator(':visible')).click();
   }
 }

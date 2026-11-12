@@ -20,6 +20,11 @@ export default class QRScannerAssertion {
   }
 
   public async assertDetailViewShowsAsset(page: Page, assetNumber: string): Promise<void> {
-    await expect(page.getByText(assetNumber, { exact: false }).first()).toBeVisible();
+    // The scanned asset also has a CSS-hidden duplicate card elsewhere on the page (a
+    // second responsive layout) - scope to a visible match so this doesn't resolve to
+    // that hidden instance instead of the opened detail modal.
+    await expect(
+      page.getByText(assetNumber, { exact: false }).and(page.locator(':visible')).first()
+    ).toBeVisible();
   }
 }

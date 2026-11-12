@@ -4,6 +4,6 @@ export default class DeleteAssetCON {
   public static readonly DELETE_CONFIRM_BUTTON: string = 'asset-detail-delete-confirm-button';
 
   // Expected Text
-  public static readonly SUCCESS_TOAST_TITLE: string = 'Asset Deleted Successfully';
+  public static readonly SUCCESS_TOAST_TITLE: string = 'Asset Deleted';
   public static readonly CONFIRMATION_TITLE: string = 'Delete Hardware IT Asset';
 }

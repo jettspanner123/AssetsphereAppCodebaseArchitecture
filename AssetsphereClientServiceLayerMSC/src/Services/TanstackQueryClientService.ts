@@ -309,27 +309,23 @@ export class AssetQueryService {
         return await AssetInventoryService.current.createAsset(request);
       },
       onSuccess: async (...args) => {
-        try {
-          const [createdAsset] = args;
-          console.log('[DEBUG createAsset onSuccess] start', createdAsset);
-          this.getClient().setQueryData<Asset[]>(
-            TanstackQueryKeysCON.ASSETS,
-            (oldAssets) => {
-              console.log('[DEBUG createAsset onSuccess] setQueryData updater, oldAssets length:', oldAssets?.length);
-              if (!oldAssets) return [createdAsset];
-              const exists = oldAssets.some((a) => a.id === createdAsset.id);
-              return exists ? oldAssets : [createdAsset, ...oldAssets];
-            }
-          );
-          console.log('[DEBUG createAsset onSuccess] after setQueryData, cache now:', this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS)?.length);
-          await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
-          console.log('[DEBUG createAsset onSuccess] after invalidate ASSETS');
-          await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
-          await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
-          console.log('[DEBUG createAsset onSuccess] done, cache now:', this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS)?.length);
-        } catch (e) {
-          console.error('[DEBUG createAsset onSuccess] THREW', e);
-        }
+        const [createdAsset] = args;
+        this.getClient().setQueryData<Asset[]>(
+          TanstackQueryKeysCON.ASSETS,
+          (oldAssets) => {
+            if (!oldAssets) return [createdAsset];
+            const exists = oldAssets.some((a) => a.id === createdAsset.id);
+            return exists ? oldAssets : [createdAsset, ...oldAssets];
+          }
+        );
+        // Deliberately NOT invalidating the ASSETS query here: it was just patched with
+        // the authoritative server-confirmed object above, and an immediate refetch can
+        // race the backend's own read-after-write visibility window, returning a response
+        // that's still missing the just-created row and clobbering this correct patch with
+        // stale data. Only secondary/derived data (valuation, employee linkage) still needs
+        // a fresh fetch, since it isn't covered by the direct patch above.
+        await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
+        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSuccess as any)?.(...args);
       },
     });
@@ -380,8 +376,12 @@ export class AssetQueryService {
         );
         (options?.onSuccess as any)?.(...args);
       },
+      // Deliberately NOT invalidating the ASSETS query here: onSuccess above already
+      // patched it with the authoritative server-confirmed object, and an immediate
+      // refetch can race the backend's read-after-write visibility window and clobber
+      // that correct patch with a stale response. See useCreateAssetMutation for the
+      // same reasoning.
       onSettled: async (...args) => {
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
         await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSettled as any)?.(...args);
@@ -425,8 +425,12 @@ export class AssetQueryService {
       onSuccess: (...args) => {
         (options?.onSuccess as any)?.(...args);
       },
+      // Deliberately NOT invalidating the ASSETS query here: onMutate above already
+      // optimistically removed the row, and an immediate refetch can race the backend's
+      // read-after-write visibility window and clobber that correct removal with a stale
+      // response that still includes the just-deleted row. See useCreateAssetMutation for
+      // the same reasoning.
       onSettled: async (...args) => {
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
         await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
         await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
         (options?.onSettled as any)?.(...args);

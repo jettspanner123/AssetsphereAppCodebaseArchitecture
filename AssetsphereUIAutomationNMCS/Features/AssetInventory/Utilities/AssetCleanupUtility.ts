@@ -17,6 +17,12 @@ export default class AssetCleanupUtility {
       headers: { Authorization: `Bearer ${adminToken}` },
     });
 
+    // Idempotent: a delete-flow test may have already removed it via the real UI before
+    // this cleanup call runs - 404 means it's already gone, which is the goal either way.
+    if (response.status() === 404) {
+      return;
+    }
+
     if (!response.ok()) {
       throw new Error(
         `Failed to clean up test asset ${assetId}: HTTP ${response.status()}: ${await response.text()}`

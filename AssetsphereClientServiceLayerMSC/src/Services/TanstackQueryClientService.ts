@@ -309,18 +309,27 @@ export class AssetQueryService {
         return await AssetInventoryService.current.createAsset(request);
       },
       onSuccess: async (...args) => {
-        const [createdAsset] = args;
-        this.getClient().setQueryData<Asset[]>(
-          TanstackQueryKeysCON.ASSETS,
-          (oldAssets) => {
-            if (!oldAssets) return [createdAsset];
-            const exists = oldAssets.some((a) => a.id === createdAsset.id);
-            return exists ? oldAssets : [createdAsset, ...oldAssets];
-          }
-        );
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
-        await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
-        await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+        try {
+          const [createdAsset] = args;
+          console.log('[DEBUG createAsset onSuccess] start', createdAsset);
+          this.getClient().setQueryData<Asset[]>(
+            TanstackQueryKeysCON.ASSETS,
+            (oldAssets) => {
+              console.log('[DEBUG createAsset onSuccess] setQueryData updater, oldAssets length:', oldAssets?.length);
+              if (!oldAssets) return [createdAsset];
+              const exists = oldAssets.some((a) => a.id === createdAsset.id);
+              return exists ? oldAssets : [createdAsset, ...oldAssets];
+            }
+          );
+          console.log('[DEBUG createAsset onSuccess] after setQueryData, cache now:', this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS)?.length);
+          await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.ASSETS });
+          console.log('[DEBUG createAsset onSuccess] after invalidate ASSETS');
+          await this.getClient().invalidateQueries({ queryKey: ['assets', 'valuation-summary'] });
+          await this.getClient().invalidateQueries({ queryKey: TanstackQueryKeysCON.EMPLOYEES });
+          console.log('[DEBUG createAsset onSuccess] done, cache now:', this.getClient().getQueryData<Asset[]>(TanstackQueryKeysCON.ASSETS)?.length);
+        } catch (e) {
+          console.error('[DEBUG createAsset onSuccess] THREW', e);
+        }
         (options?.onSuccess as any)?.(...args);
       },
     });

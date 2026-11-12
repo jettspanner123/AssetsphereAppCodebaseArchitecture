@@ -9,6 +9,7 @@ export interface CardSharedComponentProps {
   onContextMenu?: (e: React.MouseEvent<HTMLDivElement>) => void;
   hoverable?: boolean;
   key?: React.Key;
+  testId?: string;
 }
 
 export default function CardSharedComponent({
@@ -18,6 +19,7 @@ export default function CardSharedComponent({
   onClick,
   onContextMenu,
   hoverable = false,
+  testId,
 }: CardSharedComponentProps): React.JSX.Element {
   let surfaceStyle = '';
   if (variant === 'elevated') {
@@ -34,6 +36,7 @@ export default function CardSharedComponent({
 
   return (
     <div
+      data-testid={testId}
       onClick={onClick}
       onContextMenu={onContextMenu}
       className={`rounded-xl p-5 relative transition-all duration-200 ${surfaceStyle} ${hoverClass} ${className}`}

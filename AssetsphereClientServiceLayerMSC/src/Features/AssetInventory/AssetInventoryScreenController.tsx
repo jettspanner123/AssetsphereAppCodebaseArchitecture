@@ -452,6 +452,7 @@ export default function AssetInventoryScreenController({
   const renderAssetCard = (asset: Asset, compact: boolean = false) => (
     <CardSharedComponent
       key={asset.id}
+      testId={`asset-card-${asset.assetNumber}`}
       hoverable
       onClick={() => onSelectAsset(asset)}
       onContextMenu={(e) => handleContextMenu(e, asset)}
@@ -585,6 +586,7 @@ export default function AssetInventoryScreenController({
             e.stopPropagation();
             onOpenQRBadgeModal(asset);
           }}
+          data-testid="asset-card-qr-badge-button"
           className="p-1.5 rounded-md hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer shrink-0"
           title="View / Print QR Asset Tag"
         >

@@ -260,6 +260,7 @@ export default function ProfileDropdownStaticComponent({
                   onClose();
                   onOpenScanner();
                 }}
+                data-testid="navigation-open-scanner-menu-item"
                 className="w-full flex items-center gap-2.5 px-2.5 py-3 sm:py-2 rounded-lg text-sm sm:text-xs text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800/60 transition-colors font-medium cursor-pointer"
               >
                 <QrCode className="w-5 h-5 sm:w-4 sm:h-4 text-slate-400" />

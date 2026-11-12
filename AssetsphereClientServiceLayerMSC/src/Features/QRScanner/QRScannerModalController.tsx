@@ -51,11 +51,11 @@ export default function QRScannerModalController({
         </div>
 
         {scannedAsset ? (
-          <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-left space-y-2">
+          <div data-testid="qr-scanner-result" className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-left space-y-2">
             <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold font-serif-headline">
               <CheckCircle2 className="w-4 h-4" /> Barcode Scanned Successfully!
             </div>
-            <div className="font-mono font-bold text-slate-900 dark:text-white">
+            <div data-testid="qr-scanner-result-asset-number" className="font-mono font-bold text-slate-900 dark:text-white">
               {scannedAsset.assetNumber} — {scannedAsset.deviceName}
             </div>
             <div className="text-[11px] text-slate-500">
@@ -67,6 +67,7 @@ export default function QRScannerModalController({
               fullWidth
               onClick={handleConfirmVerify}
               className="max-sm:!h-11 max-sm:text-sm"
+              testId="qr-scanner-confirm-verify-button"
             >
               Confirm Physical Audit Signature
             </ButtonSharedComponent>
@@ -78,6 +79,7 @@ export default function QRScannerModalController({
             fullWidth
             onClick={handleSimulateScan}
             className="max-sm:!h-11 max-sm:text-sm"
+            testId="qr-scanner-simulate-scan-button"
           >
             Simulate Camera Barcode Detection
           </ButtonSharedComponent>

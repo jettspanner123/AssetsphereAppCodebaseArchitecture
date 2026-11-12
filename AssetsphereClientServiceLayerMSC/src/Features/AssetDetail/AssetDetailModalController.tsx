@@ -170,6 +170,7 @@ export default function AssetDetailModalController({
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             <ButtonSharedComponent
+              testId="asset-detail-print-badge-button"
               variant="ghost"
               size="sm"
               onClick={() => onOpenQRBadgeModal(displayAsset)}
@@ -182,6 +183,7 @@ export default function AssetDetailModalController({
               <ButtonSharedComponent
                 variant="outline"
                 size="sm"
+                testId="asset-detail-delete-button"
                 onClick={() => setIsDeleteConfirmationOpen(true)}
                 icon={<Trash2 className="w-3.5 h-3.5 text-rose-500" />}
                 className="!text-rose-600 dark:!text-rose-400 hover:!bg-rose-50 dark:hover:!bg-rose-950/40 border-rose-200/80 dark:border-rose-900/60 max-sm:w-full max-sm:justify-center max-sm:!h-11 max-sm:text-sm"
@@ -190,6 +192,7 @@ export default function AssetDetailModalController({
               </ButtonSharedComponent>
             </PermissionGuardSharedComponent>
             <ButtonSharedComponent
+              testId="asset-detail-edit-button"
               variant="outline"
               size="sm"
               onClick={() => onEditAsset(displayAsset)}
@@ -639,6 +642,7 @@ export default function AssetDetailModalController({
         subtitle={`Asset Tag: ${displayAsset.assetNumber}`}
         variant="danger"
         confirmText="Delete Asset"
+        confirmButtonTestId="asset-detail-delete-confirm-button"
         description={
           <div className="space-y-2">
             <p>

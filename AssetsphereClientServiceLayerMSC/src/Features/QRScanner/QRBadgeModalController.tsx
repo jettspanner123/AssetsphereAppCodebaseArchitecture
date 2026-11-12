@@ -60,6 +60,7 @@ export default function QRBadgeModalController({
         {/* Printable Physical Badge Card */}
         <div
           id="printable-asset-badge"
+          data-testid="qr-badge-printable-card"
           className="p-5 bg-white text-slate-900 border border-slate-300 rounded-xl shadow-sm space-y-4"
         >
           {/* Header */}
@@ -123,6 +124,7 @@ export default function QRBadgeModalController({
             onClick={handleCopyLink}
             icon={copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
             className="w-full max-sm:!h-11 max-sm:text-sm"
+            testId="qr-badge-copy-passport-url-button"
           >
             {copied ? 'Link Copied' : 'Copy Passport URL'}
           </ButtonSharedComponent>
@@ -133,6 +135,7 @@ export default function QRBadgeModalController({
             onClick={handleOpenPassport}
             icon={<ExternalLink className="w-4 h-4" />}
             className="w-full max-sm:!h-11 max-sm:text-sm"
+            testId="qr-badge-open-passport-button"
           >
             Open Passport
           </ButtonSharedComponent>
@@ -144,6 +147,7 @@ export default function QRBadgeModalController({
             size="sm"
             onClick={onClose}
             className="max-sm:flex-1 max-sm:!h-11 max-sm:text-sm"
+            testId="qr-badge-close-button"
           >
             Close
           </ButtonSharedComponent>

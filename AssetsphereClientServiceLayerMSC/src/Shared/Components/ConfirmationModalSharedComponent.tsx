@@ -18,6 +18,8 @@ export interface ConfirmationModalSharedComponentProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   additionalContent?: React.ReactNode;
   zIndex?: number;
+  confirmButtonTestId?: string;
+  cancelButtonTestId?: string;
 }
 
 export default function ConfirmationModalSharedComponent({
@@ -34,6 +36,8 @@ export default function ConfirmationModalSharedComponent({
   maxWidth = 'md',
   additionalContent,
   zIndex,
+  confirmButtonTestId,
+  cancelButtonTestId,
 }: ConfirmationModalSharedComponentProps): React.JSX.Element {
   const [exitDirection, setExitDirection] = React.useState<'down' | 'up'>('down');
   const prevIsOpenRef = React.useRef(isOpen);
@@ -93,6 +97,7 @@ export default function ConfirmationModalSharedComponent({
         {/* Footer Actions matching Register Device Modal button layout - 50:50 full-width on mobile, auto-width right-aligned on desktop */}
         <div className="flex items-center justify-end gap-3 pt-4 mt-6 border-t border-slate-200 dark:border-zinc-800 shrink-0">
           <ButtonSharedComponent
+            testId={cancelButtonTestId}
             variant="outline"
             size="sm"
             onClick={handleCancel}
@@ -102,6 +107,7 @@ export default function ConfirmationModalSharedComponent({
             {cancelText}
           </ButtonSharedComponent>
           <ButtonSharedComponent
+            testId={confirmButtonTestId}
             type="button"
             variant={variant === 'danger' ? 'danger' : 'primary'}
             size="sm"
